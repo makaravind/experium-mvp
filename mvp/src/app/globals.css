@@ -15,4 +15,29 @@
 
   --radius-cards: 9px;
   --radius-buttons: 28.8px;
+
+  --animate-confetti: confetti-fall 2.5s ease-in forwards;
+  --animate-badge-pop: badge-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(500px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes badge-pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

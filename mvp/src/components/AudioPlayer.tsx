@@ -20,6 +20,9 @@ export default function AudioPlayer({ src, onEnded }: AudioPlayerProps) {
   const [duration, setDuration] = useState(0);
   const [ended, setEnded] = useState(false);
 
+  const onEndedRef = useRef(onEnded);
+  onEndedRef.current = onEnded;
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -29,19 +32,23 @@ export default function AudioPlayer({ src, onEnded }: AudioPlayerProps) {
     const handleEnded = () => {
       setPlaying(false);
       setEnded(true);
-      onEnded?.();
+      onEndedRef.current?.();
     };
 
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("ended", handleEnded);
 
+    if (audio.readyState >= 1) {
+      setDuration(audio.duration);
+    }
+
     return () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [onEnded]);
+  }, []);
 
   const togglePlay = () => {
     const audio = audioRef.current;
