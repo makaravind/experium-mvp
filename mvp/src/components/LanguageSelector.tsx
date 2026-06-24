@@ -1,6 +1,6 @@
 "use client";
 
-import type { Language } from "@/data/plants";
+import type { Language } from "@/data/exhibits";
 
 interface LanguageSelectorProps {
   selected: Language;

@@ -2,17 +2,17 @@
 
 ## Revenue Streams
 
-### 1. Physical Plate Sponsorship (One-Time)
+### 1. Physical Marker Sponsorship (One-Time)
 
-Sponsors pay upfront to have their logo on a plate. This covers initial manufacturing + installation costs as a goodwill arrangement.
+Sponsors pay upfront to have their logo on a marker. This covers initial manufacturing + installation costs as a goodwill arrangement.
 
 | Item | Estimated Cost |
 |------|---------------|
-| Aluminum plate + printing | ₹300-800 |
+| Aluminum marker + printing | ₹300-800 |
 | Installation (post/mounting) | ₹200-500 |
-| Content creation per plant | ₹500-1000 |
-| **Total per plate** | **₹1,000-2,300** |
-| **Total for 50 plates** | **₹50,000-1,15,000** |
+| Content creation per exhibit | ₹500-1000 |
+| **Total per marker** | **₹1,000-2,300** |
+| **Total for 50 markers** | **₹50,000-1,15,000** |
 
 Sponsor pays this. No recurring fees, no performance guarantee. Pure goodwill brand placement.
 
@@ -51,7 +51,7 @@ Phase 2: Ongoing Split
 
 ### One-Time (Covered by Sponsors)
 
-- Plate manufacturing × 50
+- Marker manufacturing × 50
 - Installation labor
 - Content creation (expert interview + pipeline)
 
@@ -67,11 +67,11 @@ Phase 2: Ongoing Split
 
 ### Revenue Projection (Conservative)
 
-Assumptions: 500 visitors/day, 10% scan rate, 50 plates
+Assumptions: 500 visitors/day, 10% scan rate, 50 markers
 
 | Metric | Value |
 |--------|-------|
-| Daily scans | ~250 (50 plates × 5 scans avg) |
+| Daily scans | ~250 (50 markers × 5 scans avg) |
 | Monthly impressions | ~7,500 |
 | Monthly ad revenue (3 advertisers × ₹8K avg) | ₹24,000 |
 | Monthly costs | ₹5,000 |

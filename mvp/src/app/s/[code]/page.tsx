@@ -1,5 +1,5 @@
-import { plants, allCodes } from "@/data/plants";
-import PlantPageClient from "./PlantPageClient";
+import { exhibits, allCodes } from "@/data/exhibits";
+import ExhibitPageClient from "./ExhibitPageClient";
 
 export function generateStaticParams() {
   return allCodes.map((code) => ({ code }));
@@ -9,20 +9,20 @@ interface Props {
   params: Promise<{ code: string }>;
 }
 
-export default async function PlantPage({ params }: Props) {
+export default async function ExhibitPage({ params }: Props) {
   const { code } = await params;
-  const plant = plants[code.toUpperCase()];
+  const exhibit = exhibits[code.toUpperCase()];
 
-  if (!plant) {
+  if (!exhibit) {
     return (
       <main className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
-        <p className="font-display text-2xl text-ink mb-2">Plant not found</p>
+        <p className="font-display text-2xl text-ink mb-2">Exhibit not found</p>
         <p className="text-graphite text-sm">
-          This QR code doesn&apos;t match any plant in our system.
+          This QR code doesn&apos;t match any exhibit in our system.
         </p>
       </main>
     );
   }
 
-  return <PlantPageClient plant={plant} />;
+  return <ExhibitPageClient exhibit={exhibit} />;
 }

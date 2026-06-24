@@ -3,13 +3,13 @@
 ## System Overview
 
 ```
-[QR Code Plate]
+[QR Code Marker]
       ↓ (scan)
 [Phone Browser → GET /s/{code}]
       ↓
-[Server: resolve code → plant, log scan]
+[Server: resolve code → exhibit, log scan]
       ↓
-[Serve webapp page with plant data + ads]
+[Serve webapp page with exhibit data + ads]
       ↓
 [Client: fetch audio from CDN, play on tap]
 ```
@@ -26,9 +26,9 @@ Example:     https://natureaudiotour.in/s/A7X3
 ```
 
 The `/s/{code}` endpoint:
-1. Looks up `code` in DB → gets `plant_id`, `ad_tier`, `status`
+1. Looks up `code` in DB → gets `exhibit_id`, `ad_tier`, `status`
 2. Logs the scan (timestamp, device, user if known)
-3. If active: renders plant page
+3. If active: renders exhibit page
 4. If inactive: renders "content coming soon" fallback
 
 ## Tech Stack (v1)
@@ -49,12 +49,13 @@ The `/s/{code}` endpoint:
 ### Core Tables
 
 ```sql
-plants
+exhibits
   id            UUID PK
-  name          TEXT          -- "Neem Tree"
-  scientific_name TEXT        -- "Azadirachta indica"
+  name          TEXT          -- "Neem Tree", "Ancient Stone Arch", "Lotus Lake"
+  type          ENUM (plant, structure, water_body, landmark)
+  scientific_name TEXT NULL   -- optional, primarily for plants
   description   TEXT          -- Brief text description
-  photo_url     TEXT          -- Plant photo on CDN
+  photo_url     TEXT          -- Exhibit photo on CDN
   audio_en      TEXT          -- Audio URL (English)
   audio_hi      TEXT          -- Audio URL (Hindi)
   audio_te      TEXT          -- Audio URL (Telugu)
@@ -63,7 +64,7 @@ plants
 qr_codes
   id            UUID PK
   code          TEXT UNIQUE   -- "A7X3" (short, permanent)
-  plant_id      FK → plants   -- nullable (can be unassigned)
+  exhibit_id    FK → exhibits -- nullable (can be unassigned)
   sponsor_id    FK → sponsors
   ad_tier       ENUM (gold, silver, bronze)
   gps_lat       FLOAT
@@ -98,7 +99,7 @@ users
 user_progress
   id            UUID PK
   user_id       FK → users
-  plant_id      FK → plants
+  exhibit_id    FK → exhibits
   discovered_at TIMESTAMP
 
 reports
@@ -129,13 +130,13 @@ ads
 ### Public (Visitor)
 
 ```
-GET  /s/{code}              → Resolve QR, render plant page (SSR)
-GET  /api/plant/{id}        → Plant data + audio URLs
+GET  /s/{code}              → Resolve QR, render exhibit page (SSR)
+GET  /api/exhibit/{id}      → Exhibit data + audio URLs
 POST /api/scan              → Log a scan event
 POST /api/report            → Submit issue report
 POST /api/auth/otp/send     → Send OTP to phone
 POST /api/auth/otp/verify   → Verify OTP, create session
-GET  /api/progress          → User's discovered plants (authed)
+GET  /api/progress          → User's discovered exhibits (authed)
 ```
 
 ### Admin (Protected)
@@ -147,15 +148,15 @@ GET  /admin/reports              → All reports
 PUT  /admin/qr-codes/{id}       → Update mapping/status
 PUT  /admin/reports/{id}        → Update report status
 GET  /admin/analytics            → Scan stats, ad performance
-POST /admin/plants               → Add new plant
-PUT  /admin/plants/{id}          → Update plant info
+POST /admin/exhibits             → Add new exhibit
+PUT  /admin/exhibits/{id}        → Update exhibit info
 POST /admin/ads                  → Add new ad
 ```
 
 ## Telemetry
 
 Every scan logs:
-- `qr_code_id` — which plate
+- `qr_code_id` — which marker
 - `timestamp` — when
 - `user_id` — who (null if anonymous)
 - `device_type` — iOS/Android
@@ -164,7 +165,7 @@ Every scan logs:
 - `ad_clicked` — conversion tracking
 
 Aggregated views (computed nightly or on-demand):
-- Scans per plate per day/week/month
+- Scans per marker per day/week/month
 - Unique users per day
 - Listen rate (plays / scans)
 - Ad CTR per placement per tier

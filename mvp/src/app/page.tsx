@@ -5,7 +5,7 @@ export default function Home() {
         AI Nature Tour
       </h1>
       <p className="text-graphite text-lg max-w-sm">
-        Scan a QR code near any plant to hear its story.
+        Scan a QR code near any exhibit to hear its story.
       </p>
     </main>
   );

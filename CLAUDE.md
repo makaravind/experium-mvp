@@ -2,22 +2,27 @@
 
 ## What This Is
 
-QR-code-based audio guide for park visitors. Scan a plate near a plant → mobile webapp plays 60-second audio narration. No app install.
+QR-code-based audio guide for park visitors. Scan a marker near an exhibit → mobile webapp plays 60-second audio narration. No app install.
 
-**First deployment:** Experium Park, Hyderabad (150 acres, rare plants, ₹1000 entry, 500+ daily visitors).
+Exhibits include: rare plants, stone structures, water bodies, and landmarks.
+
+**First deployment:** Experium Park, Hyderabad (150 acres, ₹1000 entry, 500+ daily visitors).
 
 ## Business Model
 
-Model B — scans (page impressions) are the product, audio is the hook. Revenue from direct-sold local ads. Physical plates sponsored one-time by local businesses.
+Model B — scans (page impressions) are the product, audio is the hook. Revenue from direct-sold local ads. Physical markers sponsored one-time by local businesses.
 
 ## Key Architecture Decisions
 
 - QR encodes permanent short code (`/s/A7X3`) → server resolves to content (indirection layer)
-- Plates have NO plant name — only sponsor logo + QR. Allows reassignment without reprinting.
+- Markers have NO exhibit name — only sponsor logo + QR. Allows reassignment without reprinting.
+- Exhibits have a `type` field: `plant | structure | water-body | landmark`
+- `scientificName` is optional (only relevant for plants)
 - Webapp: Next.js, serverless, PostgreSQL, S3+CDN for audio
 - Audio: AI TTS (64kbps mono, <500KB per clip), 3 languages (EN/HI/TE)
 - Identity: anonymous first, OTP after 2-3 scans
 - Admin/maintainer mode built into same webapp
+- New exhibit codes: type prefix + number (PL01, ST01, WB01, LM01)
 
 ## Documentation
 
@@ -36,7 +41,7 @@ Key files for development:
 - **No app store** — webapp only, PWA optional
 - **Telemetry is minimal** — only track what drives a decision
 - **Content pipeline is code** — build as repeatable scripts, not manual process
-- **Plates are dumb, server is smart** — all logic server-side
+- **Markers are dumb, server is smart** — all logic server-side
 
 ## Open Questions
 

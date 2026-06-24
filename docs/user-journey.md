@@ -3,7 +3,7 @@
 ## First-Time Visitor
 
 ```
-[Walking in park] → Sees QR plate near a plant
+[Walking in park] → Sees QR marker near an exhibit
         ↓
 [Scans QR with phone camera]
         ↓
@@ -18,7 +18,7 @@
   ┌─────────────────────────┐
   │ [Language: EN ▼]        │
   │                         │
-  │ [Plant Photo]           │
+  │ [Exhibit Photo]         │
   │ "Neem Tree"             │
   │                         │
   │ [▶ Listen]              │
@@ -29,7 +29,7 @@
 [Taps "Listen"]
         ↓
 [Audio plays — 60-90 seconds]
-[User looks at plant while listening]
+[User observes the exhibit while listening]
         ↓
 [Audio ends]
   ┌─────────────────────────┐
@@ -38,15 +38,15 @@
   │ "Learn More" (optional  │
   │  text details expand)   │
   │                         │
-  │ [🎮 Play Plant Game!]   │
-  │ "Scan 10 plants,        │
+  │ [🎮 Explore More!]      │
+  │ "Discover 10 exhibits,  │
   │  share your discovery   │
   │  card!"                 │
   │                         │
   │ [⚠ Report Issue]       │
   └─────────────────────────┘
         ↓
-[User walks to next plant / closes tab]
+[User walks to next exhibit / closes tab]
 ```
 
 ## Second/Third Scan (Anonymous)
@@ -55,7 +55,7 @@ Same as above, but after audio:
 ```
   ┌─────────────────────────┐
   │ "You've discovered 2    │
-  │  plants! 8 more to      │
+  │  exhibits! 8 more to    │
   │  unlock your card."     │
   │                         │
   │ [Save progress →]       │
@@ -69,7 +69,7 @@ Progress tracked in browser local storage until they opt in.
 
 - Language preference remembered
 - Progress persistent across devices
-- Sees: "Welcome back! 7/10 plants discovered"
+- Sees: "Welcome back! 7/10 exhibits discovered"
 - After completing target: shareable Instagram-style card generated
 
 ## Maintainer Flow
@@ -84,10 +84,10 @@ Progress tracked in browser local storage until they opt in.
   │ Installed: 2026-03-15   │
   │ Last checked: 2026-05-01│
   │                         │
-  │ ☐ Plate visible?        │
+  │ ☐ Marker visible?       │
   │ ☐ QR scannable?         │
-  │ ☐ Correct plant nearby? │
-  │ ☐ Plate undamaged?      │
+  │ ☐ Correct exhibit?      │
+  │ ☐ Marker undamaged?     │
   │                         │
   │ [📷 Take Photo]         │
   │ [Submit Report]         │
@@ -100,8 +100,8 @@ Progress tracked in browser local storage until they opt in.
 [Visitor taps "Report Issue"]
   ┌─────────────────────────┐
   │ What's wrong?           │
-  │ ○ Wrong plant info      │
-  │ ○ Plate damaged         │
+  │ ○ Wrong info            │
+  │ ○ Marker damaged        │
   │ ○ Audio not playing     │
   │ ○ Other                 │
   │                         │

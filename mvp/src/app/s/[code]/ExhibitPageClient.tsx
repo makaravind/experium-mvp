@@ -1,30 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import type { Plant, Language } from "@/data/plants";
-import PlantCard from "@/components/PlantCard";
+import type { Exhibit, Language } from "@/data/exhibits";
+import ExhibitCard from "@/components/ExhibitCard";
 import AudioPlayer from "@/components/AudioPlayer";
 import LanguageSelector from "@/components/LanguageSelector";
 import FirstDiscoveryBadge from "@/components/FirstDiscoveryBadge";
 import { getDiscovered } from "@/lib/discovery";
 
 interface Props {
-  plant: Plant;
+  exhibit: Exhibit;
 }
 
-export default function PlantPageClient({ plant }: Props) {
+export default function ExhibitPageClient({ exhibit }: Props) {
   const [audioEnded, setAudioEnded] = useState(false);
   const [language, setLanguage] = useState<Language>("en");
   const [showBadge, setShowBadge] = useState(false);
 
-  const audioSrc = plant.audio[language] || plant.audio.en || "";
+  const audioSrc = exhibit.audio[language] || exhibit.audio.en || "";
 
   function handleAudioEnded() {
     const previouslyDiscovered = getDiscovered();
     const isFirstEver =
       previouslyDiscovered.length === 0 ||
       (previouslyDiscovered.length === 1 &&
-        previouslyDiscovered[0] === plant.code);
+        previouslyDiscovered[0] === exhibit.code);
 
     setAudioEnded(true);
 
@@ -35,7 +35,7 @@ export default function PlantPageClient({ plant }: Props) {
 
   return (
     <main className="min-h-screen px-6 py-10 max-w-md mx-auto flex flex-col gap-8">
-      <PlantCard plant={plant} />
+      <ExhibitCard exhibit={exhibit} />
       <div className="flex flex-col gap-6">
         <LanguageSelector selected={language} onChange={setLanguage} />
         <AudioPlayer

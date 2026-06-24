@@ -12,11 +12,11 @@ End-to-end process from raw expert knowledge to published audio. Designed as a r
 
 ### 1. Expert Interview
 
-**Input:** Botanist/domain expert + list of plants to cover
-**Output:** Raw audio recording (1-2 sessions, 3-5 hours total for 50 plants)
+**Input:** Domain expert(s) + list of exhibits to cover
+**Output:** Raw audio recording (1-2 sessions, 3-5 hours total for ~50 exhibits)
 
 - Record in English
-- Cover per plant: name, species, origin, interesting facts, significance, any stories
+- Cover per exhibit: name, type, origin, interesting facts, significance, any stories
 - No strict format needed — conversational is fine
 - Record in a quiet environment (or clean up later)
 
@@ -34,34 +34,35 @@ whisper interview.mp3 --model large --language en --output_format json
 ### 3. Script Extraction (AI)
 
 **Input:** Full transcript
-**Output:** One 60-90 second script per plant (150-200 words)
+**Output:** One 60-90 second script per exhibit (150-200 words)
 
 **Prompt pattern:**
 ```
-Given this interview transcript about plants at Experium Park, extract a 
-60-second audio script for [PLANT NAME]. 
+Given this interview transcript about exhibits at Experium Park, extract a 
+60-second audio script for [EXHIBIT NAME]. 
 
 Requirements:
 - 150-200 words (= ~60 seconds when spoken)
-- Open with a brief visual identifier ("the tall tree with feathery leaves...")
-- Include: common name, scientific name, origin, 2-3 interesting facts
+- Open with a brief visual identifier ("the tall tree with feathery leaves...", "the weathered stone archway...")
+- Include: name, origin, 2-3 interesting facts
+- For plants: include scientific name
 - Tone: informative, warm, conversational (not academic)
 - End with one memorable takeaway
 
 Transcript: [...]
 ```
 
-**Output format:** JSON or markdown with structured fields per plant.
+**Output format:** JSON or markdown with structured fields per exhibit.
 
 ### 4. Translation (AI)
 
-**Input:** English scripts (all plants)
+**Input:** English scripts (all exhibits)
 **Output:** Hindi + Telugu versions of each script
 
 **Tool:** Claude / GPT-4 for translation
 
 **Key constraints:**
-- Preserve botanical/scientific names in English (don't transliterate)
+- Preserve scientific/technical names in English (don't transliterate)
 - Keep the same ~60 second length
 - Match tone and flow of English version
 - Use conversational register (not formal/literary)
@@ -80,7 +81,7 @@ Transcript: [...]
 - Format: MP3, 64kbps, mono
 - Target file size: < 500KB per clip
 - Voice: neutral, warm, informational (not robotic, not dramatic)
-- One consistent voice per language across all plants
+- One consistent voice per language across all exhibits
 
 ### 6. Review
 
@@ -88,7 +89,7 @@ Transcript: [...]
 **Output:** Approved audio files (or re-generation notes)
 
 **Check for:**
-- Pronunciation of botanical names
+- Pronunciation of names (scientific, historical, regional)
 - Natural pacing (not too fast, not too slow)
 - Audio quality (no glitches, no unnatural pauses)
 - Factual accuracy (spot-check against transcript)
@@ -100,19 +101,19 @@ Transcript: [...]
 **Output:** Live content accessible via QR codes
 
 - Upload to S3/CDN (CloudFront)
-- Register in database: `plant_id → {en: url, hi: url, te: url}`
+- Register in database: `exhibit_id → {en: url, hi: url, te: url}`
 - Verify: scan QR → correct audio plays in all languages
 
 ## File Naming Convention
 
 ```
 audio/
-  {plant_id}/
+  {exhibit_id}/
     en.mp3
     hi.mp3
     te.mp3
 scripts/
-  {plant_id}/
+  {exhibit_id}/
     en.md
     hi.md
     te.md
@@ -137,9 +138,9 @@ tools/
 Same pipeline, just re-run from the changed step:
 - Fact correction → edit script → re-translate → re-generate TTS → re-upload
 - New language → translate existing scripts → generate TTS → upload
-- New plant → mini-interview or desk research → full pipeline for that one plant
+- New exhibit → mini-interview or desk research → full pipeline for that one exhibit
 
-## Estimated Timeline (50 plants)
+## Estimated Timeline (~50 exhibits)
 
 | Step | Time |
 |------|------|

@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AI Nature Tour",
-  description: "Discover the stories behind the plants at Experium Park",
+  description: "Discover the stories behind the exhibits at Experium Park",
 };
 
 export const viewport: Viewport = {

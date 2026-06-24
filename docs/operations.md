@@ -1,15 +1,15 @@
-# Operations — Physical Plate Management
+# Operations — Physical Marker Management
 
-## Plate Specification
+## Marker Specification
 
 - **Material:** Aluminum or ACM (aluminum composite material)
 - **Size:** ~A5 (8" × 6")
-- **Content:** Sponsor logo + QR code only (no plant name)
-- **Mounting:** Bolt-mounted or zip-tied to post near plant
+- **Content:** Sponsor logo + QR code only (no exhibit name)
+- **Mounting:** Bolt-mounted or zip-tied to post/railing near exhibit
 - **Durability:** 5+ years outdoor life
 - **QR encoding:** Short URL e.g. `domain.com/s/A7X3`
 
-## Plate Lifecycle
+## Marker Lifecycle
 
 ```
 [Manufactured] → [Assigned code in DB] → [Installed at location]
@@ -18,7 +18,7 @@
                                                 ↓
                               ┌─────────────────┼─────────────────┐
                               ↓                 ↓                 ↓
-                    [User reports issue]  [Maintainer flags]  [Plant removed]
+                    [User reports issue]  [Maintainer flags]  [Exhibit removed]
                               ↓                 ↓                 ↓
                         [Status: Needs Attention]
                               ↓
@@ -31,38 +31,38 @@
         [Status: Active] [Status: Active] [Status: Inactive]
 ```
 
-## Plate States
+## Marker States
 
 | State | Meaning |
 |-------|---------|
-| Active | Working, mapped to plant, serving content |
-| Needs Attention | Issue reported (damage, wrong plant, missing) — awaiting admin review |
-| Inactive | Deliberately disabled (plant removed, area closed) — shows "coming soon" page |
+| Active | Working, mapped to exhibit, serving content |
+| Needs Attention | Issue reported (damage, wrong exhibit, missing) — awaiting admin review |
+| Inactive | Deliberately disabled (exhibit removed, area closed) — shows "coming soon" page |
 
 ## Roles
 
 ### Admin (You, initially)
 - Reviews all reports and maintenance submissions
-- Approves actions that cost money (reprint, new plate)
+- Approves actions that cost money (reprint, new marker)
 - Assigns work to maintainer
-- Manages QR → plant mappings
+- Manages QR → exhibit mappings
 - Views telemetry / analytics
 
 ### Maintainer (Field person)
-- Quarterly walk-through of all plates
+- Quarterly walk-through of all markers
 - Scans each QR → sees maintenance checklist
 - Submits report with photo
 - Executes fixes (remount, clean, replace)
 - Marks issues as resolved after fixing
 
-## Maintenance Checklist (Per Plate)
+## Maintenance Checklist (Per Marker)
 
 When maintainer scans a QR in admin mode:
 
-- [ ] Plate visible and findable?
+- [ ] Marker visible and findable?
 - [ ] QR code scannable? (test scan)
-- [ ] Correct plant still nearby?
-- [ ] Plate undamaged? (no cracks, fading, graffiti)
+- [ ] Correct exhibit still nearby?
+- [ ] Marker undamaged? (no cracks, fading, graffiti)
 - [ ] Mounting secure? (not loose, tilted, fallen)
 - [ ] Photo taken for records
 
@@ -70,27 +70,27 @@ When maintainer scans a QR in admin mode:
 
 | Activity | Frequency | Owner |
 |----------|-----------|-------|
-| Full walk-through (all plates) | Quarterly | Maintainer |
-| Spot checks (random 10 plates) | Monthly | Maintainer or park staff |
+| Full walk-through (all markers) | Quarterly | Maintainer |
+| Spot checks (random 10 markers) | Monthly | Maintainer or park staff |
 | Report review | As reports come in | Admin |
 | Data reconciliation (DB vs field) | Biannually | Admin |
 
-## Installation Process (New Plate)
+## Installation Process (New Marker)
 
 1. Assign short code in database
-2. Map code to plant (name, species, GPS coordinates)
-3. Generate and print QR plate with sponsor logo
+2. Map code to exhibit (name, type, GPS coordinates)
+3. Generate and print QR marker with sponsor logo
 4. Install at location (photo + GPS logged)
 5. Test scan from installed position
 6. Mark status: Active
 7. Content must be live before installation
 
-## Database Fields Per Plate
+## Database Fields Per Marker
 
 | Field | Type | Purpose |
 |-------|------|---------|
 | code | string | Short code (e.g., "A7X3") |
-| plant_id | FK | Links to plant record |
+| exhibit_id | FK | Links to exhibit record |
 | sponsor_id | FK | Links to sponsor |
 | ad_tier | enum | gold / silver / bronze |
 | gps_lat | float | Installed location |

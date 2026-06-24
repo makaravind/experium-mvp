@@ -127,7 +127,7 @@ export default function FirstDiscoveryBadge({
           </h2>
 
           <p className="text-ink text-sm font-medium mt-2">
-            Great start! Find your next plant nearby.
+            Great start! Find your next exhibit nearby.
           </p>
 
           <div className="w-full bg-bone rounded-[9px] p-4 mt-2">
@@ -135,8 +135,8 @@ export default function FirstDiscoveryBadge({
               What&apos;s next
             </p>
             <p className="text-ink text-sm">
-              49 more plants are waiting to be discovered. Look for QR codes on
-              nearby plant plates!
+              49 more exhibits are waiting to be discovered. Look for QR codes
+              on nearby markers!
             </p>
           </div>
 
