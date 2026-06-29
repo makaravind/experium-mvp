@@ -24,6 +24,16 @@ Model B — scans (page impressions) are the product, audio is the hook. Revenue
 - Admin/maintainer mode built into same webapp
 - New exhibit codes: type prefix + number (PL01, ST01, WB01, LM01)
 
+## GitHub
+
+- **Always use `ghp`** (not `gh`) for all GitHub CLI operations in this repo. `ghp` uses the personal account (`makaravind`).
+- **Project board:** https://github.com/users/makaravind/projects/1 — tracks all work (app + content pipeline + launch tasks). Use `ghp project` commands to manage items.
+
+## Repository Structure
+
+- **App source code:** `experium-ai-tour-app/` — all application code lives here. Code changes go in this folder.
+- **Everything else** (docs, content generation scripts, audio assets, presentation) — lives in the repo root outside the app folder.
+
 ## Documentation
 
 All design docs are in `/docs/`. Read `docs/README.md` for the full index.
