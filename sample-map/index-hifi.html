@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Experium Park Map</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { overflow: hidden; touch-action: none; font-family: system-ui, -apple-system, sans-serif; height: 100%; }
+    canvas { display: block; }
+
+    /* Exhibit Card - slide up panel */
+    #card-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.4);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    #card-overlay.visible { opacity: 1; pointer-events: auto; }
+
+    #exhibit-card {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 101;
+      background: #fff; border-radius: 20px 20px 0 0;
+      padding: 24px 24px 32px;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      max-height: 70vh; overflow-y: auto;
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.15);
+    }
+    #exhibit-card.visible { transform: translateY(0); }
+
+    #card-handle {
+      width: 36px; height: 4px; background: #ddd; border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+
+    #card-type {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;
+      color: #64748b; margin-bottom: 4px; font-weight: 600;
+    }
+    #card-name {
+      font-size: 24px; font-weight: 600; color: #1e293b;
+      letter-spacing: -0.5px; line-height: 1.2;
+    }
+    #card-scientific {
+      font-size: 13px; color: #64748b; font-style: italic; margin-top: 2px;
+    }
+    #card-teaser {
+      font-size: 15px; color: #334155; line-height: 1.5; margin-top: 12px;
+    }
+
+    /* Audio player */
+    #audio-section { margin-top: 20px; }
+    #play-btn {
+      width: 100%; padding: 14px 24px;
+      background: #1e293b; color: #fff;
+      border: none; border-radius: 28px;
+      font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    #play-btn:active { opacity: 0.8; }
+    #progress-bar {
+      margin-top: 12px; display: none;
+    }
+    #progress-bar.visible { display: block; }
+    #progress-track {
+      width: 100%; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden;
+    }
+    #progress-fill {
+      height: 100%; background: #1e293b; width: 0%; transition: width 0.3s;
+    }
+    #progress-times {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: #94a3b8; margin-top: 6px;
+    }
+
+    /* Language selector */
+    #lang-selector {
+      display: flex; gap: 8px; margin-top: 16px;
+    }
+    .lang-btn {
+      padding: 6px 14px; border-radius: 16px;
+      border: 1.5px solid #e2e8f0; background: #fff;
+      font-size: 13px; color: #64748b; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-btn.active {
+      background: #1e293b; color: #fff; border-color: #1e293b;
+    }
+
+    /* Info badge */
+    #info {
+      position: absolute; top: 12px; left: 12px;
+      color: #fff; font-size: 12px;
+      background: rgba(15,23,42,0.7); backdrop-filter: blur(8px);
+      padding: 8px 12px; border-radius: 8px;
+      z-index: 10;
+    }
+    @media (max-width: 480px) {
+      #info { font-size: 11px; padding: 6px 10px; top: 8px; left: 8px; }
+      #exhibit-card { padding: 20px 20px 28px; }
+      #card-name { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="info">Tap a landmark to explore</div>
+
+  <!-- Card overlay backdrop -->
+  <div id="card-overlay"></div>
+
+  <!-- Exhibit card -->
+  <div id="exhibit-card">
+    <div id="card-handle"></div>
+    <div id="card-type"></div>
+    <h2 id="card-name"></h2>
+    <p id="card-scientific"></p>
+    <p id="card-teaser"></p>
+    <div id="lang-selector">
+      <button class="lang-btn active" data-lang="en">English</button>
+      <button class="lang-btn" data-lang="hi">हिन्दी</button>
+      <button class="lang-btn" data-lang="te">తెలుగు</button>
+    </div>
+    <div id="audio-section">
+      <button id="play-btn">▶  Listen</button>
+      <div id="progress-bar">
+        <div id="progress-track"><div id="progress-fill"></div></div>
+        <div id="progress-times"><span id="time-current">0:00</span><span id="time-duration">0:00</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // Exhibit data (matches MVP)
+    const exhibits = {
+      'Neem Grove': { code: 'NM01', name: 'Neem', type: 'Plant', scientificName: 'Azadirachta indica', teaser: 'Known as the village pharmacy, every part of this tree has been used in Indian medicine for over 4,000 years.', audio: { en: '/audio/neem-en.mp3', hi: '/audio/neem-hi.mp3' } },
+      'Ancient Banyan': { code: 'BN02', name: 'Banyan', type: 'Plant', scientificName: 'Ficus benghalensis', teaser: 'A single Banyan can spread across acres using aerial roots that become new trunks — one tree becoming an entire forest.', audio: { en: '/audio/banyan-en.mp3', hi: '/audio/banyan-hi.mp3' } },
+      'Baobab Tree': { code: 'BB04', name: 'Baobab', type: 'Plant', scientificName: 'Adansonia digitata', teaser: 'Called the Tree of Life in Africa, the Baobab can store up to 120,000 litres of water in its massive trunk.', audio: { en: '/audio/baobab-en.mp3', hi: '/audio/baobab-hi.mp3' } },
+      'Peepal Tree': { code: 'PP05', name: 'Peepal', type: 'Plant', scientificName: 'Ficus religiosa', teaser: 'Sacred across religions, the Peepal is one of the few trees that produces oxygen both day and night.', audio: {} },
+      'Stone Pavilion': { code: 'ST01', name: 'Stone Pavilion', type: 'Structure', teaser: 'A traditional open-air meeting point, inspired by Deccan plateau architecture. The octagonal design maximizes shade coverage.', audio: {} },
+      'Heritage Temple': { code: 'ST02', name: 'Heritage Temple', type: 'Structure', teaser: 'A miniature replica of Kakatiya-era temple architecture, featuring a stepped shikhara tower and sandstone finish.', audio: {} },
+      'Observation Tower': { code: 'LM01', name: 'Observation Tower', type: 'Landmark', teaser: 'Climb 40 steps for a panoramic view of the entire park. On clear days, you can spot the Golconda Fort ruins.', audio: {} },
+      'Wooden Bridge': { code: 'LM02', name: 'Wooden Bridge', type: 'Landmark', teaser: 'Handcrafted from reclaimed railway sleepers, this bridge connects the forest loop to the lotus pond area.', audio: {} },
+      'Lotus Pond': { code: 'WB01', name: 'Lotus Pond', type: 'Water Body', teaser: 'Home to over 200 lotus plants that bloom between June and September. The pond also supports a small fish ecosystem.', audio: {} },
+      'Rock Pool': { code: 'WB02', name: 'Rock Pool', type: 'Water Body', teaser: 'A natural spring-fed pool surrounded by volcanic rock formations. The water stays cool even in peak summer.', audio: {} },
+    };
+
+    // Scene
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0xd4e6f1, 0.008);
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    document.body.appendChild(renderer.domElement);
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 500);
+    camera.position.set(30, 45, 55);
+
+    // Controls — mobile-friendly
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.maxPolarAngle = Math.PI / 2.4;
+    controls.minDistance = 10;
+    controls.maxDistance = 80;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, 0, 0);
+    controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+    controls.rotateSpeed = 0.6;
+    controls.panSpeed = 0.8;
+
+    // Sky gradient
+    const skyGeo = new THREE.SphereGeometry(200, 32, 32);
+    const skyMat = new THREE.ShaderMaterial({
+      side: THREE.BackSide,
+      uniforms: {
+        topColor: { value: new THREE.Color(0x4a90d9) },
+        bottomColor: { value: new THREE.Color(0xd4e6f1) },
+      },
+      vertexShader: `
+        varying vec3 vWorldPos;
+        void main() {
+          vec4 wp = modelMatrix * vec4(position, 1.0);
+          vWorldPos = wp.xyz;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 topColor;
+        uniform vec3 bottomColor;
+        varying vec3 vWorldPos;
+        void main() {
+          float h = normalize(vWorldPos).y;
+          gl_FragColor = vec4(mix(bottomColor, topColor, max(h, 0.0)), 1.0);
+        }
+      `
+    });
+    scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+    // Lighting
+    const hemi = new THREE.HemisphereLight(0x87ceeb, 0x3d5c3a, 0.4);
+    scene.add(hemi);
+
+    const sun = new THREE.DirectionalLight(0xfff4e6, 1.8);
+    sun.position.set(25, 50, 30);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.left = -50;
+    sun.shadow.camera.right = 50;
+    sun.shadow.camera.top = 50;
+    sun.shadow.camera.bottom = -50;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 120;
+    sun.shadow.bias = -0.001;
+    sun.shadow.normalBias = 0.02;
+    scene.add(sun);
+
+    const fill = new THREE.DirectionalLight(0xb4d4f7, 0.3);
+    fill.position.set(-20, 20, -10);
+    scene.add(fill);
+
+    // Materials
+    const mat = {
+      grass: new THREE.MeshStandardMaterial({ color: 0x5a9e4b, roughness: 0.9 }),
+      grassDark: new THREE.MeshStandardMaterial({ color: 0x3d7a32, roughness: 0.9 }),
+      trail: new THREE.MeshStandardMaterial({ color: 0xc4a46b, roughness: 0.7 }),
+      trailEdge: new THREE.MeshStandardMaterial({ color: 0x8b7355, roughness: 0.8 }),
+      water: new THREE.MeshStandardMaterial({ color: 0x3b8bbd, roughness: 0.2, metalness: 0.1, transparent: true, opacity: 0.85 }),
+      stone: new THREE.MeshStandardMaterial({ color: 0x9e9e9e, roughness: 0.6 }),
+      stoneWarm: new THREE.MeshStandardMaterial({ color: 0xc9a96e, roughness: 0.5 }),
+      wood: new THREE.MeshStandardMaterial({ color: 0x6d4c2a, roughness: 0.8 }),
+      trunk: new THREE.MeshStandardMaterial({ color: 0x5c3d1e, roughness: 0.9 }),
+      foliageDark: new THREE.MeshStandardMaterial({ color: 0x2d6b2d, roughness: 0.85 }),
+      foliageMid: new THREE.MeshStandardMaterial({ color: 0x3e8b3e, roughness: 0.85 }),
+      foliageLight: new THREE.MeshStandardMaterial({ color: 0x5aad5a, roughness: 0.85 }),
+      roof: new THREE.MeshStandardMaterial({ color: 0x8b2500, roughness: 0.6 }),
+      roofDark: new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 0.4, metalness: 0.2 }),
+      white: new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.5 }),
+    };
+
+    const clickables = [];
+
+    // Terrain
+    const terrainGeo = new THREE.PlaneGeometry(100, 100, 80, 80);
+    terrainGeo.rotateX(-Math.PI / 2);
+    const positions = terrainGeo.attributes.position;
+    for (let i = 0; i < positions.count; i++) {
+      const x = positions.getX(i);
+      const z = positions.getZ(i);
+      const dist = Math.sqrt(x * x + z * z);
+      let y = Math.sin(x * 0.1) * 0.5 + Math.cos(z * 0.12) * 0.4;
+      y += Math.sin(x * 0.05 + z * 0.07) * 0.8;
+      const flatFactor = Math.max(0, 1 - dist / 45);
+      y *= (1 - flatFactor * 0.5);
+      if (dist > 35) y += (dist - 35) * 0.15;
+      positions.setY(i, y);
+    }
+    terrainGeo.computeVertexNormals();
+    const terrain = new THREE.Mesh(terrainGeo, mat.grass);
+    terrain.receiveShadow = true;
+    scene.add(terrain);
+
+    // Grass patches
+    [[-8, 5, 4], [12, 15, 3], [-18, -8, 5], [20, -5, 3], [-5, -20, 4]].forEach(([x, z, r]) => {
+      const m = new THREE.Mesh(new THREE.CircleGeometry(r, 16), mat.grassDark);
+      m.rotation.x = -Math.PI / 2;
+      m.position.set(x, 0.08, z);
+      scene.add(m);
+    });
+
+    // Water
+    function makeWater(x, z, rx, name) {
+      const shoreMesh = new THREE.Mesh(
+        new THREE.CircleGeometry(rx + 1, 32),
+        new THREE.MeshStandardMaterial({ color: 0x9e8c6c, roughness: 0.9 })
+      );
+      shoreMesh.rotation.x = -Math.PI / 2;
+      shoreMesh.position.set(x, 0.05, z);
+      scene.add(shoreMesh);
+
+      const water = new THREE.Mesh(new THREE.CircleGeometry(rx, 32), mat.water);
+      water.rotation.x = -Math.PI / 2;
+      water.position.set(x, 0.15, z);
+      water.userData = { name };
+      water.receiveShadow = true;
+      clickables.push(water);
+      scene.add(water);
+    }
+    makeWater(-14, 8, 6, 'Lotus Pond');
+    makeWater(10, 18, 3.5, 'Rock Pool');
+
+    // Trails
+    function makeTrail(points, width = 1.2) {
+      const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(p[0], 0.12, p[1])));
+      const geo = new THREE.TubeGeometry(curve, 64, width * 0.5, 8, false);
+      const mesh = new THREE.Mesh(geo, mat.trail);
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+      const edgeGeo = new THREE.TubeGeometry(curve, 64, width * 0.6, 8, false);
+      const edge = new THREE.Mesh(edgeGeo, mat.trailEdge);
+      edge.position.y = -0.05;
+      scene.add(edge);
+    }
+    makeTrail([[0,20],[8,18],[14,12],[18,4],[18,-5],[14,-12],[8,-18],[0,-20],[-8,-18],[-14,-12],[-18,-5],[-18,4],[-14,12],[-8,18],[0,20]], 1.2);
+    makeTrail([[0,12],[6,8],[8,0],[6,-8],[0,-12],[-6,-8],[-8,0],[-6,8],[0,12]], 0.8);
+    makeTrail([[0,12],[0,20]], 0.7);
+    makeTrail([[8,0],[18,0]], 0.7);
+    makeTrail([[-8,0],[-14,4],[-14,8]], 0.7);
+    makeTrail([[6,-8],[14,-12]], 0.7);
+
+    // Trees
+    function makeTree(x, z, opts = {}) {
+      const { height = 3, type = 'cone', name, foliageMat } = opts;
+      const group = new THREE.Group();
+      const trunkH = height * 0.35;
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.25, trunkH, 7), mat.trunk);
+      trunk.position.y = trunkH / 2;
+      trunk.castShadow = true;
+      group.add(trunk);
+
+      const fMat = foliageMat || [mat.foliageDark, mat.foliageMid, mat.foliageLight][Math.floor(Math.random() * 3)];
+
+      if (type === 'cone') {
+        const foliage = new THREE.Mesh(new THREE.ConeGeometry(height * 0.4, height * 0.65, 7), fMat);
+        foliage.position.y = trunkH + height * 0.25;
+        foliage.castShadow = true;
+        if (name) { foliage.userData = { name }; clickables.push(foliage); }
+        group.add(foliage);
+      } else if (type === 'sphere') {
+        const foliage = new THREE.Mesh(new THREE.IcosahedronGeometry(height * 0.4, 1), fMat);
+        foliage.position.y = trunkH + height * 0.3;
+        foliage.castShadow = true;
+        if (name) { foliage.userData = { name }; clickables.push(foliage); }
+        group.add(foliage);
+      } else if (type === 'banyan') {
+        const canopy = new THREE.Mesh(new THREE.SphereGeometry(height * 0.7, 8, 6), fMat);
+        canopy.scale.set(1.4, 0.6, 1.4);
+        canopy.position.y = trunkH + height * 0.15;
+        canopy.castShadow = true;
+        if (name) { canopy.userData = { name }; clickables.push(canopy); }
+        group.add(canopy);
+        for (let i = 0; i < 4; i++) {
+          const angle = (i / 4) * Math.PI * 2 + Math.random() * 0.5;
+          const r = height * 0.4;
+          const root = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, trunkH * 0.8, 4), mat.trunk);
+          root.position.set(Math.cos(angle) * r, trunkH * 0.3, Math.sin(angle) * r);
+          group.add(root);
+        }
+      }
+      group.position.set(x, 0, z);
+      scene.add(group);
+    }
+
+    // Named exhibits
+    makeTree(5, -5, { height: 5, type: 'banyan', name: 'Ancient Banyan' });
+    makeTree(-5, -14, { height: 4.5, type: 'sphere', name: 'Baobab Tree', foliageMat: mat.foliageDark });
+    makeTree(12, 6, { height: 4, type: 'cone', name: 'Neem Grove' });
+    makeTree(-10, -3, { height: 3.5, type: 'sphere', name: 'Peepal Tree', foliageMat: mat.foliageLight });
+
+    // Forest clusters
+    function treeCluster(cx, cz, count, radius) {
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+        const r = Math.random() * radius;
+        makeTree(cx + Math.cos(angle) * r, cz + Math.sin(angle) * r, { height: 2 + Math.random() * 2.5, type: ['cone','sphere','cone'][Math.floor(Math.random()*3)] });
+      }
+    }
+    treeCluster(22, 12, 8, 5);
+    treeCluster(-22, -12, 6, 4);
+    treeCluster(-20, 18, 7, 5);
+    treeCluster(22, -18, 5, 4);
+    treeCluster(0, 25, 6, 4);
+    [[15,-20],[-25,0],[25,0],[-12,22],[28,8],[-28,-5],[5,-25],[-5,28]].forEach(([x,z]) => {
+      makeTree(x, z, { height: 2.5 + Math.random() * 2, type: Math.random() > 0.5 ? 'cone' : 'sphere' });
+    });
+
+    // Structures
+    function makePavilion(x, z, name) {
+      const group = new THREE.Group();
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(3, 3.2, 0.4, 8), mat.stoneWarm);
+      base.position.y = 0.2; base.castShadow = true; base.receiveShadow = true;
+      base.userData = { name };
+      clickables.push(base);
+      group.add(base);
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.18, 3, 8), mat.white);
+        pillar.position.set(Math.cos(angle) * 2.2, 1.9, Math.sin(angle) * 2.2);
+        pillar.castShadow = true;
+        group.add(pillar);
+      }
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(3.5, 2, 8), mat.roof);
+      roof.position.y = 4.2; roof.castShadow = true;
+      group.add(roof);
+      group.position.set(x, 0, z);
+      scene.add(group);
+    }
+
+    function makeTemple(x, z, name) {
+      const group = new THREE.Group();
+      const base = new THREE.Mesh(new THREE.BoxGeometry(4, 0.6, 4), mat.stone);
+      base.position.y = 0.3; base.castShadow = true; base.receiveShadow = true;
+      group.add(base);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), mat.stoneWarm);
+      body.position.y = 2.1; body.castShadow = true;
+      body.userData = { name };
+      clickables.push(body);
+      group.add(body);
+      const tower = new THREE.Mesh(new THREE.ConeGeometry(1.8, 3, 4), mat.stoneWarm);
+      tower.position.y = 5; tower.rotation.y = Math.PI / 4; tower.castShadow = true;
+      group.add(tower);
+      const finial = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.8, roughness: 0.2 }));
+      finial.position.y = 6.7;
+      group.add(finial);
+      group.position.set(x, 0, z);
+      scene.add(group);
+    }
+
+    function makeTower(x, z, name) {
+      const group = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.5, 6, 8), mat.stone);
+      body.position.y = 3; body.castShadow = true;
+      body.userData = { name };
+      clickables.push(body);
+      group.add(body);
+      const platform = new THREE.Mesh(new THREE.CylinderGeometry(2, 1.5, 0.5, 8), mat.stone);
+      platform.position.y = 6.25; platform.castShadow = true;
+      group.add(platform);
+      const railing = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.08, 4, 16), mat.roofDark);
+      railing.position.y = 6.8; railing.rotation.x = Math.PI / 2;
+      group.add(railing);
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(2.2, 1.5, 8), mat.roofDark);
+      roof.position.y = 7.8; roof.castShadow = true;
+      group.add(roof);
+      group.position.set(x, 0, z);
+      scene.add(group);
+    }
+
+    function makeBridge(x, z, rotation, name) {
+      const group = new THREE.Group();
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(5, 0.3, 1.5), mat.wood);
+      deck.position.y = 0.8; deck.castShadow = true;
+      deck.userData = { name };
+      clickables.push(deck);
+      group.add(deck);
+      for (let side = -1; side <= 1; side += 2) {
+        for (let i = -2; i <= 2; i++) {
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.8, 4), mat.wood);
+          post.position.set(i, 1.3, side * 0.7);
+          group.add(post);
+        }
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(5, 0.08, 0.08), mat.wood);
+        rail.position.set(0, 1.7, side * 0.7);
+        group.add(rail);
+      }
+      group.position.set(x, 0, z);
+      group.rotation.y = rotation;
+      scene.add(group);
+    }
+
+    makePavilion(0, -8, 'Stone Pavilion');
+    makeTemple(-8, -17, 'Heritage Temple');
+    makeTower(16, -6, 'Observation Tower');
+    makeBridge(-11, 6, Math.PI * 0.3, 'Wooden Bridge');
+
+    // Benches
+    [[4,12,0],[-6,6,0.5],[10,-14,-0.3],[-16,-6,1.2]].forEach(([x,z,r]) => {
+      const group = new THREE.Group();
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(2, 0.25, 0.6), mat.stone);
+      seat.position.y = 0.55; seat.castShadow = true;
+      group.add(seat);
+      const l1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.5), mat.stone);
+      l1.position.set(-0.7, 0.25, 0); group.add(l1);
+      const l2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.5), mat.stone);
+      l2.position.set(0.7, 0.25, 0); group.add(l2);
+      group.position.set(x, 0, z); group.rotation.y = r;
+      scene.add(group);
+    });
+
+    // Rocks
+    [[12,16,0.8],[13,17.5,0.5],[11,17,0.6],[-16,10,0.7],[-17,9,0.4],[20,-10,1],[21,-9,0.5],[-3,-20,0.6],[0,-22,0.5]].forEach(([x,z,s]) => {
+      const geo = new THREE.IcosahedronGeometry(s, 0);
+      geo.translate(0, s * 0.5, 0);
+      const pos = geo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        pos.setX(i, pos.getX(i) + (Math.random() - 0.5) * s * 0.3);
+        pos.setY(i, Math.max(0, pos.getY(i) + (Math.random() - 0.5) * s * 0.2));
+        pos.setZ(i, pos.getZ(i) + (Math.random() - 0.5) * s * 0.3);
+      }
+      geo.computeVertexNormals();
+      const rock = new THREE.Mesh(geo, mat.stone);
+      rock.position.set(x, 0, z); rock.rotation.y = Math.random() * Math.PI;
+      rock.castShadow = true; rock.receiveShadow = true;
+      scene.add(rock);
+    });
+
+    // Flowers
+    [[3,8,12,0xff69b4],[-3,-3,8,0xffff00],[8,-12,10,0xff4500],[-10,14,8,0xda70d6]].forEach(([cx,cz,count,color]) => {
+      const fMat = new THREE.MeshStandardMaterial({ color, roughness: 0.7 });
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const r = Math.random() * 1.5;
+        const f = new THREE.Mesh(new THREE.SphereGeometry(0.12, 5, 5), fMat);
+        f.position.set(cx + Math.cos(angle) * r, 0.2, cz + Math.sin(angle) * r);
+        scene.add(f);
+      }
+    });
+
+    // --- INTERACTION: Card + Audio ---
+    const cardOverlay = document.getElementById('card-overlay');
+    const card = document.getElementById('exhibit-card');
+    const cardType = document.getElementById('card-type');
+    const cardName = document.getElementById('card-name');
+    const cardScientific = document.getElementById('card-scientific');
+    const cardTeaser = document.getElementById('card-teaser');
+    const playBtn = document.getElementById('play-btn');
+    const progressBar = document.getElementById('progress-bar');
+    const progressFill = document.getElementById('progress-fill');
+    const timeCurrent = document.getElementById('time-current');
+    const timeDuration = document.getElementById('time-duration');
+
+    let audio = null;
+    let currentExhibit = null;
+    let currentLang = 'en';
+    let isPlaying = false;
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      return `${m}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
+    }
+
+    function openCard(name) {
+      const ex = exhibits[name];
+      if (!ex) return;
+      currentExhibit = ex;
+
+      cardType.textContent = ex.type;
+      cardName.textContent = ex.name;
+      cardScientific.textContent = ex.scientificName || '';
+      cardScientific.style.display = ex.scientificName ? 'block' : 'none';
+      cardTeaser.textContent = ex.teaser;
+
+      // Reset audio state
+      if (audio) { audio.pause(); audio = null; }
+      isPlaying = false;
+      playBtn.textContent = '▶  Listen';
+      progressBar.classList.remove('visible');
+      progressFill.style.width = '0%';
+
+      // Show/hide audio section based on availability
+      const hasAudio = ex.audio[currentLang] || ex.audio.en;
+      document.getElementById('audio-section').style.display = hasAudio ? 'block' : 'none';
+
+      // Update lang buttons
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === currentLang);
+      });
+
+      cardOverlay.classList.add('visible');
+      card.classList.add('visible');
+      controls.enabled = false;
+    }
+
+    function closeCard() {
+      cardOverlay.classList.remove('visible');
+      card.classList.remove('visible');
+      controls.enabled = true;
+      if (audio) { audio.pause(); audio = null; }
+      isPlaying = false;
+    }
+
+    cardOverlay.addEventListener('click', closeCard);
+
+    // Swipe down to close
+    let touchStartY = 0;
+    card.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+    });
+    card.addEventListener('touchmove', (e) => {
+      const dy = e.touches[0].clientY - touchStartY;
+      if (dy > 60) closeCard();
+    });
+
+    // Language buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentLang = btn.dataset.lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b === btn));
+        if (audio) { audio.pause(); audio = null; }
+        isPlaying = false;
+        playBtn.textContent = '▶  Listen';
+        progressBar.classList.remove('visible');
+        const hasAudio = currentExhibit?.audio[currentLang] || currentExhibit?.audio.en;
+        document.getElementById('audio-section').style.display = hasAudio ? 'block' : 'none';
+      });
+    });
+
+    // Play button
+    playBtn.addEventListener('click', () => {
+      if (!currentExhibit) return;
+      const src = currentExhibit.audio[currentLang] || currentExhibit.audio.en;
+      if (!src) return;
+
+      if (!audio) {
+        audio = new Audio(src);
+        audio.addEventListener('loadedmetadata', () => {
+          timeDuration.textContent = formatTime(audio.duration);
+        });
+        audio.addEventListener('timeupdate', () => {
+          const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+          progressFill.style.width = pct + '%';
+          timeCurrent.textContent = formatTime(audio.currentTime);
+        });
+        audio.addEventListener('ended', () => {
+          isPlaying = false;
+          playBtn.textContent = '▶  Play Again';
+        });
+      }
+
+      if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+        playBtn.textContent = '▶  Resume';
+      } else {
+        audio.play();
+        isPlaying = true;
+        playBtn.textContent = '❚❚  Pause';
+        progressBar.classList.add('visible');
+      }
+    });
+
+    // Raycaster — handles both click and tap
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let pointerDown = null;
+
+    function onPointerDown(e) {
+      const x = e.clientX ?? e.touches?.[0]?.clientX;
+      const y = e.clientY ?? e.touches?.[0]?.clientY;
+      pointerDown = { x, y, time: Date.now() };
+    }
+
+    function onPointerUp(e) {
+      if (!pointerDown) return;
+      const x = e.clientX ?? e.changedTouches?.[0]?.clientX;
+      const y = e.clientY ?? e.changedTouches?.[0]?.clientY;
+      const dx = x - pointerDown.x;
+      const dy = y - pointerDown.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const elapsed = Date.now() - pointerDown.time;
+
+      // Only count as tap if short duration and small movement
+      if (dist < 10 && elapsed < 300) {
+        pointer.x = (x / innerWidth) * 2 - 1;
+        pointer.y = -(y / innerHeight) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+        const hits = raycaster.intersectObjects(clickables);
+        if (hits.length > 0 && hits[0].object.userData.name) {
+          openCard(hits[0].object.userData.name);
+        }
+      }
+      pointerDown = null;
+    }
+
+    renderer.domElement.addEventListener('pointerdown', onPointerDown);
+    renderer.domElement.addEventListener('pointerup', onPointerUp);
+
+    // Hover cursor (desktop only)
+    renderer.domElement.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'touch') return;
+      pointer.x = (e.clientX / innerWidth) * 2 - 1;
+      pointer.y = -(e.clientY / innerHeight) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects(clickables);
+      renderer.domElement.style.cursor = hits.length > 0 ? 'pointer' : 'grab';
+    });
+
+    // Resize
+    addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    // Animate
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
