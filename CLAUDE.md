@@ -26,8 +26,13 @@ Model B — scans (page impressions) are the product, audio is the hook. Revenue
 
 ## GitHub
 
-- **Always use `ghp`** (not `gh`) for all GitHub CLI operations in this repo. `ghp` uses the personal account (`makaravind`).
-- **Project board:** https://github.com/users/makaravind/projects/1 — tracks all work (app + content pipeline + launch tasks). Use `ghp project` commands to manage items.
+- **Personal account:** `makaravind`. To run GitHub CLI commands for this repo:
+  1. `gh auth switch --hostname github.com --user makaravind`
+  2. Run your commands (`gh issue`, `gh project`, `gh api`, etc.)
+  3. Switch back: `gh auth switch --hostname github.com --user ametku`
+- **Project board:** https://github.com/users/makaravind/projects/1 — tracks all work (app + content pipeline + launch tasks).
+- **Milestones:** use `gh api repos/makaravind/experium-ai-tour-app/milestones` (no `gh milestone` subcommand exists).
+- **Local cache:** `.claude/current-milestone.md` has current milestone state — read that first before hitting the API.
 
 ## Repository Structure
 
