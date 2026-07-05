@@ -1,28 +1,6 @@
 # Nature Audio Tour
 
-## What This Is
-
-QR-code-based audio guide for park visitors. Scan a marker near an exhibit → mobile webapp plays 60-second audio narration. No app install.
-
-Exhibits include: rare plants, stone structures, water bodies, and landmarks.
-
-**First deployment:** Experium Park, Hyderabad (150 acres, ₹1000 entry, 500+ daily visitors).
-
-## Business Model
-
-Model B — scans (page impressions) are the product, audio is the hook. Revenue from direct-sold local ads. Physical markers sponsored one-time by local businesses.
-
-## Key Architecture Decisions
-
-- QR encodes permanent short code (`/s/A7X3`) → server resolves to content (indirection layer)
-- Markers have NO exhibit name — only sponsor logo + QR. Allows reassignment without reprinting.
-- Exhibits have a `type` field: `plant | structure | water-body | landmark`
-- `scientificName` is optional (only relevant for plants)
-- Webapp: Next.js, serverless, PostgreSQL, S3+CDN for audio
-- Audio: AI TTS (64kbps mono, <500KB per clip), 3 languages (EN/HI/TE)
-- Identity: anonymous first, OTP after 2-3 scans
-- Admin/maintainer mode built into same webapp
-- New exhibit codes: type prefix + number (PL01, ST01, WB01, LM01)
+QR-code-based audio guide for park visitors. Scan marker → webapp plays audio narration. No app install. First deployment: Experium Park, Hyderabad.
 
 ## GitHub
 
@@ -30,44 +8,53 @@ Model B — scans (page impressions) are the product, audio is the hook. Revenue
   1. `gh auth switch --hostname github.com --user makaravind`
   2. Run your commands (`gh issue`, `gh project`, `gh api`, etc.)
   3. Switch back: `gh auth switch --hostname github.com --user ametku`
-- **Project board:** https://github.com/users/makaravind/projects/1 — tracks all work (app + content pipeline + launch tasks).
-- **Milestones:** use `gh api repos/makaravind/experium-ai-tour-app/milestones` (no `gh milestone` subcommand exists).
-- **Local cache:** `.claude/current-milestone.md` has current milestone state — read that first before hitting the API.
+- **Project board:** https://github.com/users/makaravind/projects/1
+- **Milestones:** `gh api repos/makaravind/experium-ai-tour-app/milestones`
+- **Local cache:** `.claude/current-milestone.md` — read before hitting API.
 
 ## Repository Structure
 
-- **App source code:** `experium-ai-tour-app/` — all application code lives here. Code changes go in this folder.
-- **Everything else** (docs, content generation scripts, audio assets, presentation) — lives in the repo root outside the app folder.
+- `experium-ai-tour-app/` — all application code. Code changes go here.
+- `docs/` — all design docs, decisions, specs.
+- `references/` — design refs, Open Design prompts.
+- `mvp/` — early prototype (static audio player).
 
-## Documentation
+## Documentation Index
 
-All design docs are in `/docs/`. Read `docs/README.md` for the full index.
-
-Key files for development:
+### Architecture & Decisions
 - `docs/tech-architecture.md` — DB schema, API endpoints, stack
-- `docs/user-journey.md` — UI flows
-- `docs/content-pipeline.md` — audio generation process
 - `docs/decisions.md` — all resolved decisions
+- `docs/open-questions.md` — unresolved items by urgency
+
+### User Experience
+- `docs/user-journey.md` — high-level visitor flows
+- `docs/design.md` — full design system
+- `docs/user-flows/flow-1-qr-scan-to-exhibit.md` — core flow (loading → map → audio → milestone)
+- `docs/user-flows/flow-5-home-screen.md` — home tab
+- `docs/user-flows/flow-6-gamification-trail.md` — trail, milestones, discovery cards
+- `docs/user-flows/flow-7-report-issue.md` — issue reporting
+
+### Map & GPS
+- `docs/interactive-map.md` — Three.js/R3F spec, GPS, nearby highlights
+- `docs/pwa-vs-native-evaluation.md` — PWA feasibility (GPS, audio, offline)
+
+### Business & Operations
+- `docs/revenue-model.md` — CPM pricing, ad tiers, projections
+- `docs/operations.md` — marker lifecycle, maintenance
+- `docs/park-partnership-brief.md` — pitch to park
+- `docs/partnership-saas-model.md` — alternative SaaS model (internal)
+
+### Content
+- `docs/content-pipeline.md` — audio generation (interview → script → TTS)
+- `docs/content-review-66-beyond.md` — park content review
+- `docs/gamification-badges.md` — milestone badges
+
+### References
+- `references/opendesign-flow-prompts.md` — prompts to regenerate UI screens
 
 ## Development Guidelines
 
 - **v1 mentality:** Keep it simple. No over-engineering.
-- **Assume connectivity is good** — don't build offline-first
-- **No app store** — webapp only, PWA optional
-- **Telemetry is minimal** — only track what drives a decision
-- **Content pipeline is code** — build as repeatable scripts, not manual process
-- **Markers are dumb, server is smart** — all logic server-side
-
-## Open Questions
-
-See `docs/open-questions.md` — some block development (domain name, gamification design), others block launch only.
-
-## Stack
-
-- Frontend: Next.js (App Router)
-- Backend: Next.js API routes / serverless
-- DB: PostgreSQL (Supabase or Neon)
-- Audio: S3 + CloudFront
-- Auth: OTP (Twilio/MSG91)
-- Hosting: Vercel or Cloudflare Pages
-- Content: Whisper + Claude/GPT + ElevenLabs/Google TTS
+- **Offline after initial load** — service worker caches everything on first visit.
+- **Markers are dumb, server is smart** — all logic server-side.
+- **Content pipeline is code** — repeatable scripts, not manual process.

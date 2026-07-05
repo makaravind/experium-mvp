@@ -9,15 +9,41 @@
         ↓
 [Browser opens: domain.com/s/A7X3]
         ↓
-[Page loads — ~1 second]
+[Loading Screen — downloads all assets]
   ┌─────────────────────────┐
-  │ [Splash Ad - 2-3 sec]   │
-  │ Sponsor banner           │
+  │                         │
+  │  [Park illustration/    │
+  │   logo animation]       │
+  │                         │
+  │  "Preparing your        │
+  │   audio tour..."        │
+  │                         │
+  │  ━━━━━━━━━━━░░░ 72%    │
+  │                         │
+  │  Language: [EN] [HI] [TE]│
+  │                         │
   └─────────────────────────┘
         ↓
+[Assets cached — map + metadata + audio for selected language (~25MB)]
+        ↓
+[Optional Info Modal]
   ┌─────────────────────────┐
-  │ [Language: EN ▼]        │
   │                         │
+  │  "Personalize your      │
+  │   experience"           │
+  │                         │
+  │  Name     [          ]  │
+  │  Phone    [          ]  │
+  │  Email    [          ]  │
+  │                         │
+  │  [Continue →]           │
+  │                         │
+  │       Skip for now      │
+  └─────────────────────────┘
+        ↓
+[App ready — fully offline from here]
+        ↓
+  ┌─────────────────────────┐
   │ [Exhibit Photo]         │
   │ "Neem Tree"             │
   │                         │
@@ -38,39 +64,115 @@
   │ "Learn More" (optional  │
   │  text details expand)   │
   │                         │
-  │ [🎮 Explore More!]      │
-  │ "Discover 10 exhibits,  │
-  │  share your discovery   │
-  │  card!"                 │
+  │ KEEP EXPLORING          │
+  │                         │
+  │ 🌿 Your Trail           │
+  │ ●─────●─────○─────○────│
+  │ 5    7↑    10     20   │
+  │      you                │
+  │ "3 more to next unlock!"│
+  │                         │
+  │ ┌───────────────────┐   │
+  │ │  [📷]             │   │
+  │ │  Scan Now         │   │
+  │ │  Scan what's near │   │
+  │ │  you              │   │
+  │ └───────────────────┘   │
+  │                         │
+  │ [▼ Explore the Park]    │
+  │  (collapsible map)      │
   │                         │
   │ [⚠ Report Issue]       │
   └─────────────────────────┘
         ↓
-[User walks to next exhibit / closes tab]
+[User scans next nearby exhibit / taps "Explore" to see map]
 ```
 
-## Second/Third Scan (Anonymous)
+## Second/Third Scan
 
-Same as above, but after audio:
+Same as above (no loading screen — assets already cached offline). After audio, same "Keep Exploring" screen with horizontal trail updated:
 ```
   ┌─────────────────────────┐
-  │ "You've discovered 2    │
-  │  exhibits! 8 more to    │
-  │  unlock your card."     │
+  │ KEEP EXPLORING          │
   │                         │
-  │ [Save progress →]       │
-  │ "Enter phone number"    │
+  │ 🌿 Your Trail           │
+  │ ●─────●↑────○─────○────│
+  │ 0    2you   5     10   │
+  │ "3 more to next unlock!"│
+  │                         │
+  │ ┌───────────────────┐   │
+  │ │  [📷] Scan Now    │   │
+  │ └───────────────────┘   │
+  │                         │
+  │ [▼ Explore the Park]    │
+  │                         │
   └─────────────────────────┘
 ```
 
-Progress tracked in browser local storage until they opt in.
+Progress tracked in browser local storage. Synced to server when online (if user provided info on first load).
 
-## Returning User (Logged In via OTP)
+## Milestone Unlock (at 5, 10, 20, 35, 50)
 
-- Language preference remembered
-- Progress persistent across devices
+Full-screen celebration takeover:
+```
+  ┌─────────────────────────┐
+  │                         │
+  │    🎉 ✨ 🎊             │
+  │                         │
+  │    [Badge Animation]    │
+  │    🌿 Explorer 🌿       │
+  │                         │
+  │  "10 Exhibits           │
+  │   Discovered!"          │
+  │                         │
+  │  [at 10 & 50 only:]    │
+  │  "Your Discovery Card   │
+  │   is ready!"            │
+  │  [View Card →]          │
+  │                         │
+  │       [Tap to continue] │
+  └─────────────────────────┘
+```
+
+## Explore the Park (Collapsible Map)
+
+When user taps "Explore the Park" below Scan Now:
+```
+  ┌─────────────────────────┐
+  │ [▲ Explore the Park]    │
+  │                         │
+  │ ┌───────────────────┐   │
+  │ │  [Illustrated     │   │
+  │ │   Park Map SVG]   │   │
+  │ │                   │   │
+  │ │  • Pin 1 (Lake)   │   │
+  │ │  • Pin 2 (Rare    │   │
+  │ │    Garden)        │   │
+  │ │  • Pin 3 ...      │   │
+  │ │  (5 unvisited     │   │
+  │ │   curated pins)   │   │
+  │ └───────────────────┘   │
+  │                         │
+  │ [Pin tapped:]           │
+  │ ┌───────────────────┐   │
+  │ │ 📷 Baobab Tree    │   │
+  │ │ "Near the lake    │   │
+  │ │  entrance, ~5 min │   │
+  │ │  walk"            │   │
+  │ │ [Navigate →]      │   │
+  │ └───────────────────┘   │
+  └─────────────────────────┘
+```
+
+5 curated unvisited exhibits shown. As exhibits are visited, next unvisited ones rotate in.
+
+## Returning User
+
+- Language preference remembered (localStorage)
+- Progress persisted locally; synced to server if user provided info
 - Sees: "Welcome back! 7/10 exhibits discovered"
 - After completing target: shareable Instagram-style card generated
+- No loading screen on return (assets already cached by service worker)
 
 ## Maintainer Flow
 

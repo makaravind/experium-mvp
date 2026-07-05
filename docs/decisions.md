@@ -13,8 +13,8 @@ Source of truth for all design decisions made during initial planning.
 | Post-audio | Text details available after listening | Reward for engagement, doesn't compete with audio |
 | Language | English + Hindi + Telugu | Matches Hyderabad visitor demographic |
 | Language selection | Visible dropdown at top, user picks before pressing listen | Explicit choice, no autodetect |
-| User identity | Anonymous first scan, OTP prompt after 2-3 scans | Zero friction on first touch, identity needed for gamification |
-| Gamification | Yes — exhibit discovery game, shareable cards | Drives repeat scans; details TBD |
+| User identity | Anonymous-first. Optional name/phone/email on first load (skippable). No OTP in v1 | Zero friction; soft capture for personalization + marketing leads |
+| Gamification | Yes — exhibit discovery game, shareable cards | Drives repeat scans; see gamification section below |
 | Feedback | User can report wrong info / damaged markers | Crowdsourced maintenance safety net |
 | Exhibit types | plant, structure, water-body, landmark | Covers all park experiences |
 | Exhibit terminology | "Exhibit" (user-facing + code) | Generic term for any scannable point of interest |
@@ -28,7 +28,7 @@ Source of truth for all design decisions made during initial planning.
 | Stack | Next.js or similar, serverless backend, Postgres DB | Simple, low concurrent load (~50 simultaneous max) |
 | QR URL scheme | `domain.com/s/{SHORT_CODE}` → server redirect | Indirection allows remapping without reprinting markers |
 | Audio format | Pre-compressed speech (64kbps mono, ~500KB/min) | Loads in 2-3 sec even on weak 4G, no streaming needed |
-| Connectivity | Assume good (v1) | Hyderabad urban area, don't over-engineer |
+| Connectivity | ~~Assume good~~ **Offline after initial load** | First load downloads all assets (~25MB for selected language); service worker caches for full offline park visit |
 | Admin data | Proper database | Reports, reviews, state tracking needed |
 | Telemetry | Scans/marker/day, unique users, listen rate, ad CTR | Only metrics that drive a decision |
 | Code scheme (new exhibits) | Type prefix + number (PL01, ST01, WB01, LM01) | Distinguishes exhibit types at a glance |
@@ -70,3 +70,23 @@ Source of truth for all design decisions made during initial planning.
 | Pipeline design | Built as repeatable script/tool | Reusable for content updates and future parks |
 | scientificName field | Optional (null for non-plant exhibits) | Only plants have scientific names |
 | Discovery counter | Flat ("X exhibits discovered"), not type-aware | Simple v1, per-type badges in v2 |
+| Exhibit category system | A/B/C tier (orthogonal to type enum) | Drives content investment, sponsor pricing, and user-facing differentiation (audio length, pin prominence) |
+
+## Gamification
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Progress display | Horizontal trail with milestones shown post-audio (combined with Scan Now + Explore) | Single "Keep Exploring" screen — no dead-end; user always has next action visible |
+| Trail scope | Shows current segment (last milestone → next milestone) | Compact horizontal bar, not overwhelming |
+| Milestones | 1, 3, 5, 10, 15, 20, 30, 40, 50 exhibits | Frequent early milestones hook users fast; spacing increases as engagement deepens |
+| Milestone celebration | Full-screen takeover with confetti + badge reveal at every milestone | Every milestone feels like an event |
+| Discovery cards | Shareable Instagram-style card unlocked at milestones 10 and 50 | Big rewards at key thresholds; cards = organic marketing |
+| Post-audio primary CTA | "Scan Now" — opens phone camera | Most natural next action; user is already in the park near markers |
+| Post-audio secondary | Collapsible "Explore the park" section with illustrated map | Discoverable but not in the way of scanning flow |
+| Park map style | Stylized illustrated SVG (theme park brochure style) | On-brand, single asset, works at any zoom |
+| Map suggestions | 5 curated unvisited exhibits shown as pins, rotate as completed | Enough choice without decision fatigue |
+| Navigation | ~~Text/photo hint only~~ **GPS "You are here"** — live blue accuracy circle on Three.js map via `watchPosition()` | ~~No GPS dependency in v1~~ **OVERRIDDEN** — GPS is v1 scope; PWA evaluation confirms feasibility |
+| Nearby exhibit highlights | Unvisited pins within 50m (max 5) pulse + 1.3× scale on map; Category A guaranteed a slot | Drives next scan naturally via map visual cues, no extra UI |
+| Curated path | Fixed recommended route designed editorially | Complements GPS — editorial curation for "what to see" vs GPS for "what's close" |
+| Exhibit categories | A/B/C tier per exhibit, manually assigned, default B | A = longer audio (90s) + larger pin (1.3×) + nearby priority + persists at low zoom. C = 60s audio, standard pin, hides at low zoom. Reassign from real data after 2-4 weeks |
+| User info capture | Optional modal on first load (name, phone, email) + skip link | No OTP in v1. Stored locally, synced when online. Never re-shown if skipped; Discovery Card shows "Your Name Here" tap-to-edit at milestone 10 |

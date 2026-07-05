@@ -40,7 +40,7 @@ The `/s/{code}` endpoint:
 | Database | PostgreSQL (Supabase or Neon) | Managed, free tier sufficient for v1 |
 | Audio hosting | S3 + CloudFront | Cheap, fast, global CDN |
 | Auth (admin) | Simple password or Supabase Auth | Only you and maintainer need access |
-| Auth (visitor) | OTP via Twilio/MSG91 | Indian phone numbers, cheap SMS |
+| Auth (visitor) | None in v1 (optional info capture, no OTP) | Plain inputs stored locally, synced to server when online |
 | Hosting | Vercel or Cloudflare Pages | Free tier handles this traffic easily |
 | Analytics | Custom (DB writes) | Simple scan logging, no third-party needed |
 
@@ -53,6 +53,7 @@ exhibits
   id            UUID PK
   name          TEXT          -- "Neem Tree", "Ancient Stone Arch", "Lotus Lake"
   type          ENUM (plant, structure, water_body, landmark)
+  category      ENUM (A, B, C) DEFAULT B  -- priority tier: A=premium, B=standard, C=minimal
   scientific_name TEXT NULL   -- optional, primarily for plants
   description   TEXT          -- Brief text description
   photo_url     TEXT          -- Exhibit photo on CDN
@@ -92,7 +93,9 @@ scans
 
 users
   id            UUID PK
-  phone         TEXT UNIQUE
+  name          TEXT NULL     -- optional, captured on first-load modal
+  phone         TEXT NULL     -- optional, captured on first-load modal (no OTP in v1)
+  email         TEXT NULL     -- optional, captured on first-load modal
   language_pref TEXT          -- en, hi, te
   created_at    TIMESTAMP
 
@@ -134,9 +137,9 @@ GET  /s/{code}              → Resolve QR, render exhibit page (SSR)
 GET  /api/exhibit/{id}      → Exhibit data + audio URLs
 POST /api/scan              → Log a scan event
 POST /api/report            → Submit issue report
-POST /api/auth/otp/send     → Send OTP to phone
-POST /api/auth/otp/verify   → Verify OTP, create session
-GET  /api/progress          → User's discovered exhibits (authed)
+POST /api/user/info         → Save optional user details (name/phone/email)
+GET  /api/progress          → User's discovered exhibits
+GET  /api/exhibits/all      → All exhibit metadata + coords (for offline cache)
 ```
 
 ### Admin (Protected)

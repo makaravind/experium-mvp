@@ -5,7 +5,7 @@
 | # | Question | Context | Notes |
 |---|----------|---------|-------|
 | 1 | Final brand name and domain? | QR codes encode a permanent URL — domain must be decided before first marker is printed | Working title: "Nature Audio Tour" |
-| 2 | Gamification mechanics? | Game design affects DB schema, user model, and UI flows | Deferred from initial discussion — needs dedicated session |
+| 2 | ~~Gamification mechanics?~~ | ~~Game design affects DB schema, user model, and UI flows~~ | **RESOLVED** — see decisions.md § Gamification. Trail ladder + milestones + illustrated map + discovery cards |
 
 ## Blocks Launch
 
@@ -22,11 +22,11 @@
 
 | # | Question | Context | Notes |
 |---|----------|---------|-------|
-| 9 | Privacy policy for OTP/user data? | Required before collecting phone numbers | Standard mobile OTP consent |
+| 9 | Privacy policy for user data (name/phone/email)? | Required before collecting info on first-load modal | No OTP in v1; plain optional inputs stored locally then synced |
 | 10 | Ad disclosure requirements? | Legal requirement to mark sponsored content | "Sponsored" label on ads |
 | 11 | Partnership agreement terms? | Formal contract with Experium | Needs legal review |
 | 12 | Multi-park expansion criteria? | When/how to approach park #2 | Not focusing on this now — revisit after Experium proves the model |
-| 13 | Reward for gamification (park restaurant discount, etc.)? | Requires park cooperation and agreement | Deferred with gamification design |
+| 13 | Reward for gamification (park restaurant discount, etc.)? | Requires park cooperation and agreement | Gamification UX resolved; physical rewards still open — needs park agreement |
 
 ## TODO (Deferred)
 
@@ -35,3 +35,6 @@
 | 14 | Migrate existing codes (NM01→PL01 etc.) or keep as permanent aliases? | New exhibits use type-prefix scheme; existing MVP codes still work |
 | 15 | Per-type audio script guidance | Document different approaches when first non-plant exhibit is created |
 | 16 | Per-type discovery badges | v2 gamification — "3 plants, 1 lake discovered" style |
+| 17 | GPS → 3D coordinate mapping | How to project real GPS lat/lng onto Three.js map coordinates (needs calibration points from park survey) |
+| 18 | Category A/B/C initial assignment | All exhibits start as B; when to do first reassignment pass (after 2-4 weeks of scan data?) |
+| 19 | Service worker cache strategy | ~25MB initial download (50 × 500KB audio + map). Progressive or all-at-once? Loading UX for slow connections? |
