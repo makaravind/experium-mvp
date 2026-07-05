@@ -35,14 +35,23 @@ The `/s/{code}` endpoint:
 
 | Layer | Choice | Rationale |
 |-------|--------|-----------|
+| Hosting | Vercel | Next.js first-class support, free tier handles traffic |
 | Frontend | Next.js (App Router) | SSR for fast first paint, React for interactivity |
-| Backend | Next.js API routes or serverless functions | Minimal infra, co-located with frontend |
-| Database | PostgreSQL (Supabase or Neon) | Managed, free tier sufficient for v1 |
-| Audio hosting | S3 + CloudFront | Cheap, fast, global CDN |
-| Auth (admin) | Simple password or Supabase Auth | Only you and maintainer need access |
+| Backend | Next.js API routes (serverless) | Minimal infra, co-located with frontend |
+| Database | Supabase (Postgres + Auth + Storage) | One platform: DB, auth, file storage, dashboard as admin UI |
+| DB Client | Supabase JS (`@supabase/supabase-js`) | Single SDK for queries, auth, storage — no ORM needed |
+| Audio/Files | Supabase Storage (built-in CDN via Fastly) | Fewer components — no separate AWS account/S3/CloudFront |
+| State Mgmt | Zustand | Single store (~50 lines), handles audio + progress + language pref |
+| Styling | Tailwind CSS + shadcn/ui | Fast iteration, accessible components, zero runtime overhead |
+| Map | Three.js / React Three Fiber | Interactive illustrated park map with GPS |
+| PWA / Offline | `next-pwa` (full upfront ~25MB download) | Offline-first after initial load; all audio cached via service worker |
+| Auth (admin) | Supabase Auth (magic link) | Already in stack, RLS integration, no password management |
 | Auth (visitor) | None in v1 (optional info capture, no OTP) | Plain inputs stored locally, synced to server when online |
-| Hosting | Vercel or Cloudflare Pages | Free tier handles this traffic easily |
+| Admin UI | Supabase dashboard (no custom admin in v1) | Table editor + RLS = sufficient for solo dev + maintainer |
 | Analytics | Custom (DB writes) | Simple scan logging, no third-party needed |
+| TTS | Deferred (ElevenLabs / Google TTS per batch) | Not a runtime dep — manual content pipeline step |
+
+**External services: 2** — Vercel (hosting) + Supabase (everything else).
 
 ## Database Schema (High-Level)
 
@@ -142,19 +151,9 @@ GET  /api/progress          → User's discovered exhibits
 GET  /api/exhibits/all      → All exhibit metadata + coords (for offline cache)
 ```
 
-### Admin (Protected)
+### Admin
 
-```
-GET  /admin                      → Dashboard
-GET  /admin/qr-codes             → All QR codes with status
-GET  /admin/reports              → All reports
-PUT  /admin/qr-codes/{id}       → Update mapping/status
-PUT  /admin/reports/{id}        → Update report status
-GET  /admin/analytics            → Scan stats, ad performance
-POST /admin/exhibits             → Add new exhibit
-PUT  /admin/exhibits/{id}        → Update exhibit info
-POST /admin/ads                  → Add new ad
-```
+No custom admin UI in v1. All admin operations (CRUD on exhibits, QR codes, reports, ads) done directly via Supabase dashboard with RLS policies restricting access to authenticated admin users.
 
 ## Telemetry
 

@@ -25,7 +25,22 @@ Source of truth for all design decisions made during initial planning.
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | Developer | Solo (Aravind), AI-assisted | No hard deadline, AI pipeline for speed |
-| Stack | Next.js or similar, serverless backend, Postgres DB | Simple, low concurrent load (~50 simultaneous max) |
+| Hosting | Vercel | Next.js first-class support, free tier sufficient |
+| Frontend | Next.js (App Router) | SSR for fast first paint, React for interactivity |
+| Backend | Next.js API routes (serverless) | Co-located with frontend, minimal infra |
+| Database | Supabase (Postgres + Auth + Storage) | One platform replaces separate DB + auth + file storage |
+| DB Client | Supabase JS only (no ORM) | Single SDK, no cold-start penalty, auto-generated types |
+| Audio/File hosting | Supabase Storage | Fewer components — reuse existing platform instead of separate S3 + CloudFront |
+| State management | Zustand | Lightweight (~50 lines), avoids Context re-render issues |
+| Styling | Tailwind CSS + shadcn/ui | Fast iteration, accessible components, no runtime CSS |
+| Map | Three.js / React Three Fiber | Interactive illustrated park map with GPS overlay |
+| PWA / Service Worker | `next-pwa` | Drop-in, handles precaching + runtime caching with ~10 lines config |
+| Audio strategy | Full upfront download (~25MB per language) | Simple, fully offline after first load; hybrid later if bounce is an issue |
+| Admin UI | Supabase dashboard (no custom admin in v1) | Table editor + RLS sufficient; eliminates entire admin route surface |
+| Admin auth | Supabase Auth (magic link) | Already in stack, ties into RLS, no password management |
+| TTS service | Deferred — trial ElevenLabs / Google TTS | Not a runtime dep; manual content pipeline step |
+| Offline UX (first load) | Blocker screen if no network + retry button | App is useless without audio; don't over-engineer partial states |
+| Offline UX (missing audio) | Inline error message + log to analytics | Simple, no retry loop or fallback TTS |
 | QR URL scheme | `domain.com/s/{SHORT_CODE}` → server redirect | Indirection allows remapping without reprinting markers |
 | Audio format | Pre-compressed speech (64kbps mono, ~500KB/min) | Loads in 2-3 sec even on weak 4G, no streaming needed |
 | Connectivity | ~~Assume good~~ **Offline after initial load** | First load downloads all assets (~25MB for selected language); service worker caches for full offline park visit |
