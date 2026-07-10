@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+  <script src="config.js"></script>
+  <style> html,body,#map { margin:0; width:100%; height:100%; } </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="log" style="position:fixed;top:10px;left:10px;background:rgba(255,255,255,.9);padding:8px;font-family:monospace;font-size:11px;max-width:500px;z-index:99;max-height:300px;overflow:auto"></div>
+<script>
+  const log = s => { document.getElementById('log').innerHTML += s + '<br>'; console.log(s); };
+
+  mapboxgl.accessToken = window.MAPBOX_TOKEN;
+
+  const STYLE = {
+    version: 8,
+    name: 'Park Illustrated',
+    sprite: 'mapbox://sprites/mapbox/outdoors-v12',
+    glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf',
+    sources: {
+      composite: {
+        type: 'vector',
+        url: 'mapbox://mapbox.mapbox-streets-v8,mapbox.mapbox-terrain-v2,mapbox.mapbox-bathymetry-v2'
+      }
+    },
+    layers: [
+      { id: 'background', type: 'background', paint: { 'background-color': '#f5f0e8' } },
+      { id: 'water', type: 'fill', source: 'composite', 'source-layer': 'water',
+        paint: { 'fill-color': '#89cff0' } },
+      { id: 'landuse-park', type: 'fill', source: 'composite', 'source-layer': 'landuse',
+        filter: ['==', ['get', 'class'], 'park'],
+        paint: { 'fill-color': '#b2d8a8' } },
+      { id: 'road-path', type: 'line', source: 'composite', 'source-layer': 'road',
+        filter: ['==', ['get', 'class'], 'path'],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#c8a878', 'line-width': 1.5 } },
+      { id: 'road-street', type: 'line', source: 'composite', 'source-layer': 'road',
+        filter: ['match', ['get', 'class'], ['street', 'street_limited'], true, false],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#f0e8d8', 'line-width': 4 } },
+    ]
+  };
+
+  log('Initialising map with inline style...');
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: STYLE,
+    center: [-91.994, 46.842],
+    zoom: 14,
+  });
+
+  map.on('load', () => log('✅ map loaded'));
+  map.on('error', e => log('❌ ' + (e.error?.message || JSON.stringify(e.error))));
+
+  setTimeout(() => {
+    if (!map.loaded()) log('⚠️ not loaded after 5s');
+  }, 5000);
+</script>
+</body>
+</html>

@@ -33,7 +33,7 @@ Source of truth for all design decisions made during initial planning.
 | Audio/File hosting | Supabase Storage | Fewer components — reuse existing platform instead of separate S3 + CloudFront |
 | State management | Zustand | Lightweight (~50 lines), avoids Context re-render issues |
 | Styling | Tailwind CSS + shadcn/ui | Fast iteration, accessible components, no runtime CSS |
-| Map | Three.js / React Three Fiber | Interactive illustrated park map with GPS overlay |
+| Map | ~~Three.js / React Three Fiber~~ **Mapbox GL JS + drone orthophoto** | Real drone ortho is more accurate than illustrated map; visitors recognize actual park landmarks |
 | PWA / Service Worker | `next-pwa` | Drop-in, handles precaching + runtime caching with ~10 lines config |
 | Audio strategy | Full upfront download (~25MB per language) | Simple, fully offline after first load; hybrid later if bounce is an issue |
 | Admin UI | Supabase dashboard (no custom admin in v1) | Table editor + RLS sufficient; eliminates entire admin route surface |
@@ -98,7 +98,7 @@ Source of truth for all design decisions made during initial planning.
 | Discovery cards | Shareable Instagram-style card unlocked at milestones 10 and 50 | Big rewards at key thresholds; cards = organic marketing |
 | Post-audio primary CTA | "Scan Now" — opens phone camera | Most natural next action; user is already in the park near markers |
 | Post-audio secondary | Collapsible "Explore the park" section with illustrated map | Discoverable but not in the way of scanning flow |
-| Park map style | Stylized illustrated SVG (theme park brochure style) | On-brand, single asset, works at any zoom |
+| Park map style | ~~Stylized illustrated SVG~~ **Drone orthophoto raster tileset on Mapbox** | Real photo; visitors see actual trees, paths, water bodies. Illustrated SVG dropped. |
 | Map suggestions | 5 curated unvisited exhibits shown as pins, rotate as completed | Enough choice without decision fatigue |
 | Navigation | ~~Text/photo hint only~~ **GPS "You are here"** — live blue accuracy circle on Three.js map via `watchPosition()` | ~~No GPS dependency in v1~~ **OVERRIDDEN** — GPS is v1 scope; PWA evaluation confirms feasibility |
 | Nearby exhibit highlights | Unvisited pins within 50m (max 5) pulse + 1.3× scale on map; Category A guaranteed a slot | Drives next scan naturally via map visual cues, no extra UI |

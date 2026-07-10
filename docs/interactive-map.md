@@ -1,8 +1,16 @@
-# Interactive Park Map — Three.js / React Three Fiber
+# Interactive Park Map — Mapbox GL JS + Drone Orthophoto
+
+> **Decision (2026-07-10):** Three.js/R3F illustrated map replaced by Mapbox GL JS with a real drone orthophoto raster tileset. Real photo is more accurate and recognizable to visitors; no Blender modeling required. See `docs/drone-survey-mapbox.md` for survey spec and processing pipeline.
 
 ## Overview
 
-Full 3D low-poly interactive map of Experium Park. Visitors orbit, pan, and tap landmarks to trigger audio playback. Birds-eye isometric view with camera fly-to animations on QR scan.
+Mapbox GL JS map with drone orthophoto overlaid as a raster tileset. Visitors pan/zoom and tap exhibit pins to trigger audio playback. GPS "you are here" dot via `watchPosition()`.
+
+---
+
+## ~~Three.js / R3F Approach~~ (Superseded)
+
+> The original Three.js spec below is kept for reference only. It is no longer the implementation target.
 
 ## Asset Pipeline
 

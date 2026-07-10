@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drony Ortho — Mapbox</title>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+  <script src="config.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #map { width: 100%; height: 100%; }
+    #controls {
+      position: fixed; top: 12px; left: 12px; z-index: 10;
+      background: rgba(255,255,255,.92); backdrop-filter: blur(10px);
+      border-radius: 10px; padding: 12px 16px; display: flex;
+      flex-direction: column; gap: 10px; min-width: 200px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.2);
+      font-family: system-ui, sans-serif; font-size: 13px;
+    }
+    #controls h3 { font-size: 13px; font-weight: 700; color: #111; }
+    .divider { border: none; border-top: 1px solid #e5e7eb; margin: 2px 0; }
+    .section-label { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; }
+    label { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: #333; }
+    input[type=range] { width: 100px; accent-color: #3b82f6; }
+    select { font-size: 12px; border: 1px solid #ccc; border-radius: 4px; padding: 2px 4px; }
+    .you-dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #4285f4; border: 2px solid #fff;
+      box-shadow: 0 0 0 2px #4285f4;
+      position: relative;
+    }
+    .you-dot::after {
+      content: ''; position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(66,133,244,.2);
+      animation: pulse 1.8s ease-out infinite;
+    }
+    @keyframes pulse {
+      0%   { transform: translate(-50%,-50%) scale(.5); opacity: 1; }
+      100% { transform: translate(-50%,-50%) scale(1.8); opacity: 0; }
+    }
+    #coords {
+      position: fixed; bottom: 36px; right: 12px; z-index: 10;
+      background: rgba(0,0,0,.6); color: #fff;
+      font-family: monospace; font-size: 12px;
+      padding: 5px 9px; border-radius: 6px; pointer-events: none;
+    }
+    #bounds-info {
+      position: fixed; bottom: 64px; left: 12px; z-index: 10;
+      background: rgba(0,0,0,.6); color: #fff;
+      font-family: monospace; font-size: 11px;
+      padding: 6px 10px; border-radius: 6px; pointer-events: none;
+      display: none; line-height: 1.6;
+    }
+    #trail-output {
+      position: fixed; bottom: 36px; right: 12px; z-index: 10;
+      background: rgba(0,0,0,.85); color: #4ade80;
+      font-family: monospace; font-size: 11px;
+      padding: 8px 10px; border-radius: 6px;
+      max-width: 340px; max-height: 200px; overflow-y: auto;
+      display: none; white-space: pre; line-height: 1.5;
+    }
+    .record-btn {
+      font-size: 12px; padding: 4px 10px; border-radius: 4px; cursor: pointer;
+      border: 1px solid #ccc; background: #fff; color: #333;
+    }
+    .record-btn.active { border-color: #ef4444; background: #ef4444; color: #fff; }
+    .trail-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+    .trail-actions button {
+      font-size: 11px; padding: 3px 7px; border-radius: 4px; cursor: pointer;
+      border: 1px solid #d1d5db; background: #f9fafb; color: #374151;
+    }
+    .trail-actions button:hover { background: #e5e7eb; }
+    #trail-count { font-size: 11px; color: #6b7280; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="coords">lng: — lat: — zoom: —</div>
+<div id="bounds-info"></div>
+
+<div id="controls">
+  <h3>Drony Ortho</h3>
+  <hr class="divider" />
+  <span class="section-label">Layers</span>
+  <label>Ortho (RGB)
+    <input type="checkbox" id="ortho-toggle" checked />
+  </label>
+  <label>Opacity
+    <input type="range" id="ortho-opacity" min="0" max="1" step="0.05" value="1" />
+  </label>
+  <hr class="divider" />
+  <span class="section-label">Go to</span>
+  <div style="display:flex;gap:6px;">
+    <input type="text" id="go-lat" placeholder="lat" style="width:72px;font-size:12px;border:1px solid #ccc;border-radius:4px;padding:3px 5px;" />
+    <input type="text" id="go-lng" placeholder="lng" style="width:72px;font-size:12px;border:1px solid #ccc;border-radius:4px;padding:3px 5px;" />
+    <button id="go-btn" style="font-size:12px;padding:3px 8px;border-radius:4px;border:1px solid #3b82f6;background:#3b82f6;color:#fff;cursor:pointer;">Go</button>
+  </div>
+  <hr class="divider" />
+  <span class="section-label">You are here</span>
+  <div style="display:flex;gap:6px;">
+    <input type="text" id="you-lat" placeholder="lat" style="width:72px;font-size:12px;border:1px solid #ccc;border-radius:4px;padding:3px 5px;" />
+    <input type="text" id="you-lng" placeholder="lng" style="width:72px;font-size:12px;border:1px solid #ccc;border-radius:4px;padding:3px 5px;" />
+    <button id="you-btn" style="font-size:12px;padding:3px 8px;border-radius:4px;border:1px solid #4285f4;background:#4285f4;color:#fff;cursor:pointer;">Pin</button>
+  </div>
+  <hr class="divider" />
+  <span class="section-label">Base map</span>
+  <select id="basemap">
+    <option value="satellite">Satellite</option>
+    <option value="mapbox://styles/mapbox/outdoors-v12">Outdoors</option>
+    <option value="mapbox://styles/mapbox/light-v11">Light</option>
+  </select>
+  <hr class="divider" />
+  <span class="section-label">Trails</span>
+  <div id="trail-toggles"></div>
+  <hr class="divider" />
+  <span class="section-label">Route finder</span>
+  <label>From <select id="route-from" style="width:80px;font-size:12px;border:1px solid #ccc;border-radius:4px;padding:2px 4px;"><option value="">—</option></select></label>
+  <label>To <select id="route-to" style="width:80px;font-size:12px;border:1px solid #ccc;border-radius:4px;padding:2px 4px;"><option value="">—</option></select></label>
+  <div class="trail-actions">
+    <button id="find-route-btn">Find route</button>
+    <button id="clear-route-btn">Clear</button>
+  </div>
+  <span id="route-dist" style="font-size:11px;color:#6b7280;"></span>
+  <hr class="divider" />
+  <span class="section-label">Trail recorder</span>
+  <button class="record-btn" id="record-btn">● Record trail</button>
+  <span id="trail-count">0 points</span>
+  <div class="trail-actions">
+    <button id="undo-btn">↩ Undo</button>
+    <button id="clear-trail-btn">✕ Clear</button>
+    <button id="copy-btn">⎘ Copy GeoJSON</button>
+  </div>
+</div>
+<div id="trail-output"></div>
+
+<script>
+  mapboxgl.accessToken = window.MAPBOX_TOKEN;
+
+  const ORTHO_ID = 'aravindmetku.nedour';
+  const ORTHO_BOUNDS = [78.45778053580075, 17.934780490162368, 78.46515161551673, 17.940598787066882];
+  const SNAP_RADIUS = 5; // meters — recorder snaps to existing nodes within this distance
+
+  const TRAILS = [
+    {
+      id: 'trail-1',
+      name: 'Trail 1',
+      color: '#22c55e',
+      coordinates: [
+        [78.460188, 17.9376],
+        [78.46053, 17.937542],
+        [78.460897, 17.937484]
+      ]
+    },
+    {
+      id: 'trail-2',
+      name: 'Trail 2',
+      color: '#f59e0b',
+      coordinates: [
+        [78.460341, 17.936441],
+        [78.46053, 17.937542]
+      ]
+    },
+    {
+      id: 'trail-3',
+      name: 'Trail 3',
+      color: '#a855f7',
+      coordinates: [
+        [78.460341, 17.936441],
+        [78.46053, 17.937542],
+        [78.460338, 17.936441],
+        [78.46072, 17.936385],
+        [78.460897, 17.937484]
+      ]
+    }
+  ];
+
+  // ── Graph ────────────────────────────────────────────────
+  let nodes = []; // [{id, lng, lat}] global numbered landmarks
+  let graph = {}; // {nodeId: [{id, dist}]}
+
+  function haversine(lng1, lat1, lng2, lat2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function findOrCreateNode(lng, lat) {
+    for (const n of nodes) {
+      if (haversine(n.lng, n.lat, lng, lat) < SNAP_RADIUS) return n.id;
+    }
+    const id = nodes.length + 1;
+    nodes.push({ id, lng, lat });
+    return id;
+  }
+
+  function buildGraph() {
+    nodes = [];
+    graph = {};
+    TRAILS.forEach(t => {
+      const ids = t.coordinates.map(([lng, lat]) => findOrCreateNode(lng, lat));
+      for (let i = 0; i < ids.length - 1; i++) {
+        const a = ids[i], b = ids[i + 1];
+        const na = nodes[a - 1], nb = nodes[b - 1];
+        const dist = haversine(na.lng, na.lat, nb.lng, nb.lat);
+        if (!graph[a]) graph[a] = [];
+        if (!graph[b]) graph[b] = [];
+        if (!graph[a].find(x => x.id === b)) graph[a].push({ id: b, dist });
+        if (!graph[b].find(x => x.id === a)) graph[b].push({ id: a, dist });
+      }
+    });
+  }
+
+  function dijkstra(startId, endId) {
+    const dist = {}, prev = {}, visited = new Set();
+    nodes.forEach(n => { dist[n.id] = Infinity; });
+    dist[startId] = 0;
+    const queue = [{ id: startId, d: 0 }];
+    while (queue.length) {
+      queue.sort((a, b) => a.d - b.d);
+      const { id } = queue.shift();
+      if (visited.has(id)) continue;
+      visited.add(id);
+      if (id === endId) break;
+      (graph[id] || []).forEach(({ id: nid, dist: d }) => {
+        const nd = dist[id] + d;
+        if (nd < dist[nid]) { dist[nid] = nd; prev[nid] = id; queue.push({ id: nid, d: nd }); }
+      });
+    }
+    if (dist[endId] === Infinity) return null;
+    const path = [];
+    let cur = endId;
+    while (cur !== undefined) { path.unshift(cur); cur = prev[cur]; }
+    return { path, totalDist: dist[endId] };
+  }
+
+  const STYLES = {
+    satellite: 'mapbox://styles/mapbox/satellite-v9',
+    outdoors:  'mapbox://styles/mapbox/outdoors-v12',
+    light:     'mapbox://styles/mapbox/light-v11',
+  };
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: STYLES.satellite,
+    center: [78.46147, 17.93769],
+    zoom: 18,
+    hash: true,
+  });
+
+  map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+  map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
+
+  function addOrtho() {
+    if (map.getSource('ortho')) return;
+    map.addSource('ortho', { type: 'raster', url: `mapbox://${ORTHO_ID}`, tileSize: 256 });
+    map.addLayer({ id: 'ortho-layer', type: 'raster', source: 'ortho',
+      paint: { 'raster-opacity': 1, 'raster-resampling': 'linear' } });
+
+    const b = ORTHO_BOUNDS;
+    if (!map.getSource('ortho-bounds')) {
+      map.addSource('ortho-bounds', { type: 'geojson', data: {
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [[[b[0],b[1]],[b[2],b[1]],[b[2],b[3]],[b[0],b[3]],[b[0],b[1]]]] }
+      }});
+      map.addLayer({ id: 'ortho-bounds-line', type: 'line', source: 'ortho-bounds',
+        paint: { 'line-color': '#f97316', 'line-width': 2, 'line-dasharray': [4, 2] } });
+    }
+
+    map.fitBounds(b, { padding: 40, duration: 1200, maxZoom: 19 });
+  }
+
+  function addTrails() {
+    TRAILS.forEach(t => {
+      if (map.getSource(t.id)) return;
+      map.addSource(t.id, {
+        type: 'geojson',
+        data: { type: 'Feature', geometry: { type: 'LineString', coordinates: t.coordinates } }
+      });
+      map.addLayer({ id: t.id + '-line', type: 'line', source: t.id,
+        paint: { 'line-color': t.color, 'line-width': 4, 'line-opacity': 0.9 } });
+    });
+  }
+
+  function addLandmarkLayer() {
+    const data = {
+      type: 'FeatureCollection',
+      features: nodes.map(n => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [n.lng, n.lat] },
+        properties: { num: String(n.id) }
+      }))
+    };
+    if (map.getSource('landmarks')) { map.getSource('landmarks').setData(data); return; }
+    map.addSource('landmarks', { type: 'geojson', data });
+    map.addLayer({ id: 'landmark-circles', type: 'circle', source: 'landmarks',
+      paint: { 'circle-radius': 10, 'circle-color': '#1d4ed8', 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' } });
+    map.addLayer({ id: 'landmark-labels', type: 'symbol', source: 'landmarks',
+      layout: {
+        'text-field': ['get', 'num'],
+        'text-size': 11,
+        'text-font': ['DIN Offc Pro Bold', 'Arial Unicode MS Bold'],
+        'text-anchor': 'center',
+      },
+      paint: { 'text-color': '#fff' }
+    });
+  }
+
+  function addRouteLayer() {
+    if (map.getSource('route')) return;
+    map.addSource('route', { type: 'geojson',
+      data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [] } } });
+    map.addLayer({ id: 'route-line', type: 'line', source: 'route',
+      paint: { 'line-color': '#3b82f6', 'line-width': 5, 'line-opacity': 0.95 } });
+  }
+
+  function populateRouteDropdowns() {
+    ['route-from', 'route-to'].forEach(selId => {
+      const sel = document.getElementById(selId);
+      sel.innerHTML = '<option value="">—</option>';
+      nodes.forEach(n => {
+        const opt = document.createElement('option');
+        opt.value = n.id;
+        opt.textContent = `Node ${n.id}`;
+        sel.appendChild(opt);
+      });
+    });
+  }
+
+  function buildTrailToggles() {
+    const container = document.getElementById('trail-toggles');
+    container.innerHTML = '';
+    TRAILS.forEach(t => {
+      const lbl = document.createElement('label');
+      lbl.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:8px;';
+      lbl.innerHTML =
+        `<span style="display:flex;align-items:center;gap:6px;">` +
+        `<span style="width:12px;height:4px;border-radius:2px;background:${t.color};display:inline-block;"></span>` +
+        `${t.name}</span>` +
+        `<input type="checkbox" data-trail="${t.id}" checked />`;
+      container.appendChild(lbl);
+    });
+    container.addEventListener('change', e => {
+      const id = e.target.dataset.trail;
+      if (!id) return;
+      const vis = e.target.checked ? 'visible' : 'none';
+      map.setLayoutProperty(id + '-line', 'visibility', vis);
+    });
+  }
+
+  function initAll() {
+    buildGraph();
+    addOrtho();
+    addTrails();
+    addLandmarkLayer();
+    addRouteLayer();
+    addTrailLayers();
+    buildTrailToggles();
+    populateRouteDropdowns();
+  }
+
+  map.on('load', initAll);
+
+  // Show bounds info (static — bounds known from API)
+  (function() {
+    const b = ORTHO_BOUNDS;
+    const el = document.getElementById('bounds-info');
+    el.style.display = 'block';
+    el.innerHTML =
+      `<b>Tileset bounds</b><br>` +
+      `W: ${b[0].toFixed(6)}  E: ${b[2].toFixed(6)}<br>` +
+      `S: ${b[1].toFixed(6)}  N: ${b[3].toFixed(6)}`;
+  })();
+
+  // Live coords
+  const coordsEl = document.getElementById('coords');
+  function updateCoords() {
+    const c = map.getCenter();
+    coordsEl.textContent = `lng: ${c.lng.toFixed(6)}  lat: ${c.lat.toFixed(6)}  zoom: ${map.getZoom().toFixed(2)}`;
+  }
+  map.on('move', updateCoords);
+  updateCoords();
+
+  document.getElementById('ortho-toggle').addEventListener('change', e => {
+    map.setLayoutProperty('ortho-layer', 'visibility', e.target.checked ? 'visible' : 'none');
+  });
+  document.getElementById('ortho-opacity').addEventListener('input', e => {
+    map.setPaintProperty('ortho-layer', 'raster-opacity', parseFloat(e.target.value));
+  });
+  document.getElementById('go-btn').addEventListener('click', () => {
+    const lat = parseFloat(document.getElementById('go-lat').value);
+    const lng = parseFloat(document.getElementById('go-lng').value);
+    if (!isNaN(lat) && !isNaN(lng)) map.flyTo({ center: [lng, lat], zoom: 18, duration: 1000 });
+  });
+  ['go-lat', 'go-lng'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('go-btn').click();
+    });
+  });
+
+  let youMarker = null;
+  document.getElementById('you-btn').addEventListener('click', () => {
+    const lat = parseFloat(document.getElementById('you-lat').value);
+    const lng = parseFloat(document.getElementById('you-lng').value);
+    if (isNaN(lat) || isNaN(lng)) return;
+    const el = document.createElement('div');
+    el.className = 'you-dot';
+    if (youMarker) youMarker.remove();
+    youMarker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+      .setLngLat([lng, lat])
+      .addTo(map);
+    map.flyTo({ center: [lng, lat], zoom: 19, duration: 1000 });
+  });
+  ['you-lat', 'you-lng'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('you-btn').click();
+    });
+  });
+
+  document.getElementById('basemap').addEventListener('change', e => {
+    map.setStyle(STYLES[e.target.value] || e.target.value);
+    map.once('style.load', initAll);
+  });
+
+  // ── Trail recorder ──────────────────────────────────────────
+  let isRecording = false;
+  let trailPoints = [];
+
+  function addTrailLayers() {
+    if (map.getSource('trail')) return;
+    map.addSource('trail', {
+      type: 'geojson',
+      data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [] } }
+    });
+    map.addSource('trail-pts', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] }
+    });
+    map.addLayer({ id: 'trail-line', type: 'line', source: 'trail',
+      paint: { 'line-color': '#f97316', 'line-width': 3, 'line-opacity': 0.9 } });
+    map.addLayer({ id: 'trail-dots', type: 'circle', source: 'trail-pts',
+      paint: { 'circle-radius': 5, 'circle-color': '#f97316', 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' } });
+  }
+
+  function syncTrailSources() {
+    if (!map.getSource('trail')) return;
+    map.getSource('trail').setData({
+      type: 'Feature', geometry: { type: 'LineString', coordinates: trailPoints }
+    });
+    map.getSource('trail-pts').setData({
+      type: 'FeatureCollection',
+      features: trailPoints.map(c => ({ type: 'Feature', geometry: { type: 'Point', coordinates: c } }))
+    });
+    document.getElementById('trail-count').textContent = `${trailPoints.length} point${trailPoints.length !== 1 ? 's' : ''}`;
+  }
+
+  function getGeoJSON() {
+    return JSON.stringify({
+      type: 'Feature',
+      geometry: { type: 'LineString', coordinates: trailPoints }
+    }, null, 2);
+  }
+
+  function updateOutput() {
+    const el = document.getElementById('trail-output');
+    if (trailPoints.length === 0) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    el.textContent = getGeoJSON();
+  }
+
+  function snapToNearest(lng, lat) {
+    for (const n of nodes) {
+      if (haversine(n.lng, n.lat, lng, lat) < SNAP_RADIUS) return [n.lng, n.lat];
+    }
+    return [lng, lat];
+  }
+
+  map.on('click', e => {
+    if (!isRecording) return;
+    const [lng, lat] = snapToNearest(
+      parseFloat(e.lngLat.lng.toFixed(6)),
+      parseFloat(e.lngLat.lat.toFixed(6))
+    );
+    trailPoints.push([lng, lat]);
+    syncTrailSources();
+    updateOutput();
+  });
+
+  const recordBtn = document.getElementById('record-btn');
+  recordBtn.addEventListener('click', () => {
+    isRecording = !isRecording;
+    recordBtn.textContent = isRecording ? '■ Stop recording' : '● Record trail';
+    recordBtn.classList.toggle('active', isRecording);
+    map.getCanvas().style.cursor = isRecording ? 'crosshair' : '';
+  });
+
+  document.getElementById('undo-btn').addEventListener('click', () => {
+    if (trailPoints.length === 0) return;
+    trailPoints.pop();
+    syncTrailSources();
+    updateOutput();
+  });
+
+  document.getElementById('clear-trail-btn').addEventListener('click', () => {
+    trailPoints = [];
+    syncTrailSources();
+    document.getElementById('trail-output').style.display = 'none';
+  });
+
+  document.getElementById('copy-btn').addEventListener('click', () => {
+    if (trailPoints.length === 0) return;
+    navigator.clipboard.writeText(getGeoJSON()).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = '⎘ Copy GeoJSON', 1500);
+    });
+  });
+
+  // ── Route finder ──────────────────────────────────────────
+  document.getElementById('find-route-btn').addEventListener('click', () => {
+    const fromId = parseInt(document.getElementById('route-from').value);
+    const toId = parseInt(document.getElementById('route-to').value);
+    if (!fromId || !toId || fromId === toId) return;
+    const result = dijkstra(fromId, toId);
+    const distEl = document.getElementById('route-dist');
+    if (!result) {
+      distEl.textContent = 'No path found';
+      map.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [] } });
+      return;
+    }
+    const coords = result.path.map(id => { const n = nodes[id - 1]; return [n.lng, n.lat]; });
+    map.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: coords } });
+    distEl.textContent = `${Math.round(result.totalDist)}m · ${result.path.length} nodes`;
+  });
+
+  document.getElementById('clear-route-btn').addEventListener('click', () => {
+    if (map.getSource('route')) {
+      map.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [] } });
+    }
+    document.getElementById('route-dist').textContent = '';
+    document.getElementById('route-from').value = '';
+    document.getElementById('route-to').value = '';
+  });
+</script>
+</body>
+</html>

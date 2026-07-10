@@ -1,5 +1,13 @@
 # Open Questions
 
+## Blocks Development (Drone Survey)
+
+| # | Question | Context | Notes |
+|---|----------|---------|-------|
+| 20 | Which photogrammetry software does the operator use? | ODM, Agisoft, DJI Terra — affects output quality and format | Ask before booking |
+| 21 | Can the park provide a boundary shapefile or GPS waypoints for the 90-acre exhibit zone? | Operator needs this to define flight area | Alternative: walk the boundary with a GPS app |
+| 22 | Survey timing — before or after exhibit GPS coords are finalized? | If after, exhibit pins can be placed on the real ortho for accuracy check | Recommend: survey first, then GPS-tag exhibits against the ortho |
+
 ## Blocks Development
 
 | # | Question | Context | Notes |
@@ -35,6 +43,6 @@
 | 14 | Migrate existing codes (NM01→PL01 etc.) or keep as permanent aliases? | New exhibits use type-prefix scheme; existing MVP codes still work |
 | 15 | Per-type audio script guidance | Document different approaches when first non-plant exhibit is created |
 | 16 | Per-type discovery badges | v2 gamification — "3 plants, 1 lake discovered" style |
-| 17 | GPS → 3D coordinate mapping | How to project real GPS lat/lng onto Three.js map coordinates (needs calibration points from park survey) |
+| 17 | ~~GPS → 3D coordinate mapping~~ | **RESOLVED** — Mapbox uses real WGS84 lat/lng natively; Three.js coordinate projection no longer needed |
 | 18 | Category A/B/C initial assignment | All exhibits start as B; when to do first reassignment pass (after 2-4 weeks of scan data?) |
 | 19 | Service worker cache strategy | ~25MB initial download (50 × 500KB audio + map). Progressive or all-at-once? Loading UX for slow connections? |

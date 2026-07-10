@@ -43,7 +43,7 @@ The `/s/{code}` endpoint:
 | Audio/Files | Supabase Storage (built-in CDN via Fastly) | Fewer components — no separate AWS account/S3/CloudFront |
 | State Mgmt | Zustand | Single store (~50 lines), handles audio + progress + language pref |
 | Styling | Tailwind CSS + shadcn/ui | Fast iteration, accessible components, zero runtime overhead |
-| Map | Three.js / React Three Fiber | Interactive illustrated park map with GPS |
+| Map | Mapbox GL JS v3 + drone orthophoto tileset | Real ortho raster over Mapbox basemap; exhibit pins as GeoJSON; GPS "you are here" via watchPosition() |
 | PWA / Offline | `next-pwa` (full upfront ~25MB download) | Offline-first after initial load; all audio cached via service worker |
 | Auth (admin) | Supabase Auth (magic link) | Already in stack, RLS integration, no password management |
 | Auth (visitor) | None in v1 (optional info capture, no OTP) | Plain inputs stored locally, synced to server when online |
