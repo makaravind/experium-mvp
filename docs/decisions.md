@@ -101,6 +101,7 @@ Source of truth for all design decisions made during initial planning.
 | Park map style | ~~Stylized illustrated SVG~~ **Drone orthophoto raster tileset on Mapbox** | Real photo; visitors see actual trees, paths, water bodies. Illustrated SVG dropped. |
 | Map suggestions | 5 curated unvisited exhibits shown as pins, rotate as completed | Enough choice without decision fatigue |
 | Navigation | ~~Text/photo hint only~~ **GPS "You are here"** — live blue accuracy circle on Three.js map via `watchPosition()` | ~~No GPS dependency in v1~~ **OVERRIDDEN** — GPS is v1 scope; PWA evaluation confirms feasibility |
+| Trail routing model | **Segment graph + BFS** — draw physical trail segments once, chain via BFS for any A→B route | Cross-product (one polyline per landmark pair) = N×(N-1)/2 hand-drawn paths (190 for 20 exhibits); segment model needs ~15–30 segments total. See `docs/interactive-map.md § Trail Routing` |
 | Nearby exhibit highlights | Unvisited pins within 50m (max 5) pulse + 1.3× scale on map; Category A guaranteed a slot | Drives next scan naturally via map visual cues, no extra UI |
 | Curated path | Fixed recommended route designed editorially | Complements GPS — editorial curation for "what to see" vs GPS for "what's close" |
 | Exhibit categories | A/B/C tier per exhibit, manually assigned, default B | A = longer audio (90s) + larger pin (1.3×) + nearby priority + persists at low zoom. C = 60s audio, standard pin, hides at low zoom. Reassign from real data after 2-4 weeks |

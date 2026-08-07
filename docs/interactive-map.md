@@ -8,6 +8,145 @@ Mapbox GL JS map with drone orthophoto overlaid as a raster tileset. Visitors pa
 
 ---
 
+## Trail Routing Between Landmarks
+
+**Approach:** Draw physical trail *segments* as GeoJSON, then chain them with BFS to route between any two landmarks. No pre-drawing routes per pair, no routing library.
+
+**Why not cross-product routes?** N landmarks = N×(N-1)/2 hand-drawn routes (20 landmarks = 190 routes). Segments model avoids this — draw only the ~15–30 physical paths that exist in the park; routing is derived.
+
+### Data Model
+
+Each GeoJSON feature is a **physical trail segment** connecting two adjacent nodes (landmarks or trail intersections):
+
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "seg-baobab-junction1",
+      "properties": { "connects": ["baobab", "junction1"] },
+      "geometry": { "type": "LineString", "coordinates": [[78.3456, 17.4321], [78.3467, 17.4335]] }
+    },
+    {
+      "type": "Feature",
+      "id": "seg-junction1-savanna",
+      "properties": { "connects": ["junction1", "savanna"] },
+      "geometry": { "type": "LineString", "coordinates": [[78.3467, 17.4335], [78.3480, 17.4340]] }
+    },
+    {
+      "type": "Feature",
+      "id": "seg-junction1-waterfall",
+      "properties": { "connects": ["junction1", "waterfall"] },
+      "geometry": { "type": "LineString", "coordinates": [[78.3467, 17.4335], [78.3455, 17.4350]] }
+    }
+  ]
+}
+```
+
+Junctions (`junction1`, `junction2`, …) are trail intersections with no exhibit — just routing nodes.
+
+Trace segments over the drone orthophoto using [geojson.io](https://geojson.io).
+
+### Graph Traversal (BFS)
+
+Build an adjacency graph from segments, then BFS to find the chain of segments connecting any two landmarks:
+
+```js
+function findRoute(segments, fromId, toId) {
+  const graph = {};
+  segments.forEach(seg => {
+    const [a, b] = seg.properties.connects;
+    (graph[a] = graph[a] || []).push({ node: b, seg });
+    (graph[b] = graph[b] || []).push({ node: a, seg });
+  });
+
+  // BFS
+  const queue = [{ node: fromId, segs: [] }];
+  const visited = new Set([fromId]);
+  while (queue.length) {
+    const { node, segs } = queue.shift();
+    if (node === toId) return segs;
+    for (const { node: next, seg } of graph[node] || []) {
+      if (!visited.has(next)) {
+        visited.add(next);
+        queue.push({ node: next, segs: [...segs, seg] });
+      }
+    }
+  }
+  return null; // no path
+}
+```
+
+### Rendering the Route
+
+Concatenate segment coordinates into a single `LineString` and push to a dedicated Mapbox source:
+
+```js
+function showRoute(fromId, toId) {
+  const segs = findRoute(trailData.features, fromId, toId);
+  if (!segs) return;
+
+  const coords = segs.flatMap((seg, i) =>
+    i === 0 ? seg.geometry.coordinates : seg.geometry.coordinates.slice(1)
+  );
+
+  routeSource.setData({
+    type: 'Feature',
+    geometry: { type: 'LineString', coordinates: coords }
+  });
+}
+```
+
+```js
+map.addSource('route', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [] } } });
+map.addLayer({ id: 'trail-route', type: 'line', source: 'route',
+  paint: { 'line-color': '#FF6B35', 'line-width': 4 } });
+
+const routeSource = map.getSource('route');
+```
+
+### Mapbox Layer Setup (all segments, faintly)
+
+```js
+map.addSource('trails', { type: 'geojson', data: '/data/trails.geojson' });
+map.addLayer({
+  id: 'trails-default', type: 'line', source: 'trails',
+  paint: { 'line-color': '#888', 'line-width': 2, 'line-opacity': 0.4 }
+});
+```
+
+### Animated Dot Along Route (optional)
+
+To pulse a dot moving along the highlighted trail, use Mapbox's `querySourceFeatures` + `turf.along` at an interval:
+
+```js
+import along from '@turf/along';
+import length from '@turf/length';
+
+function animateDot(trailFeature) {
+  const totalLen = length(trailFeature);
+  let dist = 0;
+  const step = totalLen / 60;
+  const interval = setInterval(() => {
+    dist += step;
+    if (dist > totalLen) { clearInterval(interval); return; }
+    const pt = along(trailFeature, dist);
+    dotSource.setData(pt);
+  }, 100);
+}
+```
+
+### Authoring Trail GeoJSON
+
+1. Open [geojson.io](https://geojson.io)
+2. Import orthophoto as a reference (or use satellite base)
+3. Trace each trail segment as a `LineString`
+4. Set `id` and `connects` properties per feature
+5. Export → save to `experium-ai-tour-app/public/data/trails.geojson`
+
+---
+
 ## ~~Three.js / R3F Approach~~ (Superseded)
 
 > The original Three.js spec below is kept for reference only. It is no longer the implementation target.

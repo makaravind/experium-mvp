@@ -36,6 +36,14 @@
 | 12 | Multi-park expansion criteria? | When/how to approach park #2 | Not focusing on this now — revisit after Experium proves the model |
 | 13 | Reward for gamification (park restaurant discount, etc.)? | Requires park cooperation and agreement | Gamification UX resolved; physical rewards still open — needs park agreement |
 
+## TODO (Deferred — Trail Routing)
+
+| # | Item | Context |
+|---|------|---------|
+| 23 | Who traces trail segments in geojson.io? | Need access to drone ortho before tracing. Do after tileset is uploaded to Mapbox. |
+| 24 | Naming convention for junction nodes? | Junctions (trail intersections with no exhibit) need stable IDs — suggest `junctionN` or named by location (e.g., `junction-main-gate`) |
+| 25 | Should trail routing be a v1 feature or post-launch? | GPS "you are here" is confirmed v1; A→B routing is a nice-to-have — can ship map without it |
+
 ## TODO (Deferred)
 
 | # | Item | Context |

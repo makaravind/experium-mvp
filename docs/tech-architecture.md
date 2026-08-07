@@ -44,6 +44,7 @@ The `/s/{code}` endpoint:
 | State Mgmt | Zustand | Single store (~50 lines), handles audio + progress + language pref |
 | Styling | Tailwind CSS + shadcn/ui | Fast iteration, accessible components, zero runtime overhead |
 | Map | Mapbox GL JS v3 + drone orthophoto tileset | Real ortho raster over Mapbox basemap; exhibit pins as GeoJSON; GPS "you are here" via watchPosition() |
+| Trail routing | `@turf/along` + `@turf/length` + custom BFS | Segment graph in `public/data/trails.geojson`; BFS chains segments for A→B routing; no third-party routing API |
 | PWA / Offline | `next-pwa` (full upfront ~25MB download) | Offline-first after initial load; all audio cached via service worker |
 | Auth (admin) | Supabase Auth (magic link) | Already in stack, RLS integration, no password management |
 | Auth (visitor) | None in v1 (optional info capture, no OTP) | Plain inputs stored locally, synced to server when online |
