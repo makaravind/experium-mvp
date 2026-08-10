@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experium DB Schema — m1-foundation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 2rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin-bottom: .25rem; }
+  .subtitle { color: #64748b; font-size: .85rem; margin-bottom: 2rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem; }
+  .card { background: #1e2130; border: 1px solid #2d3148; border-radius: 10px; overflow: hidden; }
+  .card-header { padding: .7rem 1rem; display: flex; align-items: center; gap: .6rem; border-bottom: 1px solid #2d3148; }
+  .card-header h2 { font-size: .95rem; font-weight: 600; color: #f1f5f9; font-family: monospace; }
+  .badge { font-size: .65rem; font-weight: 600; padding: .2rem .5rem; border-radius: 4px; text-transform: uppercase; letter-spacing: .04em; }
+  .badge-exists  { background: #14532d; color: #86efac; }
+  .badge-missing { background: #431407; color: #fdba74; }
+  .badge-drop    { background: #4c1d95; color: #c4b5fd; }
+  table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  th { padding: .4rem 1rem; text-align: left; color: #64748b; font-weight: 600; font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #2d3148; }
+  td { padding: .38rem 1rem; border-bottom: 1px solid #1a1f35; font-family: monospace; }
+  td:first-child { color: #93c5fd; }
+  td:nth-child(2) { color: #a78bfa; }
+  td:nth-child(3) { color: #94a3b8; font-size: .75rem; }
+  tr:last-child td { border-bottom: none; }
+  .pk   { color: #fbbf24 !important; }
+  .fk   { color: #34d399 !important; }
+  .section { margin-top: 2rem; }
+  .section-title { font-size: .75rem; font-weight: 600; color: #94a3b8; margin-bottom: .75rem; text-transform: uppercase; letter-spacing: .06em; }
+  .rls-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: .75rem; }
+  .rls-card { background: #1e2130; border: 1px solid #2d3148; border-radius: 8px; padding: .85rem 1rem; }
+  .rls-table { font-family: monospace; font-size: .85rem; color: #93c5fd; font-weight: 600; margin-bottom: .4rem; }
+  .rls-row { font-size: .78rem; color: #cbd5e1; display: flex; gap: .5rem; align-items: flex-start; margin-top: .25rem; }
+  .op { font-family: monospace; font-size: .7rem; padding: .1rem .35rem; border-radius: 3px; font-weight: 700; flex-shrink: 0; margin-top: .05rem; }
+  .op-select { background: #1e3a5f; color: #60a5fa; }
+  .op-insert { background: #14532d; color: #86efac; }
+  .op-all    { background: #312e81; color: #a5b4fc; }
+  .op-deny   { background: #450a0a; color: #fca5a5; }
+  .role { font-size: .7rem; color: #64748b; }
+  .buckets { display: flex; gap: .75rem; flex-wrap: wrap; }
+  .bucket { background: #1e2130; border: 1px solid #2d3148; border-radius: 8px; padding: .75rem 1.1rem; }
+  .bucket-name { font-family: monospace; font-size: .9rem; color: #fbbf24; font-weight: 600; }
+  .bucket-meta { font-size: .75rem; color: #64748b; margin-top: .25rem; }
+  .bucket-skip { opacity: .4; }
+  .state-banner { background: #1a2744; border: 1px solid #2d4a7c; border-radius: 8px; padding: .75rem 1.1rem; margin-bottom: 1.5rem; font-size: .82rem; color: #93c5fd; }
+  .state-banner strong { color: #60a5fa; }
+  .decisions { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: .6rem; }
+  .decision { background: #1e2130; border: 1px solid #2d3148; border-left: 3px solid #22c55e; border-radius: 0 8px 8px 0; padding: .6rem 1rem; }
+  .d-label { font-size: .65rem; font-weight: 700; color: #22c55e; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .2rem; }
+  .d-body { font-size: .8rem; color: #cbd5e1; }
+  .d-body code { font-family: monospace; color: #a78bfa; font-size: .78rem; }
+  .note { font-size: .72rem; color: #475569; margin-top: .25rem; }
+  .dep-line { font-size: .75rem; color: #64748b; margin-top: .35rem; padding: 0 1rem .6rem; }
+  .dep-line span { color: #34d399; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<h1>Experium DB Schema — m1-foundation / Issue #16</h1>
+<p class="subtitle">Resolved design · ready for migration</p>
+
+<div class="state-banner">
+  <strong>Migration plan:</strong> DROP + recreate all tables in a single migration file. <code>exhibits</code> currently exists (1 test row, no RLS) — will be dropped. Migrations dir is empty; this file becomes the single source of truth.
+</div>
+
+<!-- RESOLVED DECISIONS -->
+<div class="section">
+  <div class="section-title">Resolved decisions</div>
+  <div class="decisions">
+    <div class="decision">
+      <div class="d-label">User identity</div>
+      <div class="d-body">fingerprintjs (open-source) as primary. <code>users.fingerprint_id = TEXT UNIQUE NULL</code>. Internal PK is <code>UUID</code>. All FKs use UUID.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">users RLS</div>
+      <div class="d-body">Anon = <code>INSERT</code> only. No anon SELECT/UPDATE. Reads + updates via server-side API route using service role key.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">ENUM strategy</div>
+      <div class="d-body"><code>TEXT + CHECK</code> constraints throughout. No Postgres native <code>CREATE TYPE</code> — easier to alter pre-launch.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">Tier scale</div>
+      <div class="d-body"><code>gold | silver | bronze</code> everywhere — on <code>exhibits.tier</code> and <code>ads.tier_target</code>. No separate A/B/C scale.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">Ad tier cross-reference</div>
+      <div class="d-body"><code>ad_tier</code> removed from <code>exhibit_qr_codes</code>. Ad system cross-references <code>exhibits.tier</code> directly via exhibit_id join.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">User types</div>
+      <div class="d-body"><code>users.type = visitor | maintainer</code>. Admins live only in Supabase Auth — no row in <code>users</code> table.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">user_progress removed</div>
+      <div class="d-body">Dropped. <code>scans.discovered BOOLEAN</code> replaces it. Progress = <code>SELECT DISTINCT exhibit_id FROM scans WHERE user_id = $uid AND discovered = true</code>.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">scans mutability</div>
+      <div class="d-body">Scan row updated in-place as user listens. <code>listened</code>, <code>listen_duration_sec</code>, <code>discovered</code> updated via service role. <code>scanned_at</code> = creation timestamp.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">reports.reporter_type</div>
+      <div class="d-body">Dropped. Derive from <code>users.type</code> via join. <code>reports.user_id NOT NULL</code> — every reporter must have a users row.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">ads ownership</div>
+      <div class="d-body"><code>ads.sponsor_id UUID NOT NULL FK → ad_sponsors</code>. Every ad owned by a sponsor — including in-house (Experium = a sponsor row). Drop <code>advertiser TEXT</code>.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">report-photos bucket</div>
+      <div class="d-body">Skip in v1. <code>reports.photo_url</code> column dropped entirely. Two buckets only: <code>audio</code> + <code>images</code>.</div>
+    </div>
+    <div class="decision">
+      <div class="d-label">Storage paths</div>
+      <div class="d-body">Relative paths stored (e.g. <code>exhibits/uuid/en.mp3</code>). App constructs full URL at runtime via Supabase storage client.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABLE GRID -->
+<div class="section">
+  <div class="section-title">Schema — 9 tables</div>
+  <div class="grid">
+
+    <!-- exhibits -->
+    <div class="card">
+      <div class="card-header">
+        <h2>exhibits</h2>
+        <span class="badge badge-drop">drop + recreate</span>
+      </div>
+      <table>
+        <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+        <tr><td class="pk">id</td><td>UUID PK</td><td>gen_random_uuid()</td></tr>
+        <tr><td>code</td><td>TEXT UNIQUE NOT NULL</td><td>e.g. PL01, LM22, ST04</td></tr>
+        <tr><td>name</td><td>TEXT NOT NULL</td><td>"Neem Tree", "Lotus Lake"</td></tr>
+        <tr><td>type</td><td>TEXT</td><td>CHECK: plant | structure | water_body | landmark</td></tr>
+        <tr><td>tier</td><td>TEXT NOT NULL</td><td>CHECK: gold | silver | bronze  default 'silver'</td></tr>
+        <tr><td>description</td><td>TEXT NULL</td><td></td></tr>
+        <tr><td>facts</td><td>JSONB NULL</td><td>{"scientific_name":"...","age":"...","origin":"..."}</td></tr>
+        <tr><td>created_at</td><td>TIMESTAMPTZ</td><td>default now()</td></tr>
+        <tr><td>updated_at</td><td>TIMESTAMPTZ</td><td>default now(); updated via trigger</td></tr>
+      </table>
+    </div>
+
+    <!-- exhibit_audio -->
+    <div class="card">
+      <div class="card-header">
+        <h2>exhibit_audio</h2>
+        <span class="badge badge-missing">new</span>
+      </div>
+      <table>
+        <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+        <tr><td class="pk">id</td><td>UUID PK</td><td>gen_random_uuid()</td></tr>
+        <tr><td class="fk">exhibit_id</td><td>FK → exhibits NOT NULL</td><td></td></tr>
+        <tr><td>language</td><td>TEXT NOT NULL</td><td>CHECK: en | hi | te</td></tr>
+        <tr><td>script</td><td>TEXT NULL</td><td>production-ready narration; input to TTS pipeline</td></tr>
+        <tr><td>audio_url</td><td>TEXT NULL</td><td>relative path → audio bucket</td></tr>
+        <tr><td>status</td><td>TEXT NOT NULL</td><td>CHECK: draft | ready | published  default 'draft'</td></tr>
+        <tr><td>created_at</td><td>TIMESTAMPTZ</td><td>default now()</td></tr>
+        <tr><td>updated_at</td><td>TIMESTAMPTZ</td><td>default now(); updated via trigger</td></tr>
+      </table>
+      <div class="dep-line">UNIQUE on <span>(exhibit_id, language)</span> — one row per exhibit per language.</div>
+    </div>
+
+    <!-- exhibit_photos -->
+    <div class="card">
+      <div class="card-header">
+        <h2>exhibit_photos</h2>
+        <span class="badge badge-missing">new</span>
+      </div>
+      <table>
+        <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+        <tr><td class="pk">id</td><td>UUID PK</td><td>gen_random_uuid()</td></tr>
+        <tr><td class="fk">exhibit_id</td><td>FK → exhibits NOT NULL</td><td></td></tr>
+        <tr><td>url</td><td>TEXT NOT NULL</td><td>relative path → images bucket</td></tr>
+        <tr><td>caption</td><td>TEXT NULL</td><td></td></tr>
+        <tr><td>is_hero</td><td>BOOLEAN NOT NULL</td><td>default false; one hero per exhibit</td></tr>
+        <tr><td>sort_order</td><td>INT NOT NULL</td><td>default 0; display sequence</td></tr>
+      </table>
+      <div class="dep-line">Max one row WHERE <span>is_hero = true</span> per exhibit — enforced at app layer.</div>
+    </div>
+
+    <!-- exhibit_qr_codes -->
+    <div class="card">
+      <div class="card-header">
+        <h2>exhibit_qr_codes</h2>
+        <span class="badge badge-missing">new (was qr_codes)</span>
+      </div>
+      <table>
+        <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+        <tr><td class="pk">id</td><td>UUID PK</td><td>gen_random_uuid()</td></tr>
+        <tr><td>code</td><td>TEXT UNIQUE NOT NULL</td><td>"A7X3" — random short</td></tr>
+        <tr><td class="fk">exhibit_id</td><td>FK → exhibits NULL</td><td>nullable (unassigned ok)</td></tr>
+        <tr><td>gps_lat</td><td>FLOAT8 NULL</td><td></td></tr>
+        <tr><td>gps_lng</td><td>FLOAT8 NULL</td><td></td></tr>
+        <tr><td>status</td><td>TEXT NOT NULL</td><td>CHECK: active | needs_attention | inactive  default 'active'</td></tr>
+        <tr><td>install_date</td><td>DATE NULL</td><td></td></tr>
+        <tr><td>last_checked</td><td>DATE NULL</td><td></td></tr>
+        <tr><td>created_at</td><td>TIMESTAMPTZ</td><td>default now()</td></tr>
+        <tr><td>updated_at</td><td>TIMESTAMPTZ</td><td>default now(); updated via trigger</td></tr>
+      </table>
+      <div class="dep-line">No <span>sponsor_id</span>, <span>ad_tier</span>, or <span>notes</span> — ad tier derived from <span>exhibits.tier</span>.</div>
+    </div>
+
+    <!-- ad_sponsors -->
+    <div class="card">
+      <div class="card-header">
+        <h2>ad_sponsors</h2>
+        <span class="badge badge-missing">new (was sponsors)</span>
+      </div>
+      <table>
+        <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+        <tr><td class="pk">id</td><td>UUID PK</td><td>gen_random_uuid()</td></tr>
+        <tr><td>name</td><td>TEXT NOT NULL</td><td>e.g. "Experium" for in-house ads</td></tr>
+        <tr><td>logo_url</td><td>TEXT NULL</td><td></td></tr>
+        <tr><td>contact_info</td><td>TEXT NULL</td><td></td></tr>
+      </table>
+    </div>
+
+    <!-- users -->
+    <div class="card">
+      <div class="card-header">
+        <h2>users</h2>
+        <span class="badge badge-missing">new</span>
+      </div>
+      <table>
+        <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+        <tr><td class="pk">id</td><td>UUID PK</td><td>gen_random_uuid() — internal reference</td></tr>
+        <tr><td>fingerprint_id</td><td>TEXT UNIQUE NULL</td><td>fingerprintjs hash; NULL for maintainers</td></tr>
+        <tr><td>type</td><td>TEXT NOT NULL</td><td>CHECK: visitor | maintainer  default 'visitor'</td></tr>
+        <tr><td>name</td><td>TEXT NULL</td><td>optional modal capture</td></tr>
+        <tr><td>phone</td><td>TEXT NULL</td><td>optional; no OTP v1</td></tr>
+        <tr><td>email</td><td>TEXT NULL</td><td>optional</td></tr>
+        <tr><td>language_pref</td><td>TEXT NOT NULL</td><td>CHECK: en | hi | te  default 'en'</td></tr>
+        <tr><td>created_at</td><td>TIMESTAMPTZ</td><td>default now()</td></tr>
+        <tr><td>updated_at</td><td>TIMESTAMPTZ</td><td>default now(); updated via trigger</td></tr>
+      </table>
+      <div class="dep-line">RLS: anon <strong>INSERT only</strong>. Reads/updates via server-side API (service role key). Admins = Supabase Auth only — no row here.</div>
+    </div>
+
+    <!-- scans -->
+    <div class="card">
+      <div class="card-header">
+        <h2>scans</h2>
+        <span class="badge badge-missing">new</span>
+      </div>
+      <table>
+        <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+        <tr><td class="pk">id</td><td>UUID PK</td><td>gen_random_uuid()</td></tr>
+        <tr><td class="fk">qr_code_id</td><td>FK → exhibit_qr_codes NOT NULL</td><td></td></tr>
+        <tr><td class="fk">user_id</td><td>UUID FK → users NULL</td><td>nullable (anonymous scan ok)</td></tr>
+        <tr><td>scanned_at</td><td>TIMESTAMPTZ</td><td>default now() — creation timestamp</td></tr>
+        <tr><td>device_info</td><td>JSONB NULL</td><td>{"os":"iOS","browser":"Safari",...}</td></tr>
+        <tr><td>listened</td><td>BOOLEAN NOT NULL</td><td>default false</td></tr>
+        <tr><td>listen_duration_sec</td><td>INT NULL</td><td></td></tr>
+        <tr><td>ad_clicked</td><td>BOOLEAN NOT NULL</td><td>default false</td></tr>
+        <tr><td>discovered</td><td>BOOLEAN NOT NULL</td><td>default false; set true when listen threshold met</td></tr>
+        <tr><td>updated_at</td><td>TIMESTAMPTZ</td><td>default now(); updated via trigger</td></tr>
+      </table>
+      <div class="dep-line">Row updated in-place as user listens. <span>user_progress</span> table dropped — derive from <span>scans WHERE discovered = true</span>.</div>
+    </div>
+
+    <!-- reports -->
+    <div class="card">
+      <div class="card-header">
+        <h2>reports</h2>
+        <span class="badge badge-missing">new</span>
+      </div>
+      <table>
+        <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+        <tr><td class="pk">id</td><td>UUID PK</td><td>gen_random_uuid()</td></tr>
+        <tr><td class="fk">qr_code_id</td><td>FK → exhibit_qr_codes NOT NULL</td><td></td></tr>
+        <tr><td class="fk">user_id</td><td>UUID FK → users NOT NULL</td><td>reporter type derived via join on users.type</td></tr>
+        <tr><td>issue_type</td><td>TEXT NOT NULL</td><td>CHECK: wrong_info | damaged | audio_broken | other</td></tr>
+        <tr><td>description</td><td>TEXT NULL</td><td></td></tr>
+        <tr><td>status</td><td>TEXT NOT NULL</td><td>CHECK: open | under_review | resolved  default 'open'</td></tr>
+        <tr><td>created_at</td><td>TIMESTAMPTZ</td><td>default now()</td></tr>
+        <tr><td>resolved_at</td><td>TIMESTAMPTZ NULL</td><td></td></tr>
+      </table>
+      <div class="dep-line">No <span>reporter_type</span> col — join <span>users.type</span>. No <span>photo_url</span> — deferred to v2.</div>
+    </div>
+
+    <!-- ads -->
+    <div class="card">
+      <div class="card-header">
+        <h2>ads</h2>
+        <span class="badge badge-missing">new</span>
+      </div>
+      <table>
+        <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+        <tr><td class="pk">id</td><td>UUID PK</td><td>gen_random_uuid()</td></tr>
+        <tr><td>name</td><td>TEXT NOT NULL</td><td>ad label / campaign name</td></tr>
+        <tr><td class="fk">sponsor_id</td><td>UUID FK → ad_sponsors NOT NULL</td><td></td></tr>
+        <tr><td>image_url</td><td>TEXT NULL</td><td></td></tr>
+        <tr><td>click_url</td><td>TEXT NULL</td><td></td></tr>
+        <tr><td>placement</td><td>TEXT NOT NULL</td><td>CHECK: splash | banner | post_audio</td></tr>
+        <tr><td>tier_target</td><td>TEXT NOT NULL</td><td>CHECK: gold | silver | bronze | all</td></tr>
+        <tr><td>active</td><td>BOOLEAN NOT NULL</td><td>default false</td></tr>
+        <tr><td>start_date</td><td>DATE NULL</td><td></td></tr>
+        <tr><td>end_date</td><td>DATE NULL</td><td></td></tr>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- RLS POLICIES -->
+<div class="section">
+  <div class="section-title">RLS policies</div>
+  <div class="rls-grid">
+    <div class="rls-card">
+      <div class="rls-table">exhibits</div>
+      <div class="rls-row"><span class="op op-select">SELECT</span><span>anon</span></div>
+      <div class="rls-row"><span class="op op-all">ALL</span><span>authenticated admin</span></div>
+    </div>
+    <div class="rls-card">
+      <div class="rls-table">exhibit_audio</div>
+      <div class="rls-row"><span class="op op-select">SELECT</span><span>anon</span></div>
+      <div class="rls-row"><span class="op op-all">ALL</span><span>authenticated admin</span></div>
+    </div>
+    <div class="rls-card">
+      <div class="rls-table">exhibit_photos</div>
+      <div class="rls-row"><span class="op op-select">SELECT</span><span>anon</span></div>
+      <div class="rls-row"><span class="op op-all">ALL</span><span>authenticated admin</span></div>
+    </div>
+    <div class="rls-card">
+      <div class="rls-table">exhibit_qr_codes</div>
+      <div class="rls-row"><span class="op op-select">SELECT</span><span>anon — needed for /s/[code]</span></div>
+      <div class="rls-row"><span class="op op-all">ALL</span><span>authenticated admin</span></div>
+    </div>
+    <div class="rls-card">
+      <div class="rls-table">ad_sponsors</div>
+      <div class="rls-row"><span class="op op-deny">ALL</span><span>anon blocked</span></div>
+      <div class="rls-row"><span class="op op-all">ALL</span><span>authenticated admin only</span></div>
+    </div>
+    <div class="rls-card">
+      <div class="rls-table">users</div>
+      <div class="rls-row"><span class="op op-insert">INSERT</span><span>anon only</span></div>
+      <div class="rls-row"><span class="op op-deny">SELECT / UPDATE</span><span>anon blocked — service role only</span></div>
+      <div class="rls-row"><span class="op op-all">ALL</span><span>authenticated admin</span></div>
+    </div>
+    <div class="rls-card">
+      <div class="rls-table">scans</div>
+      <div class="rls-row"><span class="op op-insert">INSERT</span><span>anon</span></div>
+      <div class="rls-row"><span class="op op-deny">SELECT / UPDATE / DELETE</span><span>anon blocked — updates via service role</span></div>
+      <div class="rls-row"><span class="op op-all">ALL</span><span>authenticated admin</span></div>
+    </div>
+    <div class="rls-card">
+      <div class="rls-table">reports</div>
+      <div class="rls-row"><span class="op op-insert">INSERT</span><span>anon</span></div>
+      <div class="rls-row"><span class="op op-deny">SELECT / UPDATE / DELETE</span><span>anon blocked</span></div>
+      <div class="rls-row"><span class="op op-all">ALL</span><span>authenticated admin</span></div>
+    </div>
+    <div class="rls-card">
+      <div class="rls-table">ads</div>
+      <div class="rls-row"><span class="op op-select">SELECT</span><span>anon — WHERE active = true only</span></div>
+      <div class="rls-row"><span class="op op-deny">INSERT / UPDATE / DELETE</span><span>anon blocked</span></div>
+      <div class="rls-row"><span class="op op-all">ALL</span><span>authenticated admin</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- STORAGE BUCKETS -->
+<div class="section">
+  <div class="section-title">Storage buckets</div>
+  <div class="buckets">
+    <div class="bucket">
+      <div class="bucket-name">audio</div>
+      <div class="bucket-meta">Public read · path: <code>exhibits/{code}/en.mp3</code> etc.</div>
+    </div>
+    <div class="bucket">
+      <div class="bucket-name">images</div>
+      <div class="bucket-meta">Public read · path: <code>exhibits/{code}/photo.jpg</code></div>
+    </div>
+    <div class="bucket bucket-skip">
+      <div class="bucket-name">report-photos</div>
+      <div class="bucket-meta">Skipped in v1 — deferred to v2</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
