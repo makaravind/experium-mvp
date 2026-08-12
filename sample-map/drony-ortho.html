@@ -74,6 +74,16 @@
     }
     .trail-actions button:hover { background: #e5e7eb; }
     #trail-count { font-size: 11px; color: #6b7280; }
+    .preset-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+    .preset-btn {
+      font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer;
+      border: 1px solid #d1d5db; background: #f9fafb; color: #374151; font-weight: 500;
+    }
+    .preset-btn:hover { background: #e5e7eb; }
+    .preset-btn.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+    .slider-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; color: #333; font-size: 12px; }
+    .slider-row input[type=range] { width: 80px; accent-color: #3b82f6; }
+    .slider-val { font-size: 11px; color: #6b7280; font-family: monospace; min-width: 34px; text-align: right; }
   </style>
 </head>
 <body>
@@ -91,6 +101,35 @@
   <label>Opacity
     <input type="range" id="ortho-opacity" min="0" max="1" step="0.05" value="1" />
   </label>
+  <hr class="divider" />
+  <span class="section-label">Map Style</span>
+  <div class="preset-btns">
+    <button class="preset-btn active" data-preset="raw">Raw</button>
+    <button class="preset-btn" data-preset="vivid">Vivid</button>
+    <button class="preset-btn" data-preset="warm">Warm</button>
+    <button class="preset-btn" data-preset="poster">Poster</button>
+    <button class="preset-btn" data-preset="dark">Dark</button>
+  </div>
+  <div class="slider-row">
+    <span>Contrast</span>
+    <input type="range" id="s-contrast" min="-1" max="1" step="0.05" value="0" />
+    <span class="slider-val" id="v-contrast">0.00</span>
+  </div>
+  <div class="slider-row">
+    <span>Saturation</span>
+    <input type="range" id="s-saturation" min="-1" max="1" step="0.05" value="0" />
+    <span class="slider-val" id="v-saturation">0.00</span>
+  </div>
+  <div class="slider-row">
+    <span>Brightness</span>
+    <input type="range" id="s-brightness" min="0" max="0.5" step="0.01" value="0" />
+    <span class="slider-val" id="v-brightness">0.00</span>
+  </div>
+  <div class="slider-row">
+    <span>Hue</span>
+    <input type="range" id="s-hue" min="-180" max="180" step="5" value="0" />
+    <span class="slider-val" id="v-hue">0°</span>
+  </div>
   <hr class="divider" />
   <span class="section-label">Go to</span>
   <div style="display:flex;gap:6px;">
@@ -545,6 +584,106 @@
     document.getElementById('route-dist').textContent = '';
     document.getElementById('route-from').value = '';
     document.getElementById('route-to').value = '';
+  });
+
+  // ── Map style presets ──────────────────────────────────────
+  const PRESETS = {
+    raw: {
+      'raster-contrast': 0,
+      'raster-saturation': 0,
+      'raster-brightness-min': 0,
+      'raster-hue-rotate': 0,
+    },
+    vivid: {
+      'raster-contrast': 0.15,
+      'raster-saturation': 0.3,
+      'raster-brightness-min': 0.05,
+      'raster-hue-rotate': 0,
+    },
+    warm: {
+      'raster-contrast': 0.1,
+      'raster-saturation': 0.1,
+      'raster-brightness-min': 0.08,
+      'raster-hue-rotate': -15,
+    },
+    poster: {
+      'raster-contrast': 0.3,
+      'raster-saturation': -0.1,
+      'raster-brightness-min': 0,
+      'raster-hue-rotate': 0,
+      'raster-color': ['step', ['raster-value'],
+        '#2f6b45',
+        60,  '#4f8a52',
+        110, '#93b96a',
+        160, '#c6a878',
+        210, '#f5efe0',
+      ],
+      'raster-color-mix': [0.2126, 0.7152, 0.0722, 0],
+      'raster-color-range': [0, 255],
+    },
+    dark: {
+      'raster-contrast': 0.2,
+      'raster-saturation': -0.5,
+      'raster-brightness-min': 0,
+      'raster-hue-rotate': 180,
+    },
+  };
+
+  const SLIDER_IDS = {
+    's-contrast':   'raster-contrast',
+    's-saturation': 'raster-saturation',
+    's-brightness': 'raster-brightness-min',
+    's-hue':        'raster-hue-rotate',
+  };
+
+  function syncSliderLabels() {
+    document.getElementById('v-contrast').textContent   = parseFloat(document.getElementById('s-contrast').value).toFixed(2);
+    document.getElementById('v-saturation').textContent = parseFloat(document.getElementById('s-saturation').value).toFixed(2);
+    document.getElementById('v-brightness').textContent = parseFloat(document.getElementById('s-brightness').value).toFixed(2);
+    document.getElementById('v-hue').textContent        = document.getElementById('s-hue').value + '°';
+  }
+
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    if (!p || !map.getLayer('ortho-layer')) return;
+
+    // raster-color: set for poster, clear for others
+    if (p['raster-color']) {
+      map.setPaintProperty('ortho-layer', 'raster-color-mix',   p['raster-color-mix']);
+      map.setPaintProperty('ortho-layer', 'raster-color-range', p['raster-color-range']);
+      map.setPaintProperty('ortho-layer', 'raster-color',       p['raster-color']);
+    } else {
+      try {
+        map.setPaintProperty('ortho-layer', 'raster-color', undefined);
+      } catch(e) { /* already unset */ }
+    }
+
+    const basicProps = ['raster-contrast', 'raster-saturation', 'raster-brightness-min', 'raster-hue-rotate'];
+    basicProps.forEach(prop => map.setPaintProperty('ortho-layer', prop, p[prop] ?? 0));
+
+    // Sync sliders to preset values
+    document.getElementById('s-contrast').value   = p['raster-contrast'] ?? 0;
+    document.getElementById('s-saturation').value = p['raster-saturation'] ?? 0;
+    document.getElementById('s-brightness').value = p['raster-brightness-min'] ?? 0;
+    document.getElementById('s-hue').value        = p['raster-hue-rotate'] ?? 0;
+    syncSliderLabels();
+  }
+
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyPreset(btn.dataset.preset);
+    });
+  });
+
+  Object.entries(SLIDER_IDS).forEach(([sliderId, prop]) => {
+    document.getElementById(sliderId).addEventListener('input', () => {
+      if (!map.getLayer('ortho-layer')) return;
+      map.setPaintProperty('ortho-layer', prop, parseFloat(document.getElementById(sliderId).value));
+      syncSliderLabels();
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    });
   });
 </script>
 </body>
