@@ -24,10 +24,13 @@ START
                     │ ⚠ drone  │                        │
                     └────┬─────┘                        │
                          │                              │
-                         ▼                              │
-                    ┌──────────┐                        │
-                    │ m2b-map  │                        │
-                    └────┬─────┘                        │
+              ┌──────────┴──────────────┐               │
+              ▼                         ▼               │
+         ┌──────────┐         ┌─────────────────┐       │
+         │m2b-ortho │         │ m2b-mechanics   │       │
+         │(tileset) │         │(pins,GPS,search)│       │
+         └────┬─────┘         └────┬────────────┘       │
+              └──────────┬─────────┘                     │
                          │                              │
                     ┌────┴──────────────────┐           │
                     ▼           ▼           │           │
@@ -51,17 +54,19 @@ START
 | ID | Milestone | GitHub | Status | Blocked By |
 |----|-----------|--------|--------|------------|
 | m1-foundation | Foundation | [#4](https://github.com/makaravind/experium-ai-tour-app/milestone/4) | DONE | — |
-| m1b-dev-mode | Dev Mode | [#5](https://github.com/makaravind/experium-ai-tour-app/milestone/5) | NOT STARTED | m1 |
-| m2a-exhibit-audio | Exhibit Audio | [#6](https://github.com/makaravind/experium-ai-tour-app/milestone/6) | NOT STARTED | m1 |
-| m2c-data-collection | Data Collection | [#7](https://github.com/makaravind/experium-ai-tour-app/milestone/7) | NOT STARTED | m1 + **drone footage** |
-| m2b-map | Map | [#8](https://github.com/makaravind/experium-ai-tour-app/milestone/8) | NOT STARTED | m2c |
-| m3-home-tab | Home Tab | [#9](https://github.com/makaravind/experium-ai-tour-app/milestone/9) | NOT STARTED | m2a |
-| m4-gamification | Gamification | [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10) | NOT STARTED | m2a + m2b |
-| m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | NOT STARTED | m2a + m2b |
-| m6-ads | Ads | [#12](https://github.com/makaravind/experium-ai-tour-app/milestone/12) | NOT STARTED | m2a |
-| m7-launch-ready | Launch Ready | [#13](https://github.com/makaravind/experium-ai-tour-app/milestone/13) | NOT STARTED | m3 + m4 + m5 + m2c + m6 |
+| m1b-dev-mode | Dev Mode | [#5](https://github.com/makaravind/experium-ai-tour-app/milestone/5) | DONE | m1 |
+| m2a-exhibit-audio | Exhibit Audio | [#6](https://github.com/makaravind/experium-ai-tour-app/milestone/6) | DONE | m1 |
+| m2c-data-collection | Data Collection | [#7](https://github.com/makaravind/experium-ai-tour-app/milestone/7) | IN PROGRESS (3/8) | m1 + **drone footage** |
+| m2b-ortho | Map Ortho Tileset | [#8](https://github.com/makaravind/experium-ai-tour-app/milestone/8) | NOT STARTED (0/1) | m2c |
+| m2b-mechanics | Map Mechanics | [#15](https://github.com/makaravind/experium-ai-tour-app/milestone/15) | IN PROGRESS (4/8) | m2c |
+| m3-home-tab | Home Tab | [#9](https://github.com/makaravind/experium-ai-tour-app/milestone/9) | DONE | m2a |
+| m4-gamification | Gamification | [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10) | NOT STARTED (0/1) | m2a + m2b |
+| m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | NOT STARTED (0/0) | m2a + m2b |
+| m6-ads | Ads | [#12](https://github.com/makaravind/experium-ai-tour-app/milestone/12) | NOT STARTED (0/1) | m2a |
+| m7-launch-ready | Launch Ready | [#13](https://github.com/makaravind/experium-ai-tour-app/milestone/13) | NOT STARTED (0/4) | m3 + m4 + m5 + m2c + m6 |
 
-> Note: GitHub milestones #1–3 (App Pilot, V1, V1-QR plates) are stale from the old tracker — close manually if needed.
+> Note: GitHub milestones #1–3 (App Pilot, V1, V1-QR plates) and #14 (m2c-placeholder-data) are closed/stale — ignore.
+> `m2b-map` was split into `m2b-ortho` (#8) and `m2b-mechanics` (#15).
 
 ---
 
@@ -141,24 +146,55 @@ START
 
 ---
 
-## m2b-map
+## m2b-ortho
 
-**Goal:** Mapbox map renders with real exhibit pins (from m2c), GPS dot, and pin tap → Preview bottom sheet.
+**Goal:** Drone ortho raster tileset uploaded to Mapbox and rendering correctly on the map.
 
-⚠ **Blocked on:** m2c (needs GPS-tagged exhibit coordinates before pins can be placed)
+⚠ **Blocked on:** m2c (needs drone footage from vendor)
 
 ### Scope
-- Mapbox GL JS map with drone ortho raster tileset
-- Exhibit pins as GeoJSON (all 50, orange/green state, category sizing A/B/C)
+- Upload processed GeoTIFF ortho to Mapbox as raster tileset
+- Map renders ortho layer as base (replacing satellite)
+- Trail discovery paths GeoJSON (1 open issue)
+
+### Open issues
+- Trail discovery paths (#TBD)
+
+### Out of scope
+- Exhibit pins, GPS, preview sheet
+
+---
+
+## m2b-mechanics
+
+**Goal:** Map interactions fully working — exhibit pins, GPS dot, nearby pulse, zoom-on-scan, search.
+
+**Status:** IN PROGRESS — 3 closed, 4 open
+
+### Closed
+- Build Map view (Mapbox base) — #47
+- Real Mapbox ortho rendering — #48 (was #47 in context)
+- Exhibit pins + Preview bottom sheet — #48 / PR #53
+- Off-screen peek chips — #57
+
+### Open
+- GPS dot (#49)
+- Nearby pulse animation (#50)
+- Zoom-on-scan (#51)
+- Search feature (#56)
+
+### Scope
+- Exhibit pins as GeoJSON (orange/green state)
 - GPS dot via `watchPosition()`, blue accuracy circle
 - Nearby pulse animation (50m radius, max 5 pins)
-- Pin tap → Preview bottom sheet (State B)
-- Map zoom animation on QR scan
+- Pin tap → Preview bottom sheet (unified PreviewSheet)
+- Map zoom animation on QR scan (`/s/[code]?scan=1`)
+- Search bar (static placeholder → live filtering)
 - Pinch/pan/zoom, last-viewed position restore
 
 ### Out of scope
-- Trail routing (A→B BFS) — deferred, see open-questions.md #25
-- Trail GeoJSON tracing (m7)
+- Ortho tileset upload (m2b-ortho)
+- Trail routing (A→B BFS) — deferred
 
 ---
 
