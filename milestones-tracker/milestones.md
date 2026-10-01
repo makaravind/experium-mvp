@@ -58,7 +58,7 @@ START
 | m2a-exhibit-audio | Exhibit Audio | [#6](https://github.com/makaravind/experium-ai-tour-app/milestone/6) | DONE | m1 |
 | m2c-data-collection | Data Collection | [#7](https://github.com/makaravind/experium-ai-tour-app/milestone/7) | IN PROGRESS (3/8) | m1 + **drone footage** |
 | m2b-ortho | Map Ortho Tileset | [#8](https://github.com/makaravind/experium-ai-tour-app/milestone/8) | NOT STARTED (0/1) | m2c |
-| m2b-mechanics | Map Mechanics | [#15](https://github.com/makaravind/experium-ai-tour-app/milestone/15) | IN PROGRESS (4/8) | m2c |
+| m2b-mechanics | Map Mechanics | [#15](https://github.com/makaravind/experium-ai-tour-app/milestone/15) | IN PROGRESS (6/8) | m2c |
 | m3-home-tab | Home Tab | [#9](https://github.com/makaravind/experium-ai-tour-app/milestone/9) | DONE | m2a |
 | m4-gamification | Gamification | [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10) | NOT STARTED (0/1) | m2a + m2b |
 | m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | NOT STARTED (0/0) | m2a + m2b |
@@ -169,18 +169,18 @@ START
 
 **Goal:** Map interactions fully working — exhibit pins, GPS dot, nearby pulse, zoom-on-scan, search.
 
-**Status:** IN PROGRESS — 3 closed, 4 open
+**Status:** IN PROGRESS — 6 closed, 2 open
 
 ### Closed
-- Build Map view (Mapbox base) — #47
-- Real Mapbox ortho rendering — #48 (was #47 in context)
-- Exhibit pins + Preview bottom sheet — #48 / PR #53
+- Build Map view (Mapbox base) — #8
+- Real Mapbox map on Map tab — #47
+- Exhibit pins + Preview bottom sheet — #48
 - Off-screen peek chips — #57
+- Zoom-on-scan + last-viewed position restore — #51
+- GPS dot (#49)
 
 ### Open
-- GPS dot (#49)
 - Nearby pulse animation (#50)
-- Zoom-on-scan (#51)
 - Search feature (#56)
 
 ### Scope

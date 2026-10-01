@@ -1,17 +1,17 @@
-# Current Milestone: App Pilot (alpha)
+# Current Milestone: m2b-mechanics — Map Mechanics
 
-**Due:** 2026-08-15
-**Goal:** Get app setup + end-to-end flow for a single sample exhibit
+**GitHub:** [#15](https://github.com/makaravind/experium-ai-tour-app/milestone/15)
+**Progress:** 8/9 closed
 
-## Issues
+## Closed
+- #8 Build Map component
+- #47 Real Mapbox map on Map tab
+- #48 Exhibit pins + Preview bottom sheet
+- #57 Off-screen peek chips
+- #51 Zoom-on-scan + last-viewed position restore
+- #58 3D metal map markers (Three.js custom layer)
+- #50 Nearby pulse animation
+- #49 GPS "you are here" dot
 
-| # | Title | Status |
-|---|-------|--------|
-| 1 | Finalise contract details | In Progress |
-| 2 | Existing content reviewed and notes | Todo |
-| 3 | Review shared content | Todo |
-
-## Upcoming Milestones
-
-- **V1** (due Sep 15) — App finalized, content audio generated, tech complete
-- **V1 - QR plates installed** 🚀 (due Oct 15) — QR plates installed and E2E tested
+## Open
+- #56 Implement search feature
