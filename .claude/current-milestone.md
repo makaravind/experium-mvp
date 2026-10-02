@@ -1,18 +1,14 @@
-# Current Milestone: m2b-mechanics — Map Mechanics
+# Current Milestone: m4-gamification — Gamification
 
-**GitHub:** [#15](https://github.com/makaravind/experium-ai-tour-app/milestone/15)
-**Progress:** 9/9 closed
+**GitHub:** [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10)
+**Progress:** 3/5 closed
 
 ## Closed
-- #8 Build Map component
-- #47 Real Mapbox map on Map tab
-- #48 Exhibit pins + Preview bottom sheet
-- #57 Off-screen peek chips
-- #51 Zoom-on-scan + last-viewed position restore
-- #58 3D metal map markers (Three.js custom layer)
-- #50 Nearby pulse animation
-- #49 GPS "you are here" dot
-- #56 Implement search feature
+- #59 Post-audio toast + auto milestone celebration (S4→S5) — scope included #60's swap (see spec); merged to `main` (cbd3b0c)
 
 ## Open
-- none
+- #61 Discovery Card (milestones 10 & 50) (was blocked by #59 — now unblocked)
+- #62 Milestone badge artwork (parallel, no blocker)
+
+> #20 closed — superseded by #59 (reworked to match full S4/S5 spec).
+> #60 closed — superseded by #59 (folded in: building the real overlay made the later `TrailCard` swap redundant work). Spec: `docs/specs/gh-59-post-audio-celebration.md`.
