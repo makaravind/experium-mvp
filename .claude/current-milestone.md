@@ -1,7 +1,7 @@
 # Current Milestone: m2b-mechanics — Map Mechanics
 
 **GitHub:** [#15](https://github.com/makaravind/experium-ai-tour-app/milestone/15)
-**Progress:** 8/9 closed
+**Progress:** 9/9 closed
 
 ## Closed
 - #8 Build Map component
@@ -12,6 +12,7 @@
 - #58 3D metal map markers (Three.js custom layer)
 - #50 Nearby pulse animation
 - #49 GPS "you are here" dot
+- #56 Implement search feature
 
 ## Open
-- #56 Implement search feature
+- none
