@@ -4,7 +4,7 @@
 
 ## Summary
 
-Horizontal trail bar tracks exhibit discovery progress. Completed milestone nodes are tappable to revisit celebrations. Discovery Cards (downloadable images) unlock at milestones 10 and 50.
+Horizontal trail bar tracks exhibit discovery progress. Completed milestone nodes are tappable to revisit celebrations. Every milestone mints a Discovery Card, collected in a dedicated `/collection` route (fanned stack).
 
 ---
 
@@ -21,22 +21,22 @@ Horizontal trail bar tracks exhibit discovery progress. Completed milestone node
 |---------|---------|
 | Shape | Horizontal bar with milestone nodes |
 | Scope | Shows current segment: last achieved milestone → next milestone |
-| Completed nodes | Filled, green (#588157). Tappable → opens milestone celebration overlay (S5 from Flow 1) |
+| Completed nodes | Filled, green (#588157). Tappable → replays card reveal at `/collection?reveal={m}` |
 | Upcoming nodes | Hollow, muted (#a3b18a). Not tappable |
 | Progress fill | Green line fills between completed nodes |
 
 ---
 
-## Milestone Celebration (revisit)
+## Card Reveal (revisit)
 
 When user taps a completed milestone node on the trail bar:
 
 | Element | Details |
 |---------|---------|
-| Screen | Same full-screen overlay as Flow 1, S5 |
-| Content | Badge, confetti animation, milestone label, count |
-| Discovery Card CTA | Visible only for milestones 10 and 50 |
-| Dismiss | Tap anywhere or X → returns to previous screen |
+| Screen | Navigates to `/collection?reveal={m}` (same tap-to-flip reveal as the post-audio milestone cross) |
+| Content | Face-down card, tap or 2s auto-flip, one confetti burst, badge color + milestone number |
+| Replay | Plays every time, for any of the 9 milestones (no "seen" tracking) |
+| Continue | "Continue →" drops the query param (`router.replace`) and shows the fanned stack |
 
 ---
 
@@ -44,7 +44,9 @@ When user taps a completed milestone node on the trail bar:
 
 ### Trigger
 
-- Milestone celebration screen at milestones 10 and 50 (via post-audio S5 OR trail bar tap)
+- All 9 trail milestones (1, 3, 5, 10, 15, 20, 30, 40, 50) mint a card
+- Post-audio milestone cross → navigates to `/collection?reveal={m}` (tap-to-flip, auto-flips after 2s)
+- Trail bar tap on earned node → same reveal, replays every time
 
 ### Card Content
 
@@ -58,16 +60,17 @@ When user taps a completed milestone node on the trail bar:
 
 | Step | Action |
 |------|--------|
-| 1 | User taps "Your Discovery Card is ready!" CTA on celebration screen |
-| 2 | Card preview shown (full-screen, centered) |
+| 1 | After reveal, "Continue →" lands on fanned stack of all earned cards (or open `/collection` via Home "My Collection" link) |
+| 2 | User taps a card in the stack → full-screen view (name editable here) |
 | 3 | "Download" button below card |
 | 4 | Tapping Download saves PNG to device camera roll / downloads folder |
 | 5 | User shares manually via their preferred app (WhatsApp, Instagram, etc.) |
 
-### No persistence
+### Collection
 
-- Card is not stored in-app. No "My Cards" section.
-- User can re-access by tapping the completed milestone 10 or 50 node on trail bar → celebration → card CTA
+- Dedicated `/collection` route (outside map shell, no TabBar). Back caret → Home.
+- Membership derived from `totalDiscovered` (achieved milestones); no separate persisted card state.
+- Fanned stack shows only earned cards; name edit is shared across all cards (`userInfo.name`).
 
 ---
 

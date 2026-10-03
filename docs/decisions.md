@@ -105,4 +105,4 @@ Source of truth for all design decisions made during initial planning.
 | Nearby exhibit highlights | Unvisited pins within 50m (max 5) pulse + 1.3× scale on map; Category A guaranteed a slot | Drives next scan naturally via map visual cues, no extra UI |
 | Curated path | Fixed recommended route designed editorially | Complements GPS — editorial curation for "what to see" vs GPS for "what's close" |
 | Exhibit categories | A/B/C tier per exhibit, manually assigned, default B | A = longer audio (90s) + larger pin (1.3×) + nearby priority + persists at low zoom. C = 60s audio, standard pin, hides at low zoom. Reassign from real data after 2-4 weeks |
-| User info capture | Optional modal on first load (name, phone, email) + skip link | No OTP in v1. Stored locally, synced when online. Never re-shown if skipped; Discovery Card shows "Your Name Here" tap-to-edit at milestone 10 |
+| User info capture | Optional modal on first load (name, phone, email) + skip link | No OTP in v1. Stored locally, synced when online. Never re-shown if skipped; Discovery Card shows "Your Name Here" tap-to-edit from any card's full-screen view |
