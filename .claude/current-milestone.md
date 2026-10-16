@@ -1,22 +1,19 @@
-# Current Milestone: m2b-map-migration — MapLibre + PMTiles
+# Current Milestone: m5-pwa-offline — PWA + Offline
 
-**GitHub:** [#16](https://github.com/makaravind/experium-ai-tour-app/milestone/16)
-**Progress:** DONE — merged to main 2026-10-12
+**GitHub:** [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11)
+**Progress:** IN PROGRESS — 2/5 closed
 
-## What shipped
-- `mapbox-gl` → `maplibre-gl@^4.7.1` + `pmtiles@^3.2.1`
-- `park.pmtiles` (11MB) in `public/` — static asset, precacheable by m5
-- `ParkMapbox.tsx` → `ParkMap.tsx` (PMTiles protocol, inline style, no Mapbox token)
-- `marker-layer.ts` type imports updated
-- `NEXT_PUBLIC_MAPBOX_TOKEN` removed from `.env.example`
-- Issue #66 closed
+## Closed
+- #66 Investigate Mapbox offline options for GL JS web — resolved by m2b-map-migration, no separate build needed
+- #64 Upfront precache (audio + metadata + images) — merged to main 2026-10-16 as `0a73816`
+  - Shipped as app-wide `AppGate` (gates every route) + `lib/precache.ts` + `lib/handshake-lock.ts` (cross-tab visitor-id lock) + DebugPanel "No precache" toggle
+  - Audio precached; app has no per-exhibit images yet (criterion doesn't apply); metadata already offline via persisted Zustand store
+  - Spec: `docs/specs/gh-64-upfront-precache.md`
 
-## Previously current: m5-pwa-offline [#11] — 0/5 closed
-- #63 PWA polish
-- #64 Upfront precache (in-progress on branch impl/gh-64)
-- #65 Offline first-visit fallback
-- #66 Investigate Mapbox offline → **resolved by m2b-map-migration**
-- #67 Offline-safe retry queue for /api/scan POSTs
+## Open
+- #63 PWA polish: native feel + UI stress testing
+- #65 Offline first-visit fallback screen
+- #67 Offline-safe retry queue for `/api/scan` POSTs — real correctness gap (fire-and-forget `postScan`), not part of #64's scope
 
 ## Deferred (parallel, not blocking)
 - m4-gamification #62 (badge artwork) — milestone otherwise done (4/5)
