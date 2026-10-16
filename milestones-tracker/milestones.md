@@ -33,9 +33,16 @@ START
               └──────────┬─────────┘                     │
                          │                              │
                     ┌────┴──────────────────┐           │
-                    ▼           ▼           │           │
-               ┌──────────┐ ┌────────────┐ │           │ ← parallel
-               │ m4-gamif │ │ m5-pwa     │ │           │
+                    ▼                       │           │
+             ┌─────────────────┐            │           │
+             │m2b-map-migration│            │           │
+             │(MapLibre+PMTiles│            │           │
+             └────────┬────────┘            │           │
+                      │                    │           │
+                    ┌─┴─────────────────┐  │           │
+                    ▼           ▼       │  │           │
+               ┌──────────┐ ┌────────┐  │  │ ← parallel
+               │ m4-gamif │ │ m5-pwa │  │  │
                └────┬─────┘ └──────┬─────┘ │           │
                     └───────┬───────┘       │           │
                             └──────┬────────┘           │
@@ -57,13 +64,14 @@ START
 | m1b-dev-mode | Dev Mode | [#5](https://github.com/makaravind/experium-ai-tour-app/milestone/5) | DONE | m1 |
 | m2a-exhibit-audio | Exhibit Audio | [#6](https://github.com/makaravind/experium-ai-tour-app/milestone/6) | DONE | m1 |
 | m2c-data-collection | Data Collection | [#7](https://github.com/makaravind/experium-ai-tour-app/milestone/7) | IN PROGRESS (3/8) | m1 + **drone footage** |
-| m2b-ortho | Map Ortho Tileset | [#8](https://github.com/makaravind/experium-ai-tour-app/milestone/8) | NOT STARTED (0/1) | m2c |
-| m2b-mechanics | Map Mechanics | [#15](https://github.com/makaravind/experium-ai-tour-app/milestone/15) | IN PROGRESS (6/8) | m2c |
+| m2b-ortho | Map Ortho Tileset | [#8](https://github.com/makaravind/experium-ai-tour-app/milestone/8) | SUPERSEDED | superseded by m2b-map-migration |
+| m2b-mechanics | Map Mechanics | [#15](https://github.com/makaravind/experium-ai-tour-app/milestone/15) | DONE | m2c |
+| m2b-map-migration | Map Migration (Mapbox → MapLibre + PMTiles) | [#16](https://github.com/makaravind/experium-ai-tour-app/milestone/16) | DONE | m2b-mechanics |
 | m3-home-tab | Home Tab | [#9](https://github.com/makaravind/experium-ai-tour-app/milestone/9) | DONE | m2a |
-| m4-gamification | Gamification | [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10) | NOT STARTED (0/1) | m2a + m2b |
-| m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | NOT STARTED (0/0) | m2a + m2b |
+| m4-gamification | Gamification | [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10) | IN PROGRESS (4/5) | m2a + m2b |
+| m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | NOT STARTED (0/5) | m2a + m2b |
 | m6-ads | Ads | [#12](https://github.com/makaravind/experium-ai-tour-app/milestone/12) | NOT STARTED (0/1) | m2a |
-| m7-launch-ready | Launch Ready | [#13](https://github.com/makaravind/experium-ai-tour-app/milestone/13) | NOT STARTED (0/4) | m3 + m4 + m5 + m2c + m6 |
+| m7-launch-ready | Launch Ready | [#13](https://github.com/makaravind/experium-ai-tour-app/milestone/13) | NOT STARTED (0/5) | m3 + m4 + m5 + m2c + m6 |
 
 > Note: GitHub milestones #1–3 (App Pilot, V1, V1-QR plates) and #14 (m2c-placeholder-data) are closed/stale — ignore.
 > `m2b-map` was split into `m2b-ortho` (#8) and `m2b-mechanics` (#15).
@@ -169,7 +177,7 @@ START
 
 **Goal:** Map interactions fully working — exhibit pins, GPS dot, nearby pulse, zoom-on-scan, search.
 
-**Status:** IN PROGRESS — 6 closed, 2 open
+**Status:** DONE — 9/9 closed
 
 ### Closed
 - Build Map view (Mapbox base) — #8
@@ -177,11 +185,10 @@ START
 - Exhibit pins + Preview bottom sheet — #48
 - Off-screen peek chips — #57
 - Zoom-on-scan + last-viewed position restore — #51
-- GPS dot (#49)
-
-### Open
-- Nearby pulse animation (#50)
-- Search feature (#56)
+- GPS dot — #49
+- 3D metal map markers (Three.js custom layer) — #58
+- Nearby pulse animation — #50
+- Search feature — #56
 
 ### Scope
 - Exhibit pins as GeoJSON (orange/green state)
@@ -218,16 +225,54 @@ START
 
 **Goal:** Visitors are motivated to keep scanning — trail progress, milestone celebrations, and downloadable discovery cards.
 
+**Status:** IN PROGRESS — 4/5 closed
+
+### Closed
+- Post-audio toast + auto milestone celebration (S4→S5) — #59
+- Card reveal & collection (expanded from Discovery Card 10&50) — #61
+
+### Open
+- Milestone badge artwork — #62 (parallel, no blocker)
+
+> #20 closed — superseded by #59 (reworked to match full S4/S5 spec: toast + full-screen gradient/confetti overlay, instead of the plain `MilestoneModal`).
+> #60 closed — superseded by #59. Building the real `MilestoneCelebration` overlay in #59 made the later `TrailCard`-to-overlay swap (#60's whole scope) redundant work, so #59's spec does it directly. Spec: `docs/specs/gh-59-post-audio-celebration.md`.
+> Trail bar already exists on Home (`TrailCard.tsx` + `lib/trail.ts`) — a duplicate post-audio trail bar was considered and dropped as redundant with the post-audio toast's "X/50" count.
+> #61 scope expanded during spec grilling from "Discovery Card at milestones 10/50 only" to all 9 milestones + a persistent, browsable `/collection` route (fanned-stack binder, tap-to-flip reveal) replacing the one-off celebration CTA; `MilestoneCelebration.tsx` retired. Spec: `docs/specs/gh-61-card-reveal-collection.md`. Merged to `main` as `3c6a0f5`.
+
 ### Scope
-- Trail progress bar (Home + post-audio context): segment scoping, green filled / hollow upcoming nodes
 - Milestone detection in Zustand (thresholds: 1, 3, 5, 10, 15, 20, 30, 40, 50)
 - Tappable completed milestone nodes → revisit celebration overlay
-- Discovery Card (milestones 10 + 50): HTML Canvas → PNG, `navigator.share` / download
+- Discovery Card (milestones 10 + 50): HTML Canvas → PNG, download
 - User name injection on card (nullable, tap-to-edit)
+- Badge artwork for the 9 thresholds (code ships with placeholder until #62 lands)
 
 ### Out of scope
+- Trail progress bar in post-audio context — dropped as redundant with Home + the post-audio toast
 - Physical rewards (park discount etc.) — needs park agreement
 - Per-type badges (v2)
+- `navigator.share` — download only for v1; manual share via device share sheet
+
+---
+
+## m2b-map-migration
+
+**Goal:** Replace Mapbox GL JS with MapLibre GL JS + self-hosted PMTiles orthophoto. Map works fully offline — tiles are a static asset precacheable by the service worker. Removes Mapbox token dependency.
+
+**Blocks:** m5-pwa-offline (#66 is resolved by this migration — no separate investigation needed)
+**Supersedes:** m2b-ortho (#8) — "upload to Mapbox tileset" is replaced by PMTiles pipeline
+
+### Scope
+- Replace `mapbox-gl` → `maplibre-gl` in package.json + update all imports in `ParkMapbox.tsx`, `marker-layer.ts`
+- Process `drony.in.tif` → `park.pmtiles` using pipeline from `sample-map/pmtiles-poc/` (gdalwarp → gdal2tiles → pmtiles convert)
+- Upload `park.pmtiles` to Supabase Storage (public bucket, range-request capable)
+- Wire PMTiles protocol in `ParkMapbox.tsx`: register `pmtiles://` protocol, swap raster source URL
+- Verify Three.js custom marker layer works unchanged under MapLibre (API-compatible)
+- Remove `NEXT_PUBLIC_MAPBOX_TOKEN` from env — no longer needed
+- Close #66 (Mapbox offline investigation) as resolved
+
+### Out of scope
+- Re-doing any m2b-mechanics features (pins, GPS, peek chips) — all stay as-is
+- Changing the tile zoom range or reprocessing at higher resolution (z14–z19 from POC is sufficient)
 
 ---
 
@@ -235,14 +280,29 @@ START
 
 **Goal:** App is fully functional after initial load with no network.
 
+**Status:** NOT STARTED — 0/5 open
+
+### Open
+- PWA polish: native feel + UI stress testing — #63
+- Upfront precache (audio + metadata + images) triggered on Home's first open — #64
+- Offline first-visit fallback screen — #65
+- Investigate Mapbox offline options for GL JS web — #66 (HITL — research spike, no blocker)
+- Offline-safe retry queue for `/api/scan` POSTs — #67
+
+> `serwist` (next-pwa's successor) is already configured in `app/sw.ts` with reactive `CacheFirst` caching for audio/fonts, plus `public/manifest.json` — but that's passive/on-demand, not the upfront bulk download the original `docs/user-journey.md` flow calls for. #64 closes that gap.
+> Cache trigger point: ticket counter hands out a generic app link (Home `/`), not an exhibit QR — visitor has wifi there, loses it walking into the park. So the upfront download fires on Home's first open, not inside the first-exhibit-scan onboarding step.
+> #66 exists because Mapbox GL JS (web) has no ToS-compliant bulk/offline tile-caching mode like their native SDKs — our ortho + basemap tiles are both Mapbox-hosted (`docs/drone-survey-mapbox.md`). Investigation first, build task (if any) filed after.
+> #67 covers a real correctness gap found while scoping: `postScan` in `ExhibitPageClient.tsx` is fire-and-forget — an offline onsite-discovery POST silently drops today, which can silently break trail-milestone crossing.
+
 ### Scope
-- `next-pwa` configured with upfront cache strategy
-- Service worker caches all 50 audio files + exhibit metadata + map assets (~25MB)
+- Upfront precache: audio (selected language) + exhibit metadata + images (single variant) + offline-safe scan retry
 - Offline first-visit fallback screen ("Connect to internet to start")
 - Offline return-visit: fully functional from cache
+- Map offline: investigation only this round — Mapbox web has no sanctioned path for bulk tile caching
 
 ### Out of scope
 - Background sync, push notifications
+- Tiered image resolutions (thumbnail/medium/full) — single variant for v1
 
 ---
 
@@ -273,6 +333,9 @@ START
 - Scan analytics views in Supabase (listen rate, ad CTR, scans/marker/day)
 - Trail segments traced as GeoJSON (after ortho uploaded)
 - E2E smoke test on device (all flows, all languages)
+- Precache/offline failure observability, replacing the console.log stopgap — #68
+
+> #68 found while scoping gh-64 (m5-pwa-offline) — solo-dev, no monitoring infra yet, so precache gap-fills/retry-cap-exhaustion/continue-anyway usage would otherwise run unnoticed.
 
 ### Out of scope
 - Custom admin UI (use Supabase dashboard)

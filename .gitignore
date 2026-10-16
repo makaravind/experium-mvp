@@ -5,3 +5,5 @@ out/
 .DS_Store
 *.tsbuildinfo
 .claude/cost-tracker.jsonl
+experium-ai-tour-app/
+mvp/.idea/

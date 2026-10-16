@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experium Park — Self-hosted Map POC</title>
+  <link href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/pmtiles@3/dist/pmtiles.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #map { width: 100%; height: 100%; }
+
+    .you-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #4285f4; border: 3px solid #fff;
+      box-shadow: 0 0 0 2px #4285f4;
+      position: relative;
+    }
+    .you-dot::after {
+      content: ''; position: absolute;
+      inset: -10px; border-radius: 50%;
+      background: rgba(66,133,244,.25);
+      animation: pulse 2s ease-out infinite;
+    }
+    @keyframes pulse {
+      0%   { transform: scale(.5); opacity: 1; }
+      100% { transform: scale(2);  opacity: 0; }
+    }
+
+    #status {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,.7); color: #fff;
+      font-family: system-ui, sans-serif; font-size: 13px;
+      padding: 7px 16px; border-radius: 20px; pointer-events: none;
+      white-space: nowrap;
+    }
+    #go-park {
+      position: fixed; top: 16px; left: 16px;
+      background: #fff; border: none; border-radius: 8px;
+      font-family: system-ui, sans-serif; font-size: 13px; font-weight: 600;
+      padding: 8px 14px; cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+    #go-park:hover { background: #f0f0f0; }
+
+    .pin-dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #f97316; border: 2px solid #fff;
+      box-shadow: 0 0 0 2px #f97316;
+      position: relative;
+    }
+    .pin-dot::after {
+      content: ''; position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(249,115,22,.2);
+      animation: pulse 1.8s ease-out infinite;
+    }
+
+    #pin-panel {
+      position: fixed; top: 16px; right: 16px;
+      background: rgba(255,255,255,.95); backdrop-filter: blur(8px);
+      border-radius: 10px; padding: 10px 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.2);
+      font-family: system-ui, sans-serif; font-size: 12px;
+      display: flex; flex-direction: column; gap: 7px; min-width: 190px;
+    }
+    #pin-panel .label { font-weight: 600; font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: .4px; }
+    #pin-panel .row  { display: flex; gap: 5px; }
+    #pin-panel input {
+      flex: 1; padding: 4px 6px; font-size: 12px;
+      border: 1px solid #d1d5db; border-radius: 5px;
+    }
+    #pin-panel button {
+      padding: 4px 10px; font-size: 12px; font-weight: 600;
+      background: #f97316; color: #fff; border: none;
+      border-radius: 5px; cursor: pointer;
+    }
+    #pin-panel button:hover { background: #ea6c0a; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<button id="go-park">📍 Go to park</button>
+
+<div id="pin-panel">
+  <span class="label">Place marker</span>
+  <div class="row">
+    <input id="pin-lat" placeholder="lat" />
+    <input id="pin-lng" placeholder="lng" />
+  </div>
+  <button id="pin-btn">Pin</button>
+</div>
+
+<div id="status">Waiting for GPS…</div>
+
+<script>
+  const protocol = new pmtiles.Protocol();
+  maplibregl.addProtocol('pmtiles', protocol.tile.bind(protocol));
+
+  const BOUNDS = [78.45778, 17.93478, 78.46515, 17.94059];
+
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: {
+        park: {
+          type: 'raster',
+          url: 'pmtiles://park.pmtiles',
+          tileSize: 256,
+          minzoom: 14,
+          maxzoom: 19,
+        }
+      },
+      layers: [
+        { id: 'bg',   type: 'background', paint: { 'background-color': '#0f172a' } },
+        { id: 'park', type: 'raster',     source: 'park' },
+      ]
+    },
+    center: [78.46147, 17.93769],
+    zoom: 17,
+  });
+
+  map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+
+  map.on('load', () => map.fitBounds(BOUNDS, { padding: 40, maxZoom: 19 }));
+
+  document.getElementById('go-park').addEventListener('click', () => {
+    map.fitBounds(BOUNDS, { padding: 40, maxZoom: 19 });
+  });
+
+  // GPS
+  const statusEl = document.getElementById('status');
+  let youMarker = null;
+
+  function onPosition({ coords: { latitude: lat, longitude: lng, accuracy } }) {
+    statusEl.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}  ±${Math.round(accuracy)}m`;
+
+    if (!youMarker) {
+      const el = Object.assign(document.createElement('div'), { className: 'you-dot' });
+      youMarker = new maplibregl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([lng, lat]).addTo(map);
+    } else {
+      youMarker.setLngLat([lng, lat]);
+    }
+  }
+
+  function onError(err) {
+    statusEl.textContent = err.code === 1 ? 'GPS blocked — allow location access' : 'GPS unavailable';
+  }
+
+  // Manual marker
+  let pinMarker = null;
+  function placePin() {
+    const lat = parseFloat(document.getElementById('pin-lat').value);
+    const lng = parseFloat(document.getElementById('pin-lng').value);
+    if (isNaN(lat) || isNaN(lng)) return;
+    const el = Object.assign(document.createElement('div'), { className: 'pin-dot' });
+    if (pinMarker) pinMarker.remove();
+    pinMarker = new maplibregl.Marker({ element: el, anchor: 'center' })
+      .setLngLat([lng, lat]).addTo(map);
+    map.flyTo({ center: [lng, lat], zoom: 19, duration: 800 });
+  }
+  document.getElementById('pin-btn').addEventListener('click', placePin);
+  ['pin-lat', 'pin-lng'].forEach(id =>
+    document.getElementById(id).addEventListener('keydown', e => e.key === 'Enter' && placePin())
+  );
+
+  navigator.geolocation?.watchPosition(onPosition, onError, {
+    enableHighAccuracy: true, maximumAge: 5000,
+  }) ?? (statusEl.textContent = 'GPS not supported');
+</script>
+</body>
+</html>

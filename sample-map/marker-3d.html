@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Map Pin Marker</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1c2a1e; overflow: hidden; }
+    canvas { display: block; }
+    #nearby {
+      position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+      font: 600 13px/1 system-ui, sans-serif; letter-spacing: 0.02em;
+      padding: 10px 18px; border-radius: 999px; cursor: pointer;
+      background: #ffffff; color: #2b2b2b; border: 1px solid #e8e5df;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    }
+    #nearby[aria-pressed="true"] { background: #dda15e; border-color: #b8834a; color: #ffffff; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <button id="nearby" aria-pressed="false">Nearby sparkle</button>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ── Renderer ──────────────────────────────────────────────────────────
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1c2a1e);
+
+    // ── Studio environment ────────────────────────────────────────────────
+    // A polished metal is almost pure reflection, so what it looks like is
+    // decided by the environment, not by the lights. This builds a small
+    // lightbox of emissive panels — the broad soft streaks they cast are what
+    // reads as "polished chrome". RoomEnvironment is far too dim for this.
+    function buildStudioEnv() {
+      const env = new THREE.Scene();
+      env.background = new THREE.Color(0x1a1a1a);
+
+      const quad = new THREE.PlaneGeometry(1, 1);
+      const panel = (w, h, pos, rot, intensity) => {
+        const m = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+        m.color.setRGB(intensity, intensity * 0.97, intensity * 0.93); // faintly warm
+        const mesh = new THREE.Mesh(quad, m);
+        mesh.scale.set(w, h, 1);
+        mesh.position.set(...pos);
+        mesh.rotation.set(...rot);
+        env.add(mesh);
+      };
+
+      // Large overhead softbox — the dominant highlight across the top
+      panel(14, 14, [0, 7, 0], [Math.PI / 2, 0, 0], 11);
+      // Tall front-left and front-right strips — long vertical streaks
+      panel(3.5, 13, [-6, 1, 3.5], [0, Math.PI / 2.6, 0], 9);
+      panel(3.5, 13, [6, 1, 3.5], [0, -Math.PI / 2.6, 0], 9);
+      // Low front kicker — lifts the cone so it doesn't go black
+      panel(11, 3, [0, -5, 5], [-Math.PI / 6, 0, 0], 5.5);
+
+      // Panels BEHIND the camera. A face pointing at the viewer reflects
+      // whatever sits behind the viewer, so without these the large flat front
+      // faces have nothing to mirror and render almost black. These are kept as
+      // separate bars with dark gaps between them rather than one big wash: a
+      // mirror reflects the environment literally, so a uniform panel yields a
+      // flat uniform face, while bars read as distinct specular streaks.
+      panel(9, 2.4, [-3.2, 5.5, 10], [0, 0, 0], 5.0);   // upper bar
+      panel(2.4, 9, [-6.5, 0.5, 10], [0, 0, 0], 3.4);   // left vertical bar
+      panel(7, 1.8, [4.5, -4.0, 10], [0, 0, 0], 2.2);   // lower-right kicker
+
+      // Backdrop behind the camera, carrying a bright-to-dark vertical ramp.
+      // The big flat faces are mirrors far from the camera, so each samples a
+      // single narrow direction — a uniform backdrop makes them a flat slab of
+      // colour. The ramp is what gives the faces their top-to-bottom gradient.
+      const ramp = document.createElement('canvas');
+      ramp.width = 4;
+      ramp.height = 256;
+      const rctx = ramp.getContext('2d');
+      const grad = rctx.createLinearGradient(0, 0, 0, 256);
+      grad.addColorStop(0.0, '#ffffff');
+      grad.addColorStop(0.45, '#8f8f8f');
+      grad.addColorStop(1.0, '#101010');
+      rctx.fillStyle = grad;
+      rctx.fillRect(0, 0, 4, 256);
+      const rampTex = new THREE.CanvasTexture(ramp);
+      rampTex.colorSpace = THREE.SRGBColorSpace;
+
+      const rampMat = new THREE.MeshBasicMaterial({ map: rampTex, side: THREE.DoubleSide });
+      rampMat.color.setScalar(1.5); // lift into HDR so it reads as a light source
+      const rampMesh = new THREE.Mesh(quad, rampMat);
+      rampMesh.scale.set(26, 20, 1);
+      rampMesh.position.set(0, 0, 15);
+      env.add(rampMesh);
+
+      // Dim back wall for falloff on the rear edges
+      panel(14, 14, [0, 0, -9], [0, 0, 0], 1.6);
+
+      return env;
+    }
+
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileEquirectangularShader();
+    const studio = buildStudioEnv();
+    scene.environment = pmrem.fromScene(studio, 0.02).texture;
+    pmrem.dispose();
+
+    // ── Camera ────────────────────────────────────────────────────────────
+    const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0.35, 8);
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.07;
+    controls.target.set(0, 0, 0);
+    controls.minDistance = 3;
+    controls.maxDistance = 20;
+
+    // ── Lights ────────────────────────────────────────────────────────────
+    // Only a supporting role: the environment above does the heavy lifting.
+    // This one exists mainly to cast the ground shadow.
+    const key = new THREE.DirectionalLight(0xfff4e2, 1.2);
+    key.position.set(3, 7, 4);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.camera.left = -3;
+    key.shadow.camera.right = 3;
+    key.shadow.camera.top = 3;
+    key.shadow.camera.bottom = -3;
+    key.shadow.camera.near = 0.5;
+    key.shadow.camera.far = 20;
+    key.shadow.radius = 4;
+    scene.add(key);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+
+    // ── Material: polished orange metal ───────────────────────────────────
+    // For a metal, `color` tints the reflection itself (it is the F0 value),
+    // which is what gives the warm orange-gold cast over the whole surface.
+    const mat = new THREE.MeshStandardMaterial({
+      color: 0xdda15e,
+      metalness: 0.96,
+      roughness: 0.11,
+      envMapIntensity: 1.4,
+    });
+
+    // ── Pin silhouette ────────────────────────────────────────────────────
+    // The classic map-pin outline: a circle of radius R at the origin, with
+    // two straight tangent lines running down to a point at (0, -TIP), and a
+    // concentric circular hole. Extruding this along Z puts the hole facing
+    // the camera, and a large bevel supplies the rounded chrome edges.
+    const R = 1.0;      // head radius
+    const TIP = 2.05;   // head centre down to the tip (≈2.05·R off the reference)
+    const HOLE = 0.63;  // hole radius, sized so the *post-bevel* aperture
+                        // reads at ≈0.58 of the visible head — see below.
+
+    // Tangent contact point from the tip (an external point) to the head circle.
+    const tx = (R * Math.sqrt(TIP * TIP - R * R)) / TIP;
+    const ty = -(R * R) / TIP;
+    const aRight = Math.atan2(ty, tx);
+    const aLeft = Math.PI - aRight;
+
+    const shape = new THREE.Shape();
+    shape.moveTo(0, -TIP);
+    shape.lineTo(tx, ty);                        // right flank, tip → head
+    shape.absarc(0, 0, R, aRight, aLeft, false); // over the top of the head
+    shape.lineTo(0, -TIP);                       // left flank, head → tip
+
+    const hole = new THREE.Path();
+    hole.absarc(0, 0, HOLE, 0, Math.PI * 2, true);
+    shape.holes.push(hole);
+
+    // The bevel eats inward from every contour, so it shrinks the hole as well
+    // as the outer edge: visible aperture = HOLE - bevelSize. It must also stay
+    // within 2*bevelSize < R - HOLE, or the two bevels would meet and the flat
+    // ring face between them would disappear.
+    const BEVEL = 0.13;
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: 0.34,
+      bevelEnabled: true,
+      bevelThickness: 0.15,
+      bevelSize: BEVEL,
+      bevelOffset: 0,
+      bevelSegments: 16,
+      curveSegments: 128,
+    });
+    geo.center();
+    geo.computeVertexNormals();
+
+    const pin = new THREE.Mesh(geo, mat);
+    pin.castShadow = true;
+
+    const group = new THREE.Group();
+    group.add(pin);
+    scene.add(group);
+
+    // ── Ground shadow ─────────────────────────────────────────────────────
+    // ShadowMaterial is invisible except where something shadows it, so the
+    // plane itself never shows — only the soft pool under the tip.
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(14, 14),
+      new THREE.ShadowMaterial({ opacity: 0.4 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -1.62;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // ── Nearby state: sparkle / twinkle ───────────────────────────────────
+    // A sprite rather than geometry, so it always faces the camera. It is
+    // parented to the pin, so the glint rides the spin and the pin occludes it
+    // once the rotation carries it round to the back.
+    // A specular glint off polished metal rather than a cartoon star: a tiny
+    // blown-out core, long needle-thin flare spikes, and warm gold falloff
+    // towards the tips — the colour a gold surface throws back.
+    function makeSparkleTexture() {
+      const s = 256, c = s / 2;
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = s;
+      const x = cv.getContext('2d');
+      x.globalCompositeOperation = 'lighter';  // accumulate like real light
+
+      const core = x.createRadialGradient(c, c, 0, c, c, s * 0.13);
+      core.addColorStop(0.0, 'rgba(255,255,255,1)');
+      core.addColorStop(0.35, 'rgba(255,248,232,0.95)');
+      core.addColorStop(1.0, 'rgba(255,214,150,0)');
+      x.fillStyle = core;
+      x.fillRect(0, 0, s, s);
+
+      const halo = x.createRadialGradient(c, c, 0, c, c, s * 0.34);
+      halo.addColorStop(0.0, 'rgba(255,229,182,0.5)');
+      halo.addColorStop(1.0, 'rgba(255,200,130,0)');
+      x.fillStyle = halo;
+      x.fillRect(0, 0, s, s);
+
+      // Needle spike: a thin triangle fading white → gold → nothing.
+      const spike = (angle, len, halfw) => {
+        x.save();
+        x.translate(c, c);
+        x.rotate(angle);
+        const g = x.createLinearGradient(0, 0, len, 0);
+        g.addColorStop(0.0, 'rgba(255,255,255,1)');
+        g.addColorStop(0.2, 'rgba(255,248,233,0.85)');
+        g.addColorStop(0.6, 'rgba(255,224,172,0.4)');
+        g.addColorStop(1.0, 'rgba(255,209,146,0)');
+        x.fillStyle = g;
+        x.beginPath();
+        x.moveTo(0, -halfw);
+        x.lineTo(len, 0);
+        x.lineTo(0, halfw);
+        x.closePath();
+        x.fill();
+        x.restore();
+      };
+
+      const L = c * 0.97;
+      for (let i = 0; i < 4; i++) spike(i * Math.PI / 2, L, s * 0.038);
+      for (let i = 0; i < 4; i++) spike(Math.PI / 4 + i * Math.PI / 2, L * 0.32, s * 0.024);
+
+      const tex = new THREE.CanvasTexture(cv);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    // Just off the front face. ExtrudeGeometry's bevel adds bevelThickness at
+    // *both* ends, so the front surface sits at the bounding-box max, not at
+    // depth/2 — read it off the geometry rather than guessing.
+    geo.computeBoundingBox();
+    const FACE_Z = geo.boundingBox.max.z + 0.02;
+
+    // Top-right corner of the head, on the ring band of metal. The sprite's
+    // *base* is pinned here and the glint grows upward out of it, so
+    // `position.y` is recomputed from the current scale each frame.
+    const SPARK_X = 0.54;
+    const SPARK_BASE_Y = 0.92;
+    const SPARK_SIZE = 0.56;
+
+    const sparkle = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: makeSparkleTexture(),
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,   // but depth-tested, so the pin hides it once the
+      transparent: true,   // spin carries it round to the back
+    }));
+    sparkle.visible = false;
+    group.add(sparkle);
+
+    const btn = document.getElementById('nearby');
+    btn.addEventListener('click', () => {
+      sparkle.visible = !sparkle.visible;
+      btn.setAttribute('aria-pressed', String(sparkle.visible));
+    });
+
+    // ── Render loop ───────────────────────────────────────────────────────
+    const SPIN = 0.005;   // ≈8s per revolution at 60fps
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      group.rotation.y += SPIN;
+      const t = clock.getElapsedTime();
+
+      if (sparkle.visible) {
+        // 1s loop. Scale grows over the first 55% and the base stays put, so
+        // the star sprouts upward; brightness ramps in quickly, holds, then
+        // fades out over the tail.
+        const smooth = (v) => v * v * (3 - 2 * v);
+        const p = t % 1;
+        const grow = smooth(Math.min(p / 0.55, 1));
+        const fade = p < 0.7
+          ? smooth(Math.min(p / 0.18, 1))
+          : smooth((1 - p) / 0.3);
+
+        const s = SPARK_SIZE * grow;
+        sparkle.scale.set(s, s, 1);
+        sparkle.position.set(SPARK_X, SPARK_BASE_Y + s / 2, FACE_Z);
+        sparkle.material.opacity = fade;
+        sparkle.material.rotation = grow * 0.3;
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

@@ -1,15 +1,22 @@
-# Current Milestone: m4-gamification — Gamification
+# Current Milestone: m2b-map-migration — MapLibre + PMTiles
 
-**GitHub:** [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10)
-**Progress:** 3/5 closed
+**GitHub:** [#16](https://github.com/makaravind/experium-ai-tour-app/milestone/16)
+**Progress:** DONE — merged to main 2026-10-12
 
-## Closed
-- #59 Post-audio toast + auto milestone celebration (S4→S5) — scope included #60's swap (see spec); merged to `main` (cbd3b0c)
+## What shipped
+- `mapbox-gl` → `maplibre-gl@^4.7.1` + `pmtiles@^3.2.1`
+- `park.pmtiles` (11MB) in `public/` — static asset, precacheable by m5
+- `ParkMapbox.tsx` → `ParkMap.tsx` (PMTiles protocol, inline style, no Mapbox token)
+- `marker-layer.ts` type imports updated
+- `NEXT_PUBLIC_MAPBOX_TOKEN` removed from `.env.example`
+- Issue #66 closed
 
-## Open
-- #61 Card reveal & collection (was Discovery Card 10 & 50; now all 9 milestones + `/collection`) (was blocked by #59 — now unblocked)
-- #62 Milestone badge artwork (parallel, no blocker)
+## Previously current: m5-pwa-offline [#11] — 0/5 closed
+- #63 PWA polish
+- #64 Upfront precache (in-progress on branch impl/gh-64)
+- #65 Offline first-visit fallback
+- #66 Investigate Mapbox offline → **resolved by m2b-map-migration**
+- #67 Offline-safe retry queue for /api/scan POSTs
 
-> #20 closed — superseded by #59 (reworked to match full S4/S5 spec).
-> #60 closed — superseded by #59 (folded in: building the real overlay made the later `TrailCard` swap redundant work). Spec: `docs/specs/gh-59-post-audio-celebration.md`.
-> #61 scope superseded — expanded from 10/50-only Discovery Card to per-milestone cards (all 9) in a dedicated `/collection` route (reveal + fanned stack); retires `MilestoneCelebration.tsx`. Spec: `docs/specs/gh-61-card-reveal-collection.md`.
+## Deferred (parallel, not blocking)
+- m4-gamification #62 (badge artwork) — milestone otherwise done (4/5)
