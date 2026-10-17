@@ -1,7 +1,7 @@
 # Current Milestone: m5-pwa-offline — PWA + Offline
 
 **GitHub:** [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11)
-**Progress:** IN PROGRESS — 4/11 closed
+**Progress:** IN PROGRESS — 5/11 closed
 
 ## Closed
 - #66 Investigate Mapbox offline options for GL JS web — resolved by m2b-map-migration, no separate build needed
@@ -21,11 +21,15 @@
   - Side effect: `generateStaticParams` makes every other `/s/<code>` ISR-cached on Vercel on first hit (junk codes too)
   - Pending device checks: iOS Safari offline (e2e is Chromium-only), SW install time on Vercel, no reload when signal returns
   - Spec: `docs/specs/gh-81-offline-pages.md`
+- #67 Offline-safe retry queue for `/api/scan` POSTs — implemented on `impl/gh-67` (steps 1-10 done), NOT yet merged/pushed to main
+  - Local-first discovery: onsite scan counts on device at page land; toast/milestone work offline (`+1 · saved offline`)
+  - All scan POSTs via persisted `scanQueue` (`lib/scan-queue.ts`), ordered replay; device `scanned_at` sent, SQL caps at `now()`; server total wins when queue drains
+  - Pending: apply `upsert_scan` migration to Supabase BEFORE pushing app main; local prod-build test before push
+  - Spec: `docs/specs/gh-67-offline-scan-queue.md`
 
 ## Open
 - #63 PWA polish: native feel + UI stress testing
 - #65 Offline first-visit fallback screen
-- #67 Offline-safe retry queue for `/api/scan` POSTs — real correctness gap (fire-and-forget `postScan`), not part of #64's scope
 - #78 Precache: refresh exhibit dataset on online cold open
 - #79 Onboarding language picker offers languages with no published audio
 - #80 "Refresh content" control: refetch exhibit dataset on demand — reuses #78's refetch (build #78 first)
@@ -44,7 +48,7 @@
 | m2c-field-data-collection | GPS tagging + audio for all 66 exhibits | 7 | open |
 | m2b-ortho | Swap stub ortho with real drone raster | 8 | open |
 | m4-gamification | Trail progress, milestones, discovery cards | 10 | open (1 open: #62 badge art) |
-| m5-pwa-offline | Full offline after initial load | 11 | open (7 open) — CURRENT |
+| m5-pwa-offline | Full offline after initial load | 11 | open (6 open) — CURRENT |
 | m6-ads | All ad placements live | 12 | open |
 | m7-launch-ready | Production-ready, E2E smoke tested | 13 | open |
 | m3-amenities | Amenities layer (washrooms, ticketing, restaurant) | 17 | open |

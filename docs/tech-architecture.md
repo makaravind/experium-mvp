@@ -145,7 +145,7 @@ ads
 ```
 GET  /s/{code}              → Resolve QR, render exhibit page (SSR)
 GET  /api/exhibit/{id}      → Exhibit data + audio URLs
-POST /api/scan              → Log a scan event
+POST /api/scan              → Log a scan event (accepts optional `scanned_at`, device scan time; capped at now() in SQL)
 POST /api/report            → Submit issue report
 POST /api/user/info         → Save optional user details (name/phone/email)
 GET  /api/progress          → User's discovered exhibits

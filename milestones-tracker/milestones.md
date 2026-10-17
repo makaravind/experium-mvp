@@ -69,7 +69,7 @@ START
 | m2b-map-migration | Map Migration (Mapbox → MapLibre + PMTiles) | [#16](https://github.com/makaravind/experium-ai-tour-app/milestone/16) | DONE | m2b-mechanics |
 | m3-home-tab | Home Tab | [#9](https://github.com/makaravind/experium-ai-tour-app/milestone/9) | DONE | m2a |
 | m4-gamification | Gamification | [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10) | IN PROGRESS (4/5) | m2a + m2b |
-| m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | IN PROGRESS (4/11) | m2a + m2b |
+| m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | IN PROGRESS (5/11) | m2a + m2b |
 | m6-ads | Ads | [#12](https://github.com/makaravind/experium-ai-tour-app/milestone/12) | NOT STARTED (0/1) | m2a |
 | m7-launch-ready | Launch Ready | [#13](https://github.com/makaravind/experium-ai-tour-app/milestone/13) | NOT STARTED (0/5) | m3 + m4 + m5 + m2c + m6 |
 
@@ -280,18 +280,18 @@ START
 
 **Goal:** App is fully functional after initial load with no network.
 
-**Status:** IN PROGRESS — 4/11 closed
+**Status:** IN PROGRESS — 5/11 closed
 
 ### Closed
 - Investigate Mapbox offline options for GL JS web — #66 (resolved by m2b-map-migration, no separate build needed)
 - Upfront precache (audio + metadata + images) triggered on Home's first open — #64
 - Language switch after precache: blocking re-download + exhibit sheet shows one language — #77
 - Offline pages: every route and any `/s/<code>` open offline after precache — #81
+- Offline-safe retry queue for `/api/scan` POSTs — #67
 
 ### Open
 - PWA polish: native feel + UI stress testing — #63
 - Offline first-visit fallback screen — #65
-- Offline-safe retry queue for `/api/scan` POSTs — #67
 - Precache: refresh exhibit dataset on online cold open — #78
 - Onboarding language picker offers languages with no published audio — #79
 - "Refresh content" control: refetch exhibit dataset on demand — #80 (reuses #78's refetch — build #78 first)
@@ -300,7 +300,7 @@ START
 > `serwist` (next-pwa's successor) is already configured in `app/sw.ts` with reactive `CacheFirst` caching for audio/fonts, plus `public/manifest.json` — but that's passive/on-demand, not the upfront bulk download the original `docs/user-journey.md` flow calls for. #64 closes that gap.
 > Cache trigger point: ticket counter hands out a generic app link (Home `/`), not an exhibit QR — visitor has wifi there, loses it walking into the park. So the upfront download fires on Home's first open, not inside the first-exhibit-scan onboarding step.
 > #66 resolved without a separate build task — m2b-map-migration's self-hosted `park.pmtiles` is a static asset, precacheable like any other, so the Mapbox-hosted-tiles gap that prompted the investigation no longer exists.
-> #67 covers a real correctness gap found while scoping: `postScan` in `ExhibitPageClient.tsx` is fire-and-forget — an offline onsite-discovery POST silently drops today, which can silently break trail-milestone crossing. Confirmed still open — out of #64's scope.
+> #67 fixed a real correctness gap found while scoping #64: `postScan` in `ExhibitPageClient.tsx` was fire-and-forget, so an offline onsite-discovery POST was lost for good and could silently break trail-milestone crossing. Now every scan POST goes through a persisted queue (`lib/scan-queue.ts`) that replays in order; onsite discovery counts locally at page land (toast/milestone work offline), the device `scanned_at` is sent (SQL caps at `now()`), and the server total replaces the local count when the queue drains. Spec: `docs/specs/gh-67-offline-scan-queue.md`. Implemented on `impl/gh-67`, not yet merged/pushed to `main` (apply the `upsert_scan` migration to Supabase first).
 > #64 shipped as an app-wide `AppGate` (gates every route, not just Home) + `lib/precache.ts` + `lib/handshake-lock.ts` (cross-tab visitor-id lock) + a DebugPanel "No precache" toggle for online-only testing. Audio is precached; the app has no per-exhibit images yet so that part of the acceptance criteria doesn't apply, and metadata already works offline via the persisted Zustand store (no network call needed). Spec: `docs/specs/gh-64-upfront-precache.md`. Merged to `main` as `0a73816`.
 > #77 fixed two #64 regressions: a sheet language chip re-ran the blocking precache (unmounting the whole app), and the exhibit sheet showed only the selected language. The precache now covers only the onboarding language (`precacheLanguage`); other languages stream online, and a failed or missing one reverts to `precacheLanguage` with a toast. #78–#80 were split out while scoping it. Spec: `docs/specs/gh-77-language-switch-after-precache.md`. Merged to `main` as `48d6881`.
 > #81 and #82 found 2026-10-17 while verifying the map gap on a production build: after a precache that starts on Home (the ticket-counter path), offline only worked on the exact page loaded online. No document was cached for `/`, `/map`, `/scan`, `/collection`, and the `/s/*` cache held one exact URL, so the first phone-camera QR scan in the park hit a browser error page. `park.pmtiles` is only cached on the first online map view, so the Map tab fell back to `MapStub`. #81 caches every page document at SW install (network-first navigations, one prerendered `/s/_shell` for every code) and also stops `@serwist/next`'s injected script from reloading the page on every `online` event. Spec: `docs/specs/gh-81-offline-pages.md`. Merged to `main` as `df3b87c`. Testing it showed the offline map has no exhibit pins either (`ParkMap` queries Supabase on load), added to #82.
