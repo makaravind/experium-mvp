@@ -69,7 +69,7 @@ START
 | m2b-map-migration | Map Migration (Mapbox → MapLibre + PMTiles) | [#16](https://github.com/makaravind/experium-ai-tour-app/milestone/16) | DONE | m2b-mechanics |
 | m3-home-tab | Home Tab | [#9](https://github.com/makaravind/experium-ai-tour-app/milestone/9) | DONE | m2a |
 | m4-gamification | Gamification | [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10) | IN PROGRESS (4/5) | m2a + m2b |
-| m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | IN PROGRESS (2/5) | m2a + m2b |
+| m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | IN PROGRESS (3/9) | m2a + m2b |
 | m6-ads | Ads | [#12](https://github.com/makaravind/experium-ai-tour-app/milestone/12) | NOT STARTED (0/1) | m2a |
 | m7-launch-ready | Launch Ready | [#13](https://github.com/makaravind/experium-ai-tour-app/milestone/13) | NOT STARTED (0/5) | m3 + m4 + m5 + m2c + m6 |
 
@@ -280,22 +280,27 @@ START
 
 **Goal:** App is fully functional after initial load with no network.
 
-**Status:** IN PROGRESS — 2/5 closed
+**Status:** IN PROGRESS — 3/9 closed
 
 ### Closed
 - Investigate Mapbox offline options for GL JS web — #66 (resolved by m2b-map-migration, no separate build needed)
 - Upfront precache (audio + metadata + images) triggered on Home's first open — #64
+- Language switch after precache: blocking re-download + exhibit sheet shows one language — #77
 
 ### Open
 - PWA polish: native feel + UI stress testing — #63
 - Offline first-visit fallback screen — #65
 - Offline-safe retry queue for `/api/scan` POSTs — #67
+- Precache: refresh exhibit dataset on online cold open — #78
+- Onboarding language picker offers languages with no published audio — #79
+- "Refresh content" control: refetch exhibit dataset on demand — #80 (reuses #78's refetch — build #78 first)
 
 > `serwist` (next-pwa's successor) is already configured in `app/sw.ts` with reactive `CacheFirst` caching for audio/fonts, plus `public/manifest.json` — but that's passive/on-demand, not the upfront bulk download the original `docs/user-journey.md` flow calls for. #64 closes that gap.
 > Cache trigger point: ticket counter hands out a generic app link (Home `/`), not an exhibit QR — visitor has wifi there, loses it walking into the park. So the upfront download fires on Home's first open, not inside the first-exhibit-scan onboarding step.
 > #66 resolved without a separate build task — m2b-map-migration's self-hosted `park.pmtiles` is a static asset, precacheable like any other, so the Mapbox-hosted-tiles gap that prompted the investigation no longer exists.
 > #67 covers a real correctness gap found while scoping: `postScan` in `ExhibitPageClient.tsx` is fire-and-forget — an offline onsite-discovery POST silently drops today, which can silently break trail-milestone crossing. Confirmed still open — out of #64's scope.
 > #64 shipped as an app-wide `AppGate` (gates every route, not just Home) + `lib/precache.ts` + `lib/handshake-lock.ts` (cross-tab visitor-id lock) + a DebugPanel "No precache" toggle for online-only testing. Audio is precached; the app has no per-exhibit images yet so that part of the acceptance criteria doesn't apply, and metadata already works offline via the persisted Zustand store (no network call needed). Spec: `docs/specs/gh-64-upfront-precache.md`. Merged to `main` as `0a73816`.
+> #77 fixed two #64 regressions: a sheet language chip re-ran the blocking precache (unmounting the whole app), and the exhibit sheet showed only the selected language. The precache now covers only the onboarding language (`precacheLanguage`); other languages stream online, and a failed or missing one reverts to `precacheLanguage` with a toast. #78–#80 were split out while scoping it. Spec: `docs/specs/gh-77-language-switch-after-precache.md`. Merged to `main` as `48d6881`.
 
 ### Scope
 - Upfront precache: audio (selected language) + exhibit metadata + images (single variant) + offline-safe scan retry
