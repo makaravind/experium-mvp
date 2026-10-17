@@ -40,7 +40,8 @@ Source of truth for all design decisions made during initial planning.
 | Admin auth | Supabase Auth (magic link) | Already in stack, ties into RLS, no password management |
 | TTS service | Deferred — trial ElevenLabs / Google TTS | Not a runtime dep; manual content pipeline step |
 | Offline UX (first load) | Blocker screen if no network + retry button | App is useless without audio; don't over-engineer partial states |
-| Offline UX (missing audio) | Inline error message + log to analytics | Simple, no retry loop or fallback TTS |
+| Offline UX (missing audio) | Revert to the precache language + toast (log to analytics) | Simple, no retry loop or fallback TTS; the visitor stays on audio that works |
+| Precache language | Onboarding language only; sheet switches stream online; failures revert + toast | Switching language never re-downloads or re-gates; every language stays selectable in the sheet |
 | QR URL scheme | `domain.com/s/{SHORT_CODE}` → server redirect | Indirection allows remapping without reprinting markers |
 | Audio format | Pre-compressed speech (64kbps mono, ~500KB/min) | Loads in 2-3 sec even on weak 4G, no streaming needed |
 | Connectivity | ~~Assume good~~ **Offline after initial load** | First load downloads all assets (~25MB for selected language); service worker caches for full offline park visit |
