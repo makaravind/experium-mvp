@@ -42,6 +42,7 @@ Source of truth for all design decisions made during initial planning.
 | Offline UX (first load) | Blocker screen if no network + retry button | App is useless without audio; don't over-engineer partial states |
 | Offline UX (missing audio) | Revert to the precache language + toast (log to analytics) | Simple, no retry loop or fallback TTS; the visitor stays on audio that works |
 | Precache language | Onboarding language only; sheet switches stream online; failures revert + toast | Switching language never re-downloads or re-gates; every language stays selectable in the sheet |
+| Offline pages | Every page document cached at service-worker install; navigations network-first (3s timeout) with that cache as the fallback; one `/s/` shell serves every code | Offline has to survive tab switches, relaunches and phone-camera QR scans, not just the page loaded online; online navigation stays network-first |
 | QR URL scheme | `domain.com/s/{SHORT_CODE}` → server redirect | Indirection allows remapping without reprinting markers |
 | Audio format | Pre-compressed speech (64kbps mono, ~500KB/min) | Loads in 2-3 sec even on weak 4G, no streaming needed |
 | Connectivity | ~~Assume good~~ **Offline after initial load** | First load downloads all assets (~25MB for selected language); service worker caches for full offline park visit |
