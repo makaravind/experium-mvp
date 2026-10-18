@@ -13,6 +13,7 @@
 | [Content Pipeline](content-pipeline.md) | Interview → audio, repeatable AI pipeline |
 | [Tech Architecture](tech-architecture.md) | System design, DB schema, APIs |
 | [Park Partnership Brief](park-partnership-brief.md) | One-pager for Experium conversation |
+| [Phone OTP Auth](phone-otp-auth.md) | Deferred m8 design: decisions, India SMS/DLT research, revisit checklist |
 
 ## Status
 

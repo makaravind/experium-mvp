@@ -13,7 +13,7 @@ Source of truth for all design decisions made during initial planning.
 | Post-audio | Text details available after listening | Reward for engagement, doesn't compete with audio |
 | Language | English + Hindi + Telugu | Matches Hyderabad visitor demographic |
 | Language selection | Visible dropdown at top, user picks before pressing listen | Explicit choice, no autodetect |
-| User identity | Anonymous-first. Optional name/phone/email on first load (skippable). No OTP in v1 | Zero friction; soft capture for personalization + marketing leads |
+| User identity | Anonymous-first. Optional name/phone/email on first load (skippable). No OTP in v1 (OTP login designed but deferred: `phone-otp-auth.md`) | Zero friction; soft capture for personalization + marketing leads |
 | Gamification | Yes — exhibit discovery game, shareable cards | Drives repeat scans; see gamification section below |
 | Feedback | User can report wrong info / damaged markers | Crowdsourced maintenance safety net |
 | Exhibit types | plant, structure, water-body, landmark | Covers all park experiences |
