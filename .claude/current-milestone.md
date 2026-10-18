@@ -1,7 +1,7 @@
 # Current Milestone: m5-pwa-offline — PWA + Offline
 
 **GitHub:** [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11)
-**Progress:** IN PROGRESS — 6/11 closed
+**Progress:** IN PROGRESS — 8/11 closed
 
 ## Closed
 - #66 Investigate Mapbox offline options for GL JS web — resolved by m2b-map-migration, no separate build needed
@@ -24,15 +24,17 @@
 - #67 Offline-safe retry queue for `/api/scan` POSTs — merged to main as `ec2b7a7`
   - Local-first discovery: onsite scan counts on device at page land; toast/milestone work offline (`+1 · saved offline`)
   - All scan POSTs via persisted `scanQueue` (`lib/scan-queue.ts`), ordered replay; device `scanned_at` sent, SQL caps at `now()`; server total wins when queue drains
-  - ⚠ Pending: apply `upsert_scan` migration to Supabase (`supabase/migrations/20261017120000_upsert_scan_scanned_at.sql`)
+  - `upsert_scan` migration (`supabase/migrations/20261017120000_upsert_scan_scanned_at.sql`) applied to production Supabase 2026-10-18
   - Spec: `docs/specs/gh-67-offline-scan-queue.md`
+- #78 Refresh exhibit dataset + #80 "Refresh content" control + #65 Offline first-visit fallback — one PR, merged to main as `79642c2`
+  - #78/#80: UserMenu sheet behind a new 4th "More" (⋯) tab; Refresh content clears `cachedExhibits` and reruns the gate, disabled with an Offline badge when offline. "Log out" / "Profile" rows are disabled "Soon" placeholders
+  - #65: offline + dataset saved (some files missing) now clears the gate instead of the blocker; an error while online shows a new `fetch-error` screen ("Something went wrong") instead of "Connect to the internet"
+  - Also added: `onForeground` fetch-error retry (beyond spec). Pushed to origin; local prod-build check not confirmed
+  - Spec: `docs/specs/gh-78-dataset-refresh.md`
 
 ## Open
 - #63 PWA polish: native feel + UI stress testing
-- #65 Offline first-visit fallback screen
-- #78 Precache: refresh exhibit dataset on online cold open
 - #79 Onboarding language picker offers languages with no published audio
-- #80 "Refresh content" control: refetch exhibit dataset on demand — reuses #78's refetch (build #78 first)
 - #82 Offline map: precache `park.pmtiles`, versioned tile cache, pins from cached data — unblocked; open question: real ortho size
   - Offline map has no exhibit pins: `ParkMap` queries Supabase on every map load instead of `cachedExhibits`
 
@@ -48,7 +50,7 @@
 | m2c-field-data-collection | GPS tagging + audio for all 66 exhibits | 7 | open |
 | m2b-ortho | Swap stub ortho with real drone raster | 8 | open |
 | m4-gamification | Trail progress, milestones, discovery cards | 10 | open (1 open: #62 badge art) |
-| m5-pwa-offline | Full offline after initial load | 11 | open (6 open) — CURRENT |
+| m5-pwa-offline | Full offline after initial load | 11 | open (3 open) — CURRENT |
 | m6-ads | All ad placements live | 12 | open |
 | m7-launch-ready | Production-ready, E2E smoke tested | 13 | open |
 | m3-amenities | Amenities layer (washrooms, ticketing, restaurant) | 17 | open |
