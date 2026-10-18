@@ -1,7 +1,7 @@
 # Current Milestone: m5-pwa-offline — PWA + Offline
 
 **GitHub:** [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11)
-**Progress:** IN PROGRESS — 8/11 closed
+**Progress:** IN PROGRESS — 9/11 closed
 
 ## Closed
 - #66 Investigate Mapbox offline options for GL JS web — resolved by m2b-map-migration, no separate build needed
@@ -31,15 +31,18 @@
   - #65: offline + dataset saved (some files missing) now clears the gate instead of the blocker; an error while online shows a new `fetch-error` screen ("Something went wrong") instead of "Connect to the internet"
   - Also added: `onForeground` fetch-error retry (beyond spec). Pushed to origin; local prod-build check not confirmed
   - Spec: `docs/specs/gh-78-dataset-refresh.md`
+- #79 Onboarding picker offers languages with no published audio — closed **not planned**, no spec
+  - Content is static and EN/HI/TE are all complete before launch, so the picker never offers a zero-audio language
+  - Revisit if a language ships partial: (1) `PreviewSheet` fallback revert is sticky (`setLanguage` persists), so one partial exhibit drops TE→EN for later exhibits; (2) a TE-onboarded visitor on an exhibit without TE has no revert target (`precacheLanguage == language`), so toast only and silence even though EN/HI exist; fix is ~3 lines in `PreviewSheet.tsx` `fallback()` (~L130: use the exhibit's first available language). Details in the issue comment
 
 ## Open
-- #63 PWA polish: native feel + UI stress testing
-- #79 Onboarding language picker offers languages with no published audio
-- #82 Offline map: precache `park.pmtiles`, versioned tile cache, pins from cached data — unblocked; open question: real ortho size
-  - Offline map has no exhibit pins: `ParkMap` queries Supabase on every map load instead of `cachedExhibits`
+- #83 PWA install + production hardening — 17 gaps from a PWA checklist audit (11 must-fix: icons, `beforeinstallprompt`, install banner + UserMenu item, iOS instructions, safe-area, SW update toast, security headers); acceptance: Lighthouse PWA ≥ 90
+- #82 Offline map: precache `park.pmtiles`, versioned tile cache — waits for the real drone ortho (none yet; stub is 11.8MB)
+  - Pins half done: m3-amenities (`7dcbcb9`, 2026-10-18) made `ParkMap`/search read `cachedExhibits` (GPS + status now cached), so offline pins work
 
 ## Deferred (parallel, not blocking)
 - m4-gamification #62 (badge artwork) — milestone otherwise done (4/5)
+- #63 PWA polish (native feel + UI stress testing) moved from m5 to m7-launch-ready on 2026-10-18
 
 ---
 
@@ -50,8 +53,8 @@
 | m2c-field-data-collection | GPS tagging + audio for all 66 exhibits | 7 | open |
 | m2b-ortho | Swap stub ortho with real drone raster | 8 | open |
 | m4-gamification | Trail progress, milestones, discovery cards | 10 | open (1 open: #62 badge art) |
-| m5-pwa-offline | Full offline after initial load | 11 | open (3 open) — CURRENT |
+| m5-pwa-offline | Full offline after initial load | 11 | open (2 open) — CURRENT |
 | m6-ads | All ad placements live | 12 | open |
 | m7-launch-ready | Production-ready, E2E smoke tested | 13 | open |
-| m3-amenities | Amenities layer (washrooms, ticketing, restaurant) | 17 | open |
-| m8-user-auth | Phone + OTP login, visitor identity | 18 | open — #35 Add phone number with OTP login |
+| m3-amenities | Amenities layer (washroom, ticketing, food, gate) — merged to main `7dcbcb9` 2026-10-18: docs/specs/m3-amenities.md | 17 | DONE (7/7), closed |
+| m8-user-auth | Phone + OTP login, visitor identity | 18 | DEFERRED — #35 designed, not built; blocked on India SMS / DLT. Design: docs/phone-otp-auth.md |
