@@ -1,7 +1,7 @@
 # Current Milestone: m5-pwa-offline — PWA + Offline
 
 **GitHub:** [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11)
-**Progress:** IN PROGRESS — 5/11 closed
+**Progress:** IN PROGRESS — 6/11 closed
 
 ## Closed
 - #66 Investigate Mapbox offline options for GL JS web — resolved by m2b-map-migration, no separate build needed
@@ -21,10 +21,10 @@
   - Side effect: `generateStaticParams` makes every other `/s/<code>` ISR-cached on Vercel on first hit (junk codes too)
   - Pending device checks: iOS Safari offline (e2e is Chromium-only), SW install time on Vercel, no reload when signal returns
   - Spec: `docs/specs/gh-81-offline-pages.md`
-- #67 Offline-safe retry queue for `/api/scan` POSTs — implemented on `impl/gh-67` (steps 1-10 done), NOT yet merged/pushed to main
+- #67 Offline-safe retry queue for `/api/scan` POSTs — merged to main as `ec2b7a7`
   - Local-first discovery: onsite scan counts on device at page land; toast/milestone work offline (`+1 · saved offline`)
   - All scan POSTs via persisted `scanQueue` (`lib/scan-queue.ts`), ordered replay; device `scanned_at` sent, SQL caps at `now()`; server total wins when queue drains
-  - Pending: apply `upsert_scan` migration to Supabase BEFORE pushing app main; local prod-build test before push
+  - ⚠ Pending: apply `upsert_scan` migration to Supabase (`supabase/migrations/20261017120000_upsert_scan_scanned_at.sql`)
   - Spec: `docs/specs/gh-67-offline-scan-queue.md`
 
 ## Open
