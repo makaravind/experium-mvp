@@ -71,6 +71,7 @@ START
 | m3-amenities | Amenities (washroom, ticketing, food, gate) | [#17](https://github.com/makaravind/experium-ai-tour-app/milestone/17) | DONE (7/7) — merged to main `7dcbcb9` 2026-10-18; `docs/specs/m3-amenities.md` | m2b-map-migration + m5 precache |
 | m4-gamification | Gamification | [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10) | IN PROGRESS (4/5) | m2a + m2b |
 | m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | IN PROGRESS (9/11) | m2a + m2b |
+| m5b-offline-hardening | Offline Hardening (2026-10 offline audit) | [#19](https://github.com/makaravind/experium-ai-tour-app/milestone/19) | IN PROGRESS (3/7) — #86, #87, #88 done | m5-pwa-offline |
 | m6-ads | Ads | [#12](https://github.com/makaravind/experium-ai-tour-app/milestone/12) | NOT STARTED (0/1) | m2a |
 | m7-launch-ready | Launch Ready | [#13](https://github.com/makaravind/experium-ai-tour-app/milestone/13) | NOT STARTED (0/5) | m3 + m4 + m5 + m2c + m6 |
 | m8-user-auth | Phone + OTP login | [#18](https://github.com/makaravind/experium-ai-tour-app/milestone/18) | DEFERRED (0/1) — designed, not built; blocked on India SMS / DLT. Design: `docs/phone-otp-auth.md` | m7 |
@@ -357,6 +358,35 @@ T1 migration + store v2 + precache ─────┤                           
 ### Out of scope
 - Background sync, push notifications
 - Tiered image resolutions (thumbnail/medium/full) — single variant for v1
+
+---
+
+## m5b-offline-hardening
+
+**Goal:** No visitor gets stuck on weak signal, partial cache, or a failed download. Fixes the high-priority user paths from the 2026-10 offline/cache audit.
+
+**Status:** IN PROGRESS — 3/7 closed
+
+### Done
+- Request timeouts + weak-connection screen — #86 ✅
+- Asset failure handling: only 404/410 cap, acknowledge once, Try again, "Needs internet" strip — #87 ✅
+- Cache save verification + honest gate failures (no empty asset-error list) — #88 ✅
+
+### Open
+- Refresh content = full wipe + re-download — #89 (`offline-audit-04-full-content-refresh.md`) — blocked by #87, #90
+- Map tiles in the offline guarantee (precache `park.pmtiles`) — #90 (`offline-audit-05-map-tiles-precache.md`) — blocked by #86, #88
+- Map error recovery: startup-only fatal, Retry strip, honest fallback — #91 (`offline-audit-06-map-error-recovery.md`)
+- Weak-signal navigation: taps never hang — #92 (`offline-audit-07-weak-signal-navigation.md`)
+
+**Build order:** #86 → #87 → #88 → #90 → #89; #91, #92 parallel.
+
+> #90 overlaps m5's #82 (precache part). Versioned tile cache dropped by decision: map updates only via Refresh (#89).
+> Not yet filed (medium audit items): SW deploy/chunk mismatch offline, handshake failure loses offline discoveries, multiple QR codes per exhibit, dead-end exhibit messages, profile info lost offline, iOS/in-app-browser split storage. Missing PWA icons already tracked in #83.
+> Deferred: state-based exhibit navigation (keeps audio playing across weak-signal taps) — revisit after field test.
+
+### Out of scope
+- Automatic dataset refresh (data is mostly static; manual Refresh only)
+- Stale "coming soon" for visitors who never Refresh (accepted)
 
 ---
 
