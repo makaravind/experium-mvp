@@ -52,6 +52,12 @@ QR-code-based audio guide for park visitors. Scan marker → webapp plays audio 
 ### References
 - `references/opendesign-flow-prompts.md` — prompts to regenerate UI screens
 
+## CI
+
+- **E2E on every PR to main** — `.github/workflows/e2e.yml` runs `npm run e2e` (Chromium + WebKit) against the Next.js dev server. Playwright report uploaded as artifact on failure.
+- All Supabase calls are mocked via `page.route`; no real credentials needed in CI.
+- WebKit-specific flakes are `test.skip`'d with explanations — do not remove skips without fixing the underlying issue.
+
 ## Development Guidelines
 
 - **v1 mentality:** Keep it simple. No over-engineering.
