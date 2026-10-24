@@ -52,6 +52,31 @@ START
                                ┌──────────────────┐
                                │ m7-launch-ready  │
                                └──────────────────┘
+
+(parallel track — does not block launch)
+
+┌──────────────────────────────┐
+│ m2a-exhibit-audio (DONE)     │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ m9a-virtual-tour-viewer      │
+│ Starts: exhibit page exists  │
+│ Ends:   360 viewer on exhibit│
+│         page, DB schema live │
+└──────────────┬───────────────┘
+               │
+         ⚠ blocked: drone footage
+               │
+               ▼
+┌──────────────────────────────┐
+│ m9b-virtual-tour-navigation  │
+│ Starts: viewer works + real  │
+│         footage + graph done │
+│ Ends:   navigate park, mark- │
+│         ers, back-to-map     │
+└──────────────────────────────┘
 ```
 
 ---
@@ -71,10 +96,12 @@ START
 | m3-amenities | Amenities (washroom, ticketing, food, gate) | [#17](https://github.com/makaravind/experium-ai-tour-app/milestone/17) | DONE (7/7) — merged to main `7dcbcb9` 2026-10-18; `docs/specs/m3-amenities.md` | m2b-map-migration + m5 precache |
 | m4-gamification | Gamification | [#10](https://github.com/makaravind/experium-ai-tour-app/milestone/10) | IN PROGRESS (4/5) | m2a + m2b |
 | m5-pwa-offline | PWA + Offline | [#11](https://github.com/makaravind/experium-ai-tour-app/milestone/11) | IN PROGRESS (9/11) | m2a + m2b |
-| m5b-offline-hardening | Offline Hardening (2026-10 offline audit) | [#19](https://github.com/makaravind/experium-ai-tour-app/milestone/19) | IN PROGRESS (3/7) — #86, #87, #88 done | m5-pwa-offline |
+| m5b-offline-hardening | Offline Hardening (2026-10 offline audit) | [#19](https://github.com/makaravind/experium-ai-tour-app/milestone/19) | DONE (7/7) — all closed 2026-10-22 | m5-pwa-offline |
 | m6-ads | Ads | [#12](https://github.com/makaravind/experium-ai-tour-app/milestone/12) | NOT STARTED (0/1) | m2a |
 | m7-launch-ready | Launch Ready | [#13](https://github.com/makaravind/experium-ai-tour-app/milestone/13) | NOT STARTED (0/5) | m3 + m4 + m5 + m2c + m6 |
 | m8-user-auth | Phone + OTP login | [#18](https://github.com/makaravind/experium-ai-tour-app/milestone/18) | DEFERRED (0/1) — designed, not built; blocked on India SMS / DLT. Design: `docs/phone-otp-auth.md` | m7 |
+| m9a-virtual-tour-viewer | Virtual Tour Viewer | [#20](https://github.com/makaravind/experium-ai-tour-app/milestone/20) | NOT STARTED (0/0) | m2a |
+| m9b-virtual-tour-navigation | Virtual Tour Navigation | [#21](https://github.com/makaravind/experium-ai-tour-app/milestone/21) | NOT STARTED (0/0) | m9a + **drone footage** |
 
 > Note: GitHub milestones #1–3 (App Pilot, V1, V1-QR plates) and #14 (m2c-placeholder-data) are closed/stale — ignore.
 > `m2b-map` was split into `m2b-ortho` (#8) and `m2b-mechanics` (#15).
@@ -365,18 +392,16 @@ T1 migration + store v2 + precache ─────┤                           
 
 **Goal:** No visitor gets stuck on weak signal, partial cache, or a failed download. Fixes the high-priority user paths from the 2026-10 offline/cache audit.
 
-**Status:** IN PROGRESS — 3/7 closed
+**Status:** DONE — 7/7 closed (2026-10-22)
 
 ### Done
 - Request timeouts + weak-connection screen — #86 ✅
 - Asset failure handling: only 404/410 cap, acknowledge once, Try again, "Needs internet" strip — #87 ✅
 - Cache save verification + honest gate failures (no empty asset-error list) — #88 ✅
-
-### Open
-- Refresh content = full wipe + re-download — #89 (`offline-audit-04-full-content-refresh.md`) — blocked by #87, #90
-- Map tiles in the offline guarantee (precache `park.pmtiles`) — #90 (`offline-audit-05-map-tiles-precache.md`) — blocked by #86, #88
-- Map error recovery: startup-only fatal, Retry strip, honest fallback — #91 (`offline-audit-06-map-error-recovery.md`)
-- Weak-signal navigation: taps never hang — #92 (`offline-audit-07-weak-signal-navigation.md`)
+- Map tiles in the offline guarantee (precache `park.pmtiles`) — #90 ✅
+- Refresh content = full wipe + re-download — #89 ✅
+- Map error recovery: startup-only fatal, Retry strip, honest fallback — #91 ✅
+- Weak-signal navigation: taps never hang — #92 ✅
 
 **Build order:** #86 → #87 → #88 → #90 → #89; #91, #92 parallel.
 
@@ -449,3 +474,44 @@ T1 migration + store v2 + precache ─────┤                           
 - Pick the DLT path (Twilio International first, India provider later) and test-send to a +91 number
 - Raise the Supabase SMS rate limit (default 30/hour per project) and re-decide abuse protection
 - Privacy policy page (open question #9)
+
+---
+
+## m9a-virtual-tour-viewer
+
+**Goal:** DB schema for 360 tour nodes live; exhibit page shows a 360 panorama viewer at the exhibit's linked node and heading.
+
+### Scope
+- `tour_nodes` table: `id`, `panorama_url`, `gps` (lat/lng), `label`
+- `tour_edges` table: `from_node_id`, `to_node_id` (manual navigation graph)
+- `exhibits` gains `tour_node_id` + `tour_heading` (nullable; no viewer if null)
+- 360 viewer component on exhibit page (equirectangular, using `@photo-sphere-viewer/core` or equivalent)
+- Viewer loads the linked node's panorama at the specified heading
+- "Enter virtual tour" entry point on exhibit page (online-only; hidden when offline)
+- Stub node + panorama for local dev/testing (placeholder equirectangular image)
+
+### Out of scope
+- Navigation between nodes (m9b)
+- Exhibit markers inside the panorama (m9b)
+- Precaching panoramas for offline use
+- Admin UI for authoring nodes/edges (use Supabase dashboard)
+
+---
+
+## m9b-virtual-tour-navigation
+
+**Goal:** Full park street view — visitor can navigate between nodes, see exhibit markers in the panorama, click a marker to open the exhibit page, and return to map view.
+
+⚠ **Blocked on:** drone 360 footage received + full node graph authored in `tour_nodes`/`tour_edges`
+
+### Scope
+- Navigation arrows in the panorama pointing toward connected nodes (from `tour_edges`)
+- Exhibit markers as hotspots in the panorama (for all exhibits whose `tour_node_id` matches the current node)
+- Clicking a marker → navigates to that exhibit page (preserves audio state)
+- "Back to map" button inside the virtual tour viewer
+- Exhibit page "360" entry re-enters the tour at the correct node + heading
+
+### Out of scope
+- Precaching panoramas offline
+- Multi-floor / indoor nodes
+- Drone footage processing pipeline (handled outside the app)
