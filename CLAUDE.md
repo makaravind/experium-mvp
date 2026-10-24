@@ -33,6 +33,7 @@ QR-code-based audio guide for park visitors. Scan marker → webapp plays audio 
 - `docs/user-flows/flow-5-home-screen.md` — home tab
 - `docs/user-flows/flow-6-gamification-trail.md` — trail, milestones, discovery cards
 - `docs/user-flows/flow-7-report-issue.md` — issue reporting
+- `docs/user-flows/flow-8-virtual-tour.md` — 360° street view, node navigation, exhibit markers
 
 ### Map & GPS
 - `docs/interactive-map.md` — Three.js/R3F spec, GPS, nearby highlights
