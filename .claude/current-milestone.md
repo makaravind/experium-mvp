@@ -38,6 +38,7 @@
 ## Open
 - #83 PWA install + production hardening — 17 gaps from a PWA checklist audit (11 must-fix: icons, `beforeinstallprompt`, install banner + UserMenu item, iOS instructions, safe-area, SW update toast, security headers); acceptance: Lighthouse PWA ≥ 90
 - #82 Offline map: precache `park.pmtiles`, versioned tile cache — waits for the real drone ortho (none yet; stub is 11.8MB)
+  - Precache part now tracked by #90 (m5b-offline-hardening); versioning dropped (map updates via Refresh, #89)
   - Pins half done: m3-amenities (`7dcbcb9`, 2026-10-18) made `ParkMap`/search read `cachedExhibits` (GPS + status now cached), so offline pins work
 
 ## Deferred (parallel, not blocking)
@@ -54,6 +55,7 @@
 | m2b-ortho | Swap stub ortho with real drone raster | 8 | open |
 | m4-gamification | Trail progress, milestones, discovery cards | 10 | open (1 open: #62 badge art) |
 | m5-pwa-offline | Full offline after initial load | 11 | open (2 open) — CURRENT |
+| m5b-offline-hardening | Offline audit fixes (#86–#92) | 19 | DONE (7/7), closed 2026-10-22 |
 | m6-ads | All ad placements live | 12 | open |
 | m7-launch-ready | Production-ready, E2E smoke tested | 13 | open |
 | m3-amenities | Amenities layer (washroom, ticketing, food, gate) — merged to main `7dcbcb9` 2026-10-18: docs/specs/m3-amenities.md | 17 | DONE (7/7), closed |

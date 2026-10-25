@@ -1,69 +1,160 @@
 # Flow 8: Virtual Tour (360° Street View)
 
-## Version: V1
+## Version: V2
 
 ## Summary
 
-Visitor taps the 360° thumbnail on an exhibit page → enters a panoramic street view anchored to that exhibit's location → navigates the park freely → taps exhibit markers to open exhibit pages → returns to map view.
+Visitor enters a panoramic street view anchored to a park exhibit → navigates the park freely via node graph → taps exhibit markers to open exhibit pages → returns to map view.
 
-**Online-only.** Panoramas are not precached; the entry point is hidden when offline.
+**Online-only.** Panoramas are not precached; entry points are hidden when offline.
 
 ---
 
 ## Entry Paths
 
-### A — From Exhibit Page (primary)
+### A — From Exhibit Gallery (primary)
 
 | Step | Screen | User Action | System Response |
 |------|--------|-------------|-----------------|
-| 1 | Exhibit Page | Views exhibit bottom sheet / page | If exhibit has a linked tour node: 360° thumbnail is visible |
-| 2 | Exhibit Page | Taps 360° thumbnail / "Enter Virtual Tour" | 360 Viewer opens, panorama loads at the exhibit's linked node |
-| 3 | 360 Viewer | Panorama renders | Viewer initialises at `tour_heading` (compass bearing) defined for this exhibit. Navigation arrows appear for connected nodes |
-| 4 | 360 Viewer | Explores / navigates | See screen states below |
+| 1 | Exhibit bottom sheet | Views exhibit | If exhibit has `tour_node_id`: Gallery shows a 360° slide as the last carousel item. A "360°" badge appears on the 56×56 exhibit thumbnail in the sheet header. |
+| 2 | Exhibit bottom sheet | Swipes to the 360° gallery slide, taps it | Bypasses the gallery fullscreen modal. Navigates to `/tour?node=<tour_node_id>&heading=<tour_heading>&exhibitId=<exhibitId>` |
+| 3 | Tour Viewer | Panorama renders | Viewer initialises at `tour_heading` (compass bearing). Nav arrows appear for each connected node. Exhibit markers appear for exhibits linked to this node. A collapsed strip at the bottom shows the entry exhibit. |
+| 4 | Tour Viewer | Explores / navigates | See screen states below |
 
-### B — Navigation from another node
+### B — From Virtual Tour QR Code (physical marker in park)
 
 | Step | Screen | User Action | System Response |
 |------|--------|-------------|-----------------|
-| 1 | 360 Viewer | Taps a navigation arrow | Panorama transitions to the connected node |
-| 2 | 360 Viewer | New node renders | Navigation arrows update to connected nodes from the new position. Exhibit markers update to exhibits linked to this node |
+| 1 | — | Scans physical "Virtual Tour" QR code | Opens `/s/[code]?mode=virtual-tour` |
+| 2 | Exhibit page | Page loads with `mode=virtual-tour` | Reads `tour_node_id` + `tour_heading` from cached exhibit data. Redirects to `/tour?node=<id>&heading=<degrees>&exhibitId=<id>` |
+| 3 | Tour Viewer | Panorama renders | Same as Entry Path A, step 3 |
+
+### C — From Home Screen
+
+| Step | Screen | User Action | System Response |
+|------|--------|-------------|-----------------|
+| 1 | Home | Taps "360° Virtual Tour →" button | Navigates to `/tour` (no node param) |
+| 2 | Tour Viewer | Page loads | Fetches `tour_nodes WHERE is_lobby = true LIMIT 1`. Renders panorama at lobby node. No collapsed exhibit strip (no `exhibitId` param). |
+
+### D — Node-to-node navigation (within viewer)
+
+| Step | Screen | User Action | System Response |
+|------|--------|-------------|-----------------|
+| 1 | Tour Viewer | Taps a nav arrow | Panorama transitions to the connected node |
+| 2 | Tour Viewer | New node renders | Nav arrows update to edges from new node. Exhibit markers update to exhibits linked to the new node. URL stays static (no replace). |
 
 ---
 
 ## Screen States
 
-### S1: 360 Viewer
+### S1: Tour Viewer (`/app/tour/page.tsx`)
 
-- **Technology:** equirectangular panorama viewer (`@photo-sphere-viewer/core` or equivalent)
+- **Route:** standalone page outside the `(map)` layout group — no MapShell, no tab bar
+- **Technology:** `@photo-sphere-viewer/core` (equirectangular panorama viewer)
 - **Panorama source:** `tour_nodes.panorama_url` (remote URL, no precache)
-- **Initial heading:** `exhibits.tour_heading` (compass bearing, degrees) — only applies on entry from an exhibit page; subsequent node transitions default to the direction of travel
-- **Navigation arrows:** rendered as overlay hotspots for each edge in `tour_edges` from the current node, pointing in the bearing toward the connected node
-- **Exhibit markers:** hotspot pins for every exhibit whose `tour_node_id` = current node; same orange/green visited state as the map
-- **Back to map:** persistent button (top-left); returns to Map tab, restoring last map position
-- **Offline:** entry point hidden; if connection drops mid-tour, panorama load fails with "Needs internet" toast
+- **Initial heading:** `tour_heading` URL param (compass bearing, degrees) — only on entry; node transitions default to direction of travel
+- **Data loading:** all `tour_nodes` + `tour_edges` fetched upfront on mount (single query, small dataset)
+- **Nav arrows:** marker hotspots for each outgoing edge from the current node; positioned at `tour_edges.bearing` (admin-specified yaw, 0–359°)
+- **Exhibit markers:** hotspot pins for every exhibit where `tour_node_id` = current node; positioned at `exhibits.tour_heading` (same value used as marker yaw); same orange/green visited state as map; tapping navigates to `/s/[qr_code]`
+- **Back to map:** persistent button (top-left); `router.push('/map')`
+- **URL:** static — `/tour?node=<nodeId>&heading=<degrees>&exhibitId=<id>`; does not update on node transitions
+- **Offline:** entry points hidden; if connection drops mid-tour, panorama load fails with "Needs internet" toast
 
-### S2: Exhibit Marker Tap (inside viewer)
+### S2: Collapsed Exhibit Strip (inside viewer)
 
-- Tapping an exhibit marker opens the exhibit's bottom sheet / page (same as tapping a pin on the map)
-- Audio can be played from here
-- "Back" from the exhibit page returns to the 360 Viewer at the same node
+Shown only when `exhibitId` param is present (entry from exhibit gallery or virtual tour QR).
+
+- Persistent pill at the bottom of the viewer showing the entry exhibit name
+- Tapping navigates to `/s/[qr_code]` (the full exhibit page with audio player)
+- Back gesture / swipe-back returns to `/tour?...` (browser history)
+- Not shown when entering from home screen (no `exhibitId` param)
+
+### S3: Exhibit Marker Tap (inside viewer)
+
+- Tapping an exhibit marker navigates to `/s/[qr_code]`
+- Full exhibit page opens (audio, facts, language selector)
+- Back returns to `/tour?...` (browser history, static URL)
+- Works for any exhibit at the current node, not just the entry exhibit
 
 ---
 
-## Data Model (summary)
+## Home Screen Change
 
-| Table | Key columns | Notes |
-|-------|-------------|-------|
-| `tour_nodes` | `id`, `panorama_url`, `lat`, `lng`, `label` | One row per 360 capture position |
-| `tour_edges` | `from_node_id`, `to_node_id` | Manual graph; bidirectional edges stored as two rows |
-| `exhibits` | `tour_node_id` (FK, nullable), `tour_heading` (int, nullable) | Null = no 360 entry for this exhibit |
+The existing "Explore the Park →" button is renamed to **"360° Virtual Tour →"** and links to `/tour` (no node param — resolves lobby node on load). No new card or modal is added.
+
+---
+
+## Data Model
+
+### New Tables
+
+```sql
+CREATE TABLE tour_nodes (
+  id            UUID     PRIMARY KEY DEFAULT gen_random_uuid(),
+  panorama_url  TEXT     NOT NULL,
+  is_lobby      BOOLEAN  NOT NULL DEFAULT false
+  -- lat/lng not stored; exhibit nodes use exhibits.gps_lat/lng; path-only nodes need no GPS
+);
+
+CREATE TABLE tour_edges (
+  from_node_id UUID     NOT NULL REFERENCES tour_nodes(id) ON DELETE CASCADE,
+  to_node_id   UUID     NOT NULL REFERENCES tour_nodes(id) ON DELETE CASCADE,
+  bearing      SMALLINT NOT NULL,  -- admin-specified yaw in panorama toward to_node (0–359°)
+  PRIMARY KEY (from_node_id, to_node_id)
+  -- bidirectional: each connected pair stored as two rows with their own bearing
+);
+```
+
+### Exhibits Additions
+
+```sql
+ALTER TABLE exhibits
+  ADD COLUMN tour_node_id UUID     NULL REFERENCES tour_nodes(id) ON DELETE SET NULL,
+  ADD COLUMN tour_heading SMALLINT NULL;
+  -- tour_node_id NULL  = no virtual tour entry for this exhibit
+  -- tour_heading       = initial viewer bearing on entry AND marker yaw in the panorama
+```
+
+### Key relationships
+
+| Relationship | How |
+|---|---|
+| Exhibit has a tour node | `exhibits.tour_node_id IS NOT NULL` |
+| Multiple exhibits at one node | Many `exhibits` rows share the same `tour_node_id` |
+| Path-only node (no exhibit) | `tour_nodes` row with no `exhibits` pointing to it |
+| Default home screen entry | `tour_nodes.is_lobby = true` |
+| Nav arrow direction | `tour_edges.bearing` (admin-set, not computed from GPS) |
+| Exhibit marker yaw | `exhibits.tour_heading` (doubles as entry heading and marker position) |
+
+### exhibit_photos — unchanged
+
+Panorama URLs live on `tour_nodes.panorama_url`, not in `exhibit_photos`. The `exhibit_photos` table remains pure (regular exhibit images only).
+
+### CachedExhibit type additions (app types)
+
+`CachedExhibit`, `PreviewExhibit` need two new nullable fields:
+- `tour_node_id: string | null`
+- `tour_heading: number | null`
+
+The precache API (`/api/exhibits/all`) must include these fields so the exhibit page can resolve the tour redirect without a network call.
+
+---
+
+## Gallery Integration
+
+- `Gallery` receives an optional `onTourEnter` callback
+- When the 360° slide is tapped, `onTourEnter()` fires instead of opening `FullscreenModal`
+- The 360° slide only renders if the exhibit has `tour_node_id != null`
+- The 360° slide is the last slide in the carousel
+- The 56×56 exhibit thumbnail in `PreviewSheet` shows a small "360°" badge when `tour_node_id` is set
 
 ---
 
 ## Out of Scope (V1)
 
 - Offline panorama precaching
-- Exhibits as markers on nodes they are not directly linked to (cross-node proximity markers)
+- Cross-node proximity markers (exhibits shown on nodes they aren't directly linked to)
 - Cluster markers when multiple exhibits share a node
 - Indoor / multi-floor nodes
 - Admin UI for authoring nodes and edges (use Supabase dashboard)
+- Bearing auto-computation from GPS (admin sets `tour_edges.bearing` manually)
