@@ -52,7 +52,7 @@
 | # | Title | GH# | State |
 |---|-------|-----|-------|
 | m2c-field-data-collection | GPS tagging + audio for all 66 exhibits | 7 | open — #114 closed (EN transcript skill done) |
-| m2b-ortho | Swap stub ortho with real drone raster | 8 | open |
+| m2b-ortho | Swap stub ortho with real drone raster | 8 | open — #26 closed (GPS marker placer tool + initial coords in references/pdf-markers-gps.json); #38 closed 2026-10-26 (`c07e946`) path navigation overlay (Dijkstra routing + animated white-dash/blue-halo MapLibre line) |
 | m4-gamification | Trail progress, milestones, discovery cards | 10 | open (1 open: #62 badge art) — #113 badge grid closed 2026-10-26 (`cab9379`) |
 | m5-pwa-offline | Full offline after initial load | 11 | open (2 open) — CURRENT |
 | m5b-offline-hardening | Offline audit fixes (#86–#92) | 19 | DONE (7/7), closed 2026-10-22 |
