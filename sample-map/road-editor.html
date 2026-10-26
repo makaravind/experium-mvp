@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Road Editor — Experium Park</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { display: flex; height: 100vh; font-family: system-ui, sans-serif; background: #0f172a; }
+
+    #map { flex: 1; cursor: crosshair; }
+    #map.idle { cursor: grab; }
+
+    #sidebar {
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      background: #1e293b;
+      color: #f1f5f9;
+      border-left: 1px solid #334155;
+    }
+
+    #sidebar h1 {
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid #334155;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    #hint {
+      font-size: 12px;
+      color: #64748b;
+      padding: 10px 16px;
+      border-bottom: 1px solid #334155;
+    }
+
+    #active-label {
+      display: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: #38bdf8;
+      padding: 8px 16px;
+      border-bottom: 1px solid #334155;
+    }
+
+    #path-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .path-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-bottom: 1px solid #273548;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+    }
+    .path-row:hover { background: #273548; }
+    .path-row.active { background: #334155; border-left-color: #0ea5e9; }
+
+    .swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+    .path-info { flex: 1; min-width: 0; }
+    .path-name {
+      font-size: 13px;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .path-count { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+    .row-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    .undo-btn { color: #94a3b8; }
+    .undo-btn:hover { color: #e2e8f0; }
+    .del-btn { color: #ef4444; }
+    .del-btn:hover { color: #f87171; }
+
+    #actions {
+      padding: 12px 16px;
+      border-top: 1px solid #334155;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #actions .row { display: flex; gap: 8px; }
+
+    button.primary {
+      flex: 1;
+      padding: 9px 12px;
+      background: #0ea5e9;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.primary:hover { background: #38bdf8; }
+    button.primary:disabled { background: #334155; color: #64748b; cursor: default; }
+
+    button.secondary {
+      flex: 1;
+      padding: 9px 12px;
+      background: #334155;
+      color: #94a3b8;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button.secondary:hover { background: #475569; color: #e2e8f0; }
+    button.secondary:disabled { color: #64748b; cursor: default; background: #334155; }
+
+    /* navigate test */
+    #nav-test {
+      padding: 10px 16px;
+      border-top: 1px solid #334155;
+    }
+    #nav-test h2 {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    #nav-test .row { display: flex; gap: 8px; margin-bottom: 8px; }
+    #nav-test button { padding: 7px 8px; font-size: 12px; }
+    #nav-test button.placing { background: #0ea5e9; color: #fff; }
+    #join-gap {
+      width: 80px;
+      padding: 5px 8px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #f1f5f9;
+      font-size: 12px;
+    }
+    #join-gap:focus { outline: none; border-color: #0ea5e9; }
+    #nav-result { font-size: 12px; color: #64748b; min-height: 16px; }
+
+    .you-dot, .exhibit-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      cursor: grab;
+    }
+    .you-dot { background: #3b82f6; }
+    .exhibit-dot { background: #ef4444; }
+  </style>
+</head>
+<body>
+
+<div id="map" class="idle"></div>
+
+<div id="sidebar">
+  <h1>Road Editor</h1>
+  <div id="hint">Select a path in the sidebar, then click the map to add waypoints. Clicks near an existing point or line snap to it · hold Alt to place freely. Drag a point to move it (snaps too).</div>
+  <div id="active-label"></div>
+  <div id="path-list"></div>
+  <div id="nav-test">
+    <h2>Test Navigate</h2>
+    <div class="row">
+      <button class="secondary" id="place-you">Place You</button>
+      <button class="secondary" id="place-exhibit">Place Exhibit</button>
+    </div>
+    <div class="row">
+      <button class="primary" id="navigate-btn" disabled>Navigate</button>
+      <button class="secondary" id="nav-clear">Clear</button>
+    </div>
+    <div class="row" style="align-items:center">
+      <label for="join-gap" style="font-size:12px;color:#94a3b8;flex:1">Join gap (m)</label>
+      <input type="number" id="join-gap" value="3" min="0" step="0.5">
+    </div>
+    <div id="nav-result"></div>
+  </div>
+  <div id="actions">
+    <div class="row">
+      <button class="primary" id="new-btn">+ New Path</button>
+    </div>
+    <div class="row">
+      <button class="secondary" id="export-btn" disabled>Export JSON</button>
+      <button class="secondary" id="import-btn">Import</button>
+    </div>
+  </div>
+  <input type="file" id="import-input" accept=".json" style="display:none">
+</div>
+
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
+<script>
+  // ── PMTiles protocol ───────────────────────────────────────────────────────
+  const protocol = new pmtiles.Protocol()
+  maplibregl.addProtocol('pmtiles', protocol.tile.bind(protocol))
+
+  // ── Map ────────────────────────────────────────────────────────────────────
+  const BOUNDS = [78.187123, 17.378546, 78.196134, 17.383978]
+  const CENTER = [(BOUNDS[0] + BOUNDS[2]) / 2, (BOUNDS[1] + BOUNDS[3]) / 2]
+
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: {
+        park: {
+          type: 'raster',
+          url: 'pmtiles:///park.pmtiles',
+          tileSize: 256,
+          minzoom: 15,
+          maxzoom: 21,
+        },
+      },
+      layers: [
+        { id: 'bg', type: 'background', paint: { 'background-color': '#0f172a' } },
+        { id: 'park', type: 'raster', source: 'park' },
+      ],
+    },
+    center: CENTER,
+    zoom: 19.5,
+    maxBounds: [BOUNDS[0] - 0.002, BOUNDS[1] - 0.002, BOUNDS[2] + 0.002, BOUNDS[3] + 0.002],
+    minZoom: 15,
+  })
+
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left')
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  const COLORS = ['#f97316', '#06b6d4', '#a855f7', '#22c55e', '#f43f5e', '#eab308', '#14b8a6', '#64748b']
+
+  let paths = []        // { id, name, coords: [[lat, lng]], color }
+  let activeId = null
+  let nextId = 1
+  let colorIdx = 0
+
+  const mapEl     = document.getElementById('map')
+  const listEl    = document.getElementById('path-list')
+  const labelEl   = document.getElementById('active-label')
+  const exportBtn = document.getElementById('export-btn')
+
+  const activePath = () => paths.find(p => p.id === activeId)
+
+  function esc(s) {
+    return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+  }
+
+  function slugify(name) {
+    return name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  }
+
+  function addPath(name, coords = []) {
+    const path = { id: nextId++, name, coords, color: COLORS[colorIdx++ % COLORS.length] }
+    paths.push(path)
+    return path
+  }
+
+  // ── Map layers ─────────────────────────────────────────────────────────────
+  let mapLoaded = false
+
+  map.on('load', () => {
+    const empty = { type: 'FeatureCollection', features: [] }
+    map.addSource('all-lines', { type: 'geojson', data: empty })
+    map.addSource('all-points', { type: 'geojson', data: empty })
+
+    map.addLayer({
+      id: 'path-lines',
+      type: 'line',
+      source: 'all-lines',
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': ['case', ['get', 'active'], 3, 2],
+        'line-opacity': ['case', ['get', 'active'], 1, 0.65],
+      },
+    })
+    map.addLayer({
+      id: 'path-points',
+      type: 'circle',
+      source: 'all-points',
+      paint: {
+        'circle-radius': ['case', ['get', 'active'], 5, 4],
+        'circle-color': ['get', 'color'],
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#fff',
+      },
+    })
+
+    map.addSource('snap-hint', { type: 'geojson', data: EMPTY_FC })
+    map.addLayer({
+      id: 'snap-ring',
+      type: 'circle',
+      source: 'snap-hint',
+      paint: { 'circle-radius': 9, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' },
+    })
+
+    map.addSource('nav-path', { type: 'geojson', data: EMPTY_LINE })
+    map.addLayer({
+      id: 'nav-path-line',
+      type: 'line',
+      source: 'nav-path',
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': '#5a7fa0', 'line-width': 3, 'line-opacity': 0.85, 'line-dasharray': [0, 4, 3] },
+    }, 'path-points')  // below the waypoint dots, like exhibit-pins in the app
+
+    mapLoaded = true
+    updateMap()
+  })
+
+  function updateMap() {
+    if (!mapLoaded) return
+    const lines = [], points = []
+    for (const p of paths) {
+      const props = { color: p.color, active: p.id === activeId }
+      if (p.coords.length >= 2) {
+        lines.push({
+          type: 'Feature',
+          properties: props,
+          geometry: { type: 'LineString', coordinates: p.coords.map(([lat, lng]) => [lng, lat]) },
+        })
+      }
+      p.coords.forEach(([lat, lng], idx) => {
+        points.push({ type: 'Feature', properties: { ...props, pid: p.id, idx }, geometry: { type: 'Point', coordinates: [lng, lat] } })
+      })
+    }
+    map.getSource('all-lines').setData({ type: 'FeatureCollection', features: lines })
+    map.getSource('all-points').setData({ type: 'FeatureCollection', features: points })
+    updateNav()
+  }
+
+  // ── Sidebar ────────────────────────────────────────────────────────────────
+  function render() {
+    listEl.innerHTML = paths.map(p => {
+      const active = p.id === activeId
+      return `
+        <div class="path-row${active ? ' active' : ''}" data-id="${p.id}">
+          <span class="swatch" style="background:${p.color}"></span>
+          <div class="path-info">
+            <div class="path-name">${esc(p.name)}</div>
+            <div class="path-count">${p.coords.length} point${p.coords.length === 1 ? '' : 's'}</div>
+          </div>
+          ${active ? '<button class="row-btn undo-btn" data-act="undo" title="Undo last point">↩</button>' : ''}
+          <button class="row-btn del-btn" data-act="del" title="Delete path">✕</button>
+        </div>`
+    }).join('')
+
+    const active = activePath()
+    labelEl.style.display = active ? 'block' : 'none'
+    labelEl.textContent = active ? `Adding to: ${active.name}` : ''
+    mapEl.classList.toggle('idle', !active)
+    exportBtn.disabled = paths.length === 0
+    updateMap()
+  }
+
+  listEl.addEventListener('click', (e) => {
+    const row = e.target.closest('.path-row')
+    if (!row) return
+    const id = parseInt(row.dataset.id, 10)
+    const act = e.target.closest('[data-act]')?.dataset.act
+    if (act === 'undo') {
+      const p = paths.find(x => x.id === id)
+      if (p) p.coords.pop()
+    } else if (act === 'del') {
+      const p = paths.find(x => x.id === id)
+      if (p && p.coords.length && !window.confirm(`Delete "${p.name}" (${p.coords.length} points)?`)) return
+      paths = paths.filter(x => x.id !== id)
+      if (activeId === id) activeId = null
+    } else {
+      activeId = id
+    }
+    render()
+  })
+
+  // ── Snapping ───────────────────────────────────────────────────────────────
+  // A click within SNAP_PX of any waypoint (preferred) or path line takes that exact
+  // position, so junctions connect regardless of the app's join gap.
+  const SNAP_PX = 10
+  const EMPTY_FC = { type: 'FeatureCollection', features: [] }
+
+  // ignore: { pid, vertices: [idx], segs: [idx] } — parts of a path that must not attract the snap
+  function findSnap(point, ignore) {
+    let bestV = null, bestS = null
+    for (const p of paths) {
+      const pts = p.coords.map(([lat, lng]) => map.project([lng, lat]))
+      pts.forEach((q, i) => {
+        if (p.id === ignore?.pid && ignore.vertices.includes(i)) return
+        const d = Math.hypot(q.x - point.x, q.y - point.y)
+        if (d <= SNAP_PX && (!bestV || d < bestV.d)) bestV = { d, lat: p.coords[i][0], lng: p.coords[i][1] }
+      })
+      for (let i = 0; i < pts.length - 1; i++) {
+        if (p.id === ignore?.pid && ignore.segs.includes(i)) continue
+        const A = pts[i], B = pts[i + 1]
+        const dx = B.x - A.x, dy = B.y - A.y, len2 = dx * dx + dy * dy
+        const t = len2 ? Math.max(0, Math.min(1, ((point.x - A.x) * dx + (point.y - A.y) * dy) / len2)) : 0
+        const x = A.x + t * dx, y = A.y + t * dy
+        const d = Math.hypot(point.x - x, point.y - y)
+        if (d <= SNAP_PX && (!bestS || d < bestS.d)) {
+          const ll = map.unproject([x, y])
+          bestS = { d, lat: ll.lat, lng: ll.lng }
+        }
+      }
+    }
+    return bestV ?? bestS
+  }
+
+  // when adding: don't snap onto the point just placed or the segment leading to it
+  const snapFor = (e) => {
+    const p = activePath()
+    if (!p || placing || e.originalEvent.altKey) return null
+    const n = p.coords.length
+    return findSnap(e.point, { pid: p.id, vertices: [n - 1], segs: [n - 2] })
+  }
+
+  function showSnapHint(snap) {
+    if (!mapLoaded) return
+    map.getSource('snap-hint').setData(snap
+      ? { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [snap.lng, snap.lat] } }] }
+      : EMPTY_FC)
+  }
+
+  // ── Drag existing waypoints ────────────────────────────────────────────────
+  let drag = null          // { pid, idx, moved }
+  let justDragged = false  // swallows the click that follows a drag
+
+  map.on('mouseenter', 'path-points', () => { map.getCanvas().style.cursor = 'move' })
+  map.on('mouseleave', 'path-points', () => { map.getCanvas().style.cursor = '' })
+
+  map.on('mousedown', (e) => {
+    if (placing) return
+    const hit = map.queryRenderedFeatures(e.point, { layers: ['path-points'] })[0]
+    if (!hit) return
+    map.dragPan.disable()   // keep the map from panning while a point is dragged
+    drag = { pid: hit.properties.pid, idx: hit.properties.idx, moved: false, start: e.point }
+  })
+
+  map.on('mousemove', (e) => {
+    if (!drag) { showSnapHint(snapFor(e)); return }
+    if (!drag.moved && Math.hypot(e.point.x - drag.start.x, e.point.y - drag.start.y) < 3) return
+    drag.moved = true
+    const p = paths.find(x => x.id === drag.pid)
+    const snap = e.originalEvent.altKey ? null
+      : findSnap(e.point, { pid: p.id, vertices: [drag.idx], segs: [drag.idx - 1, drag.idx] })
+    p.coords[drag.idx] = snap ? [snap.lat, snap.lng] : [e.lngLat.lat, e.lngLat.lng]
+    showSnapHint(snap)
+    updateMap()
+  })
+  map.on('mouseout', () => showSnapHint(null))
+
+  window.addEventListener('mouseup', () => {
+    if (!drag) return
+    map.dragPan.enable()
+    justDragged = drag.moved
+    setTimeout(() => { justDragged = false }, 0)   // click only follows if released over the map
+    drag = null
+    showSnapHint(null)
+    render()
+  })
+
+  // ── Map click ─────────────────────────────────────────────────────────────
+  map.on('click', (e) => {
+    if (justDragged) { justDragged = false; return }
+    if (placing) {
+      placeTestMarker(placing, e.lngLat)
+      return
+    }
+    const p = activePath()
+    if (!p) return
+    const snap = snapFor(e)
+    p.coords.push(snap ? [snap.lat, snap.lng] : [e.lngLat.lat, e.lngLat.lng])
+    showSnapHint(null)
+    render()
+  })
+
+  // ── New Path ───────────────────────────────────────────────────────────────
+  document.getElementById('new-btn').addEventListener('click', () => {
+    // one past the highest existing "Path N", so deletes never cause duplicate names
+    const max = Math.max(0, ...paths.map(p => Number(/^Path (\d+)$/.exec(p.name)?.[1] ?? 0)))
+    activeId = addPath(`Path ${max + 1}`).id
+    render()
+  })
+
+  // ── Export JSON ───────────────────────────────────────────────────────────
+  exportBtn.addEventListener('click', () => {
+    const out = {}
+    for (const p of paths) {
+      const base = slugify(p.name) || 'path'
+      let key = base, n = 2
+      while (key in out) key = `${base}-${n++}`   // duplicate names must not overwrite each other
+      out[key] = { name: p.name, coords: p.coords }
+    }
+    const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'park-paths.json'
+    a.click()
+    URL.revokeObjectURL(a.href)
+  })
+
+  // ── Import JSON ───────────────────────────────────────────────────────────
+  document.getElementById('import-btn').addEventListener('click', () => {
+    document.getElementById('import-input').click()
+  })
+
+  document.getElementById('import-input').addEventListener('change', (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result)
+        if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Expected object')
+        const imported = []
+        for (const [key, val] of Object.entries(data)) {
+          if (!val || !Array.isArray(val.coords)) continue
+          const coords = val.coords.filter(c => Array.isArray(c) && typeof c[0] === 'number' && typeof c[1] === 'number')
+            .map(([lat, lng]) => [lat, lng])
+          imported.push({ name: typeof val.name === 'string' && val.name ? val.name : key, coords })
+        }
+        // only clear existing state once the file has parsed
+        paths = []
+        activeId = null
+        nextId = 1
+        colorIdx = 0
+        imported.forEach(({ name, coords }) => addPath(name, coords))
+        render()
+      } catch (err) {
+        alert('Invalid JSON file: ' + err.message)
+      }
+      // reset so the same file can be re-imported
+      e.target.value = ''
+    }
+    reader.readAsText(file)
+  })
+
+  // ── Test Navigate ──────────────────────────────────────────────────────────
+  // Routing across paths: nodes are waypoints; a waypoint within "join gap" of another
+  // path's line joins the two paths there. Shortest chain You → Exhibit is animated.
+  const EMPTY_LINE = { type: 'Feature', geometry: { type: 'LineString', coordinates: [] }, properties: {} }
+  const NAV_DASH_SEQ = [[0,4,3],[0.5,4,2.5],[1,4,2],[1.5,4,1.5],[2,4,1],[2.5,4,0.5],[3,4,0],[0,0.5,3,3.5],[0,1,3,3],[0,1.5,3,2.5],[0,2,3,2],[0,2.5,3,1.5],[0,3,3,1],[0,3.5,3,0.5]]
+
+  const testMarkers = { you: null, exhibit: null }
+  let placing = null          // 'you' | 'exhibit' | null
+  let navActive = false
+  let navRaf = null
+
+  const placeBtns = { you: document.getElementById('place-you'), exhibit: document.getElementById('place-exhibit') }
+  const navBtn    = document.getElementById('navigate-btn')
+  const navResult = document.getElementById('nav-result')
+  const joinGap   = document.getElementById('join-gap')
+
+  function syncNavUi() {
+    for (const k of ['you', 'exhibit']) placeBtns[k].classList.toggle('placing', placing === k)
+    navBtn.disabled = !(testMarkers.you && testMarkers.exhibit)
+  }
+
+  function startPlacing(kind) {
+    placing = placing === kind ? null : kind
+    navResult.textContent = placing ? `Click the map to place ${kind === 'you' ? 'You' : 'Exhibit'}` : ''
+    syncNavUi()
+  }
+  placeBtns.you.addEventListener('click', () => startPlacing('you'))
+  placeBtns.exhibit.addEventListener('click', () => startPlacing('exhibit'))
+
+  function placeTestMarker(kind, lngLat) {
+    if (testMarkers[kind]) {
+      testMarkers[kind].setLngLat(lngLat)
+    } else {
+      const el = document.createElement('div')
+      el.className = kind === 'you' ? 'you-dot' : 'exhibit-dot'
+      el.title = (kind === 'you' ? 'You' : 'Exhibit') + ' — drag to move'
+      testMarkers[kind] = new maplibregl.Marker({ element: el, draggable: true }).setLngLat(lngLat).addTo(map)
+      testMarkers[kind].on('dragend', updateNav)
+    }
+    placing = null
+    navResult.textContent = ''
+    syncNavUi()
+    updateNav()
+  }
+
+  // Returns { coords: [[lat, lng]], meters, youPath, exhibitPath } or { error }.
+  function computeRoute(joinM) {
+    const ex = testMarkers.exhibit.getLngLat(), you = testMarkers.you.getLngLat()
+    const ky = 111320, kx = ky * Math.cos(ex.lat * Math.PI / 180)   // metres per degree
+    const toXY = (lat, lng) => ({ x: (lng - ex.lng) * kx, y: (lat - ex.lat) * ky })
+    const toLL = (n) => [n.y / ky + ex.lat, n.x / kx + ex.lng]
+
+    const nodes = [], adj = []
+    const addNode = (x, y) => { nodes.push({ x, y }); adj.push([]); return nodes.length - 1 }
+    const link = (a, b) => {
+      const w = Math.hypot(nodes[a].x - nodes[b].x, nodes[a].y - nodes[b].y)
+      adj[a].push([b, w]); adj[b].push([a, w])
+    }
+
+    // paths with <2 points have no line to walk on
+    const usable = paths.filter(p => p.coords.length >= 2)
+    const verts = usable.map(p => p.coords.map(([lat, lng]) => { const q = toXY(lat, lng); return addNode(q.x, q.y) }))
+    const segs = []
+    usable.forEach((p, pi) => {
+      for (let i = 0; i < verts[pi].length - 1; i++) segs.push({ pi, a: verts[pi][i], b: verts[pi][i + 1], ins: [] })
+    })
+
+    const project = (n, seg) => {
+      const A = nodes[seg.a], B = nodes[seg.b]
+      const dx = B.x - A.x, dy = B.y - A.y, len2 = dx * dx + dy * dy
+      const t = len2 ? Math.max(0, Math.min(1, ((n.x - A.x) * dx + (n.y - A.y) * dy) / len2)) : 0
+      const x = A.x + t * dx, y = A.y + t * dy
+      return { t, x, y, d: Math.hypot(n.x - x, n.y - y) }
+    }
+    const insert = (seg, pr) => { const id = addNode(pr.x, pr.y); seg.ins.push({ t: pr.t, id }); return id }
+
+    const snap = (lat, lng) => {
+      const q = toXY(lat, lng)
+      let best = null
+      for (const seg of segs) {
+        const pr = project(q, seg)
+        if (!best || pr.d < best.pr.d) best = { seg, pr }
+      }
+      return best && { id: insert(best.seg, best.pr), pi: best.seg.pi, d: best.pr.d }
+    }
+    const from = snap(you.lat, you.lng), to = snap(ex.lat, ex.lng)
+    if (!from || !to) return { error: 'No paths with ≥2 points' }
+
+    // junctions: a waypoint close to another path's segment connects to it
+    verts.forEach((vs, pi) => vs.forEach(v => {
+      for (const seg of segs) {
+        if (seg.pi === pi) continue
+        const pr = project(nodes[v], seg)
+        if (pr.d <= joinM) link(v, insert(seg, pr))
+      }
+    }))
+
+    for (const seg of segs) {
+      const chain = [seg.a, ...seg.ins.sort((m, n) => m.t - n.t).map(i => i.id), seg.b]
+      for (let i = 0; i < chain.length - 1; i++) link(chain[i], chain[i + 1])
+    }
+
+    // Dijkstra (graph is tiny)
+    const dist = nodes.map(() => Infinity), prev = nodes.map(() => -1), done = nodes.map(() => false)
+    dist[from.id] = 0
+    for (;;) {
+      let u = -1
+      for (let i = 0; i < nodes.length; i++) if (!done[i] && (u < 0 || dist[i] < dist[u])) u = i
+      if (u < 0 || dist[u] === Infinity || u === to.id) break
+      done[u] = true
+      for (const [v, w] of adj[u]) if (dist[u] + w < dist[v]) { dist[v] = dist[u] + w; prev[v] = u }
+    }
+    if (dist[to.id] === Infinity) {
+      return { error: `No route: You on ${usable[from.pi].name}, Exhibit on ${usable[to.pi].name} — not connected within ${joinM} m` }
+    }
+    const ids = []
+    for (let n = to.id; n !== -1; n = prev[n]) ids.push(n)
+    return {
+      coords: ids.reverse().map(n => toLL(nodes[n])),
+      meters: dist[to.id],
+      youPath: usable[from.pi].name,
+      exhibitPath: usable[to.pi].name,
+    }
+  }
+
+  function stopAnim() {
+    if (navRaf) cancelAnimationFrame(navRaf)
+    navRaf = null
+  }
+
+  function animateNav() {
+    if (navRaf) return
+    let step = 0, last = 0
+    const tick = (ts) => {
+      if (ts - last >= 80) {
+        step = (step + 1) % NAV_DASH_SEQ.length
+        map.setPaintProperty('nav-path-line', 'line-dasharray', NAV_DASH_SEQ[step])
+        last = ts
+      }
+      navRaf = requestAnimationFrame(tick)
+    }
+    navRaf = requestAnimationFrame(tick)
+  }
+
+  // recomputes the route live, so path edits and marker drags update the line
+  function updateNav() {
+    if (!mapLoaded) return
+    let route = null
+    if (navActive) {
+      if (!testMarkers.you || !testMarkers.exhibit) {
+        navResult.textContent = 'Place both You and Exhibit'
+      } else {
+        const r = computeRoute(Number(joinGap.value) || 0)
+        if (r.error) navResult.textContent = r.error
+        else {
+          route = r
+          navResult.textContent = `Route ~${Math.round(r.meters)} m (You on ${r.youPath} → Exhibit on ${r.exhibitPath})`
+        }
+      }
+    }
+    map.getSource('nav-path').setData(route
+      ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: route.coords.map(([lat, lng]) => [lng, lat]) } }
+      : EMPTY_LINE)
+    // hide editor lines while a route shows so only the visitor-style line is visible
+    map.setLayoutProperty('path-lines', 'visibility', route ? 'none' : 'visible')
+    if (route) animateNav(); else stopAnim()
+  }
+
+  navBtn.addEventListener('click', () => { navActive = true; updateNav() })
+  joinGap.addEventListener('input', updateNav)
+
+  document.getElementById('nav-clear').addEventListener('click', () => {
+    navActive = false
+    placing = null
+    for (const k of ['you', 'exhibit']) { testMarkers[k]?.remove(); testMarkers[k] = null }
+    navResult.textContent = ''
+    syncNavUi()
+    updateNav()
+  })
+
+  render()
+</script>
+</body>
+</html>
