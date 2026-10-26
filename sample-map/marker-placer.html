@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marker Placer — Experium Park</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { display: flex; height: 100vh; font-family: system-ui, sans-serif; background: #0f172a; }
+
+    #map { flex: 1; cursor: crosshair; }
+
+    #sidebar {
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      background: #1e293b;
+      color: #f1f5f9;
+      border-left: 1px solid #334155;
+    }
+
+    #sidebar h1 {
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid #334155;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    #hint {
+      font-size: 12px;
+      color: #64748b;
+      padding: 10px 16px;
+      border-bottom: 1px solid #334155;
+    }
+
+    #table-wrap {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #1e293b;
+      padding: 8px 12px;
+      text-align: left;
+      color: #94a3b8;
+      font-weight: 500;
+      border-bottom: 1px solid #334155;
+    }
+
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: #273548; }
+
+    tbody td {
+      padding: 7px 12px;
+      border-bottom: 1px solid #1e293b;
+      color: #e2e8f0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tbody td:first-child { color: #38bdf8; font-weight: 600; }
+
+    .del-btn {
+      background: none;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    .del-btn:hover { color: #f87171; }
+
+    #actions {
+      padding: 12px 16px;
+      border-top: 1px solid #334155;
+      display: flex;
+      gap: 8px;
+    }
+
+    button.primary {
+      flex: 1;
+      padding: 9px 12px;
+      background: #0ea5e9;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.primary:hover { background: #38bdf8; }
+    button.primary:disabled { background: #334155; color: #64748b; cursor: default; }
+
+    button.secondary {
+      padding: 9px 12px;
+      background: #334155;
+      color: #94a3b8;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button.secondary:hover { background: #475569; color: #e2e8f0; }
+
+    #search-wrap {
+      padding: 8px 12px;
+      border-bottom: 1px solid #334155;
+    }
+    #search-input {
+      width: 100%;
+      padding: 7px 10px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #f1f5f9;
+      font-size: 13px;
+    }
+    #search-input:focus { outline: none; border-color: #0ea5e9; }
+    #search-input::placeholder { color: #475569; }
+
+    /* custom marker pin */
+    .pin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      background: #f97316;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      cursor: grab;
+    }
+    .pin:active { cursor: grabbing; }
+    .pin span {
+      transform: rotate(45deg);
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+
+    /* number input popup */
+    #popup {
+      position: fixed;
+      display: none;
+      z-index: 100;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      min-width: 200px;
+    }
+    #popup label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+    #popup input {
+      width: 100%;
+      padding: 8px 10px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #f1f5f9;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    #popup input:focus { outline: none; border-color: #0ea5e9; }
+    #popup-actions { display: flex; gap: 8px; }
+    #popup-actions button { flex: 1; padding: 7px; border: none; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    #popup-confirm { background: #0ea5e9; color: #fff; }
+    #popup-confirm:hover { background: #38bdf8; }
+    #popup-cancel { background: #334155; color: #94a3b8; }
+    #popup-cancel:hover { background: #475569; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="sidebar">
+  <h1>Marker Placer</h1>
+  <div id="hint">Click map to place a marker · Drag to reposition.</div>
+  <div id="search-wrap">
+    <input type="text" id="search-input" placeholder="Search by marker #…">
+  </div>
+  <div id="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Latitude</th>
+          <th>Longitude</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div id="actions">
+    <button class="primary" id="export-btn" disabled>Export JSON</button>
+    <button class="secondary" id="import-btn">Import JSON</button>
+    <button class="secondary" id="clear-btn">Clear</button>
+  </div>
+  <input type="file" id="import-input" accept=".json" style="display:none">
+</div>
+
+<!-- number entry popup -->
+<div id="popup">
+  <label>Marker number</label>
+  <input type="number" id="popup-input" min="1" step="1" placeholder="e.g. 42">
+  <div id="popup-actions">
+    <button id="popup-confirm">Add</button>
+    <button id="popup-cancel">Cancel</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
+<script>
+  // ── PMTiles protocol ───────────────────────────────────────────────────────
+  const protocol = new pmtiles.Protocol()
+  maplibregl.addProtocol('pmtiles', protocol.tile.bind(protocol))
+
+  // ── Map ────────────────────────────────────────────────────────────────────
+  const BOUNDS = [78.187123, 17.378546, 78.196134, 17.383978]
+  const CENTER = [(BOUNDS[0] + BOUNDS[2]) / 2, (BOUNDS[1] + BOUNDS[3]) / 2]
+
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: {
+        park: {
+          type: 'raster',
+          url: 'pmtiles:///park.pmtiles',
+          tileSize: 256,
+          minzoom: 15,
+          maxzoom: 21,
+        },
+      },
+      layers: [
+        { id: 'bg', type: 'background', paint: { 'background-color': '#0f172a' } },
+        { id: 'park', type: 'raster', source: 'park' },
+      ],
+    },
+    center: CENTER,
+    zoom: 19.5,
+    maxBounds: [BOUNDS[0] - 0.002, BOUNDS[1] - 0.002, BOUNDS[2] + 0.002, BOUNDS[3] + 0.002],
+    minZoom: 15,
+  })
+
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left')
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  const markers = []          // { number, lat, lng, mapMarker }
+  let pendingLngLat = null    // lngLat waiting for number input
+  let searchQuery = ''
+
+  // ── Popup logic ────────────────────────────────────────────────────────────
+  const popup   = document.getElementById('popup')
+  const input   = document.getElementById('popup-input')
+  const confirm = document.getElementById('popup-confirm')
+  const cancel  = document.getElementById('popup-cancel')
+
+  function showPopup(x, y, defaultNum) {
+    popup.style.display = 'block'
+    // keep popup on screen
+    const pw = 220, ph = 120
+    const vw = window.innerWidth, vh = window.innerHeight
+    popup.style.left = Math.min(x + 12, vw - pw - 8) + 'px'
+    popup.style.top  = Math.min(y - 10, vh - ph - 8) + 'px'
+    input.value = defaultNum
+    input.focus()
+    input.select()
+  }
+
+  function hidePopup() {
+    popup.style.display = 'none'
+    pendingLngLat = null
+  }
+
+  // ── Map click ─────────────────────────────────────────────────────────────
+  map.on('click', (e) => {
+    // figure out pixel position of click for popup placement
+    const rect = map.getCanvas().getBoundingClientRect()
+    const px = rect.left + e.point.x
+    const py = rect.top  + e.point.y
+
+    pendingLngLat = e.lngLat
+    const nextNum = (markers.length > 0 ? Math.max(...markers.map(m => m.number)) : 0) + 1
+    showPopup(px, py, nextNum)
+  })
+
+  confirm.addEventListener('click', commitMarker)
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') commitMarker()
+    if (e.key === 'Escape') hidePopup()
+  })
+  cancel.addEventListener('click', hidePopup)
+
+  function commitMarker() {
+    const num = parseInt(input.value, 10)
+    if (!pendingLngLat || isNaN(num) || num < 1) return
+    addMarker(num, pendingLngLat.lat, pendingLngLat.lng)
+    hidePopup()
+  }
+
+  // ── Add marker ────────────────────────────────────────────────────────────
+  function addMarker(num, lat, lng) {
+    // remove existing marker with same number if present
+    const existing = markers.findIndex(m => m.number === num)
+    if (existing !== -1) {
+      markers[existing].mapMarker.remove()
+      markers.splice(existing, 1)
+    }
+
+    const el = document.createElement('div')
+    el.className = 'pin'
+    el.innerHTML = `<span>${num}</span>`
+    el.title = `#${num} — drag to move · click to remove`
+
+    let wasDragged = false
+    el.addEventListener('click', (e) => {
+      e.stopPropagation()
+      if (wasDragged) { wasDragged = false; return }
+      removeMarker(num)
+    })
+
+    const mapMarker = new maplibregl.Marker({ element: el, anchor: 'bottom-left', draggable: true })
+      .setLngLat([lng, lat])
+      .addTo(map)
+
+    mapMarker.on('dragstart', () => { wasDragged = true })
+    mapMarker.on('dragend', () => {
+      const pos = mapMarker.getLngLat()
+      const entry = markers.find(m => m.number === num)
+      if (entry) { entry.lat = pos.lat; entry.lng = pos.lng }
+      renderTable()
+    })
+
+    markers.push({ number: num, lat, lng, mapMarker })
+    markers.sort((a, b) => a.number - b.number)
+    renderTable()
+  }
+
+  function removeMarker(num) {
+    const idx = markers.findIndex(m => m.number === num)
+    if (idx === -1) return
+    markers[idx].mapMarker.remove()
+    markers.splice(idx, 1)
+    renderTable()
+  }
+
+  // ── Table ──────────────────────────────────────────────────────────────────
+  const tbody = document.getElementById('tbody')
+  const exportBtn = document.getElementById('export-btn')
+
+  function renderTable() {
+    tbody.innerHTML = markers.map(m => `
+      <tr>
+        <td>${m.number}</td>
+        <td>${m.lat.toFixed(7)}</td>
+        <td>${m.lng.toFixed(7)}</td>
+        <td><button class="del-btn" data-num="${m.number}" title="Remove">✕</button></td>
+      </tr>
+    `).join('')
+
+    tbody.querySelectorAll('tr').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('.del-btn')) return
+        const num = parseInt(row.cells[0].textContent, 10)
+        const m = markers.find(x => x.number === num)
+        if (m) map.flyTo({ center: [m.lng, m.lat], zoom: map.getZoom() })
+      })
+    })
+
+    tbody.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', () => removeMarker(parseInt(btn.dataset.num, 10)))
+    })
+
+    exportBtn.disabled = markers.length === 0
+    applyFilter()
+  }
+
+  // ── Search / filter ────────────────────────────────────────────────────────
+  function applyFilter() {
+    const q = searchQuery
+    Array.from(tbody.querySelectorAll('tr')).forEach(row => {
+      const num = row.cells[0]?.textContent ?? ''
+      row.style.display = (!q || num.includes(q)) ? '' : 'none'
+    })
+    if (q) {
+      const exact = markers.find(m => String(m.number) === q)
+      if (exact) map.flyTo({ center: [exact.lng, exact.lat], zoom: map.getZoom() })
+    }
+  }
+
+  document.getElementById('search-input').addEventListener('input', (e) => {
+    searchQuery = e.target.value.trim()
+    applyFilter()
+  })
+
+  // ── Clear all ─────────────────────────────────────────────────────────────
+  document.getElementById('clear-btn').addEventListener('click', () => {
+    if (!markers.length) return
+    if (!confirm(`Remove all ${markers.length} markers?`)) return
+    markers.forEach(m => m.mapMarker.remove())
+    markers.length = 0
+    renderTable()
+  })
+
+  // ── Export JSON ───────────────────────────────────────────────────────────
+  exportBtn.addEventListener('click', () => {
+    const data = markers.map(({ number, lat, lng }) => ({ number, lat, lng }))
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'markers.json'
+    a.click()
+    URL.revokeObjectURL(a.href)
+  })
+
+  // ── Import JSON ───────────────────────────────────────────────────────────
+  document.getElementById('import-btn').addEventListener('click', () => {
+    document.getElementById('import-input').click()
+  })
+
+  document.getElementById('import-input').addEventListener('change', (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result)
+        if (!Array.isArray(data)) throw new Error('Expected array')
+        // clear existing
+        markers.forEach(m => m.mapMarker.remove())
+        markers.length = 0
+        for (const item of data) {
+          const { number, lat, lng } = item
+          if (typeof number !== 'number' || typeof lat !== 'number' || typeof lng !== 'number') continue
+          addMarker(number, lat, lng)
+        }
+      } catch (err) {
+        alert('Invalid JSON file: ' + err.message)
+      }
+      // reset so the same file can be re-imported
+      e.target.value = ''
+    }
+    reader.readAsText(file)
+  })
+</script>
+</body>
+</html>

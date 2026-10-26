@@ -7,3 +7,5 @@ out/
 .claude/cost-tracker.jsonl
 experium-ai-tour-app/
 mvp/.idea/
+references/*.zip
+sample-map/park.pmtiles
