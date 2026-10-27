@@ -11,6 +11,7 @@ Usage:
 import argparse
 import csv
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -21,8 +22,75 @@ MODELS_DIR = os.path.join(SCRIPT_DIR, "models")
 MODEL_FILE = os.path.join(MODELS_DIR, "kokoro-v1.0.onnx")
 VOICES_FILE = os.path.join(MODELS_DIR, "voices-v1.0.bin")
 
+# Pronunciation overrides for brand names, foreign words, or tricky terms.
+# Kokoro uses espeak-ng phonemization, so phonetic respellings work best.
+# For true IPA, wrap in /.../ — support depends on your kokoro-tts build.
+# Examples:
+#   "Experium": "Eks-peer-ee-um"
+#   "Baobab": "BAY-oh-bab"
+PRONUNCIATION_DICT: dict[str, str] = {}
+
+
+def strip_markdown(text: str) -> str:
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)   # bold
+    text = re.sub(r"__(.+?)__", r"\1", text)
+    text = re.sub(r"\*(.+?)\*", r"\1", text)         # italic
+    text = re.sub(r"_(.+?)_", r"\1", text)
+    text = re.sub(r"#{1,6}\s*", "", text)             # headings
+    text = re.sub(r"\[(.+?)\]\(.+?\)", r"\1", text)  # markdown links
+    text = re.sub(r"`(.+?)`", r"\1", text)            # inline code
+    text = re.sub(r"\[.*?\]", "", text)               # stage cues [beat], [pause]
+    return text.strip()
+
+
+def normalize_currency(text: str) -> str:
+    # ₹ 85 lakhs → "85 lakh rupees"  (natural Indian spoken order)
+    text = re.sub(
+        r"₹\s*(\d+(?:\.\d+)?)\s*(lakh|lakhs|crore|crores)",
+        lambda m: f"{m.group(1)} {m.group(2).rstrip('s')} rupees",
+        text, flags=re.IGNORECASE,
+    )
+    # bare ₹ X → "X rupees"
+    text = re.sub(r"₹\s*(\d[\d,]*(?:\.\d+)?)", r"\1 rupees", text)
+    return text
+
+
+def normalize_numbers(text: str) -> str:
+    # Remove thousands-separator commas inside numbers (Kokoro reads "," as a pause)
+    # e.g. 1,000 → 1000 ; 8,50,000 → 850000
+    text = re.sub(r"(\d),(\d)", r"\1\2", text)
+    # Retry for Indian triple-grouping (8,50,000 needs two passes)
+    text = re.sub(r"(\d),(\d)", r"\1\2", text)
+    return text
+
+
+def apply_pronunciation_dict(text: str) -> str:
+    for word, phonetic in PRONUNCIATION_DICT.items():
+        text = re.sub(r"\b" + re.escape(word) + r"\b", phonetic, text, flags=re.IGNORECASE)
+    return text
+
+
+def normalize_script(script: str) -> str:
+    """Clean and normalise script text before feeding to kokoro-tts."""
+    script = strip_markdown(script)
+    script = normalize_currency(script)
+    script = normalize_numbers(script)
+    script = apply_pronunciation_dict(script)
+    # Collapse excess whitespace
+    script = re.sub(r"[ \t]+", " ", script)
+    script = re.sub(r"\n{3,}", "\n\n", script)
+    return script.strip()
+
+
+def to_tts_text(script: str) -> str:
+    """One sentence per paragraph so Kokoro inserts a natural pause between sentences."""
+    script = normalize_script(script)
+    sentences = re.split(r"(?<=[.!?])\s+", script)
+    return "\n\n".join(s for s in sentences if s)
+
+
 DEFAULT_VOICE = "af_bella"
-DEFAULT_SPEED = "1.0"
+DEFAULT_SPEED = "0.95"
 LANG = "en-us"
 
 
@@ -76,7 +144,7 @@ def generate(exhibit, voice, speed):
         return
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as tmp:
-        tmp.write(exhibit["script"])
+        tmp.write(to_tts_text(exhibit["script"]))
         tmp_path = tmp.name
 
     try:

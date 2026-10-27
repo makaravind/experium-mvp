@@ -131,6 +131,31 @@ General rule: if a 12-year-old would need to Google the word, replace it with pl
 
 ---
 
+### TTS normalisation rules — STRICT
+
+These rules prevent the audio pipeline from mispronouncing or misreading the script.
+
+- **Currency:** Always write amounts as `[number] [unit] rupees` — never the ₹ symbol. Example: "85 lakh rupees", not "₹ 85 lakhs".
+- **Numbers:** Spell out or write as plain digits without thousands-separator commas. Write "eight hundred" or "800", not "800" with a comma in the middle of a larger figure. For Indian units use natural spoken order: "two crore rupees", "forty lakh rupees".
+- **Dates:** Write in full spoken form — "the fifteenth of August, nineteen forty-seven", not "15/8/1947".
+- **Acronyms:** Expand on first use unless universally known. "IIT" → "the Indian Institute of Technology". Never write all-caps abbreviations that Kokoro will spell out letter by letter.
+- **No markdown or stage cues:** No `**bold**`, no `[beat]`, no `(pause)`, no `—`. These get stripped but may leave artefacts.
+- **Pause via punctuation:** Use a comma for a short breath, a period for a full stop. Do not chain more than three or four clauses without punctuation — this causes breathless or robotic delivery.
+- **Foreign/brand words:** If a name is likely to be mispronounced, write it phonetically in parentheses on first use, e.g. "Kokoro (koh-koh-roh)". The audio pipeline will use the phonetic form.
+- **Em dashes and ellipses:** Banned. Replace `—` with a comma or split into two sentences. Replace `…` with a period.
+
+### Audio clarity rules — STRICT
+
+A listener cannot re-read. Every sentence must be understood on first hearing, without relying on memory of the previous sentence.
+
+- **No ambiguous pronouns at sentence starts.** If "it", "this", "one", or "they" opens a sentence, the listener must identify the referent from that sentence alone — not by remembering the previous one. When in doubt, repeat the exhibit name or a clear noun.
+- **No em-dash asides.** Em dashes become either a long pause or a rush depending on the narrator. If a parenthetical matters, write it as its own sentence.
+- **Always close a spoken list with "and" or "or" before the final item.** Write "stone, cut timber, cast metal, and clay" — not "Stone. Cut timber. Cast metal. Clay." Fragment sequences sound like separate sentences when heard, not a list.
+- **No sentence that only makes sense if the listener remembers the previous one.** Cover the preceding sentence. Does the current sentence still make sense? If not, rewrite it to carry its own context.
+- **Self-check before outputting the draft:** Read the full script aloud mentally. Mark any sentence where you'd need to pause and re-hear it to understand. Rewrite those sentences before proceeding to Step 4.
+
+---
+
 ## Step 4: Show the draft
 
 Show the script under a `### Script` heading.
