@@ -1,0 +1,8 @@
+{
+  "name": "experium-tools",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@supertone/supertonic": "latest"
+  }
+}
