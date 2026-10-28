@@ -1,0 +1,176 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      container-type: size;
+      background: #f8f7f4;
+    }
+
+    #end-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(88,129,87,.14) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 80%, rgba(221,161,94,.10) 0%, transparent 55%),
+        #f8f7f4;
+    }
+
+    /* QR icon — upper third */
+    #end-qr-wrap {
+      position: absolute;
+      left: 50%; top: 280px;
+      margin-left: -72px;
+    }
+
+    #end-qr-icon {
+      width: 144px; height: 144px;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(88,129,87,.15) 8px, rgba(88,129,87,.15) 9px),
+        repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(88,129,87,.15) 8px, rgba(88,129,87,.15) 9px),
+        #f0ede8;
+      border-radius: 20px;
+      border: 3px solid #588157;
+      position: relative; overflow: hidden;
+      box-shadow: 0 6px 28px rgba(88,129,87,.22);
+    }
+
+    #end-qr-icon::before {
+      content: '';
+      position: absolute; top: 14px; left: 14px;
+      width: 32px; height: 32px;
+      border: 8px solid #2b2b2b; border-radius: 4px;
+      box-shadow: inset 0 0 0 8px #f0ede8, inset 0 0 0 16px #2b2b2b;
+    }
+
+    #end-qr-icon::after {
+      content: '';
+      position: absolute; top: 14px; right: 14px;
+      width: 32px; height: 32px;
+      border: 8px solid #2b2b2b; border-radius: 4px;
+      box-shadow: inset 0 0 0 8px #f0ede8, inset 0 0 0 16px #2b2b2b;
+    }
+
+    /* Central text block */
+    #end-text {
+      position: absolute;
+      left: 60px; right: 60px;
+      top: 500px;
+      text-align: center;
+    }
+
+    #end-eyebrow {
+      font-family: Nunito, sans-serif; font-size: 14px; font-weight: 800;
+      letter-spacing: .18em; text-transform: uppercase; color: #3f6b3a;
+      margin-bottom: 22px;
+    }
+
+    #end-headline {
+      font-family: Outfit, sans-serif; font-size: 136px; font-weight: 900;
+      letter-spacing: -0.04em; color: #2b2b2b; line-height: 0.88;
+      margin-bottom: 30px;
+    }
+
+    #end-location {
+      font-family: Nunito, sans-serif; font-size: 32px; font-weight: 800;
+      color: #588157; letter-spacing: -0.01em; margin-bottom: 18px;
+    }
+
+    #end-sub {
+      font-family: Nunito, sans-serif; font-size: 24px; font-weight: 600;
+      color: #6d6d6d; letter-spacing: 0.01em; line-height: 1.5;
+    }
+
+    /* Badge pills */
+    #end-badges {
+      position: absolute;
+      left: 60px; right: 60px;
+      bottom: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    #end-badges-row {
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    }
+
+    .end-badge {
+      font-family: Nunito, sans-serif; font-size: 16px; font-weight: 800;
+      color: #3f6b3a;
+      background: rgba(63,107,58,.08);
+      border: 1.5px solid rgba(63,107,58,.22);
+      border-radius: 999px;
+      padding: 11px 22px;
+    }
+
+    #end-tagline {
+      font-family: Nunito, sans-serif; font-size: 18px; font-weight: 700;
+      color: #6e6e6e; letter-spacing: 0.02em; text-align: center;
+    }
+
+    #end-fade {
+      position: absolute; inset: 0; background: #f8f7f4; pointer-events: none;
+    }
+  </style>
+
+  <div data-hf-id="hf-ecr" id="root" data-composition-id="scene-endcard" data-width="1080" data-height="1920">
+
+    <div data-hf-id="hf-ecbg" id="end-bg" class="clip" data-start="0" data-duration="5" data-track-index="0" data-layout-ignore></div>
+
+    <div data-hf-id="hf-ecqr" id="end-qr-wrap" class="clip" data-start="0" data-duration="5" data-track-index="1" data-layout-ignore>
+      <div data-hf-id="hf-ecqi" id="end-qr-icon"></div>
+    </div>
+
+    <div data-hf-id="hf-ect" id="end-text" class="clip" data-start="0" data-duration="5" data-track-index="2">
+      <div data-hf-id="hf-ece" id="end-eyebrow" data-layout-ignore>Nature Audio Tour</div>
+      <div data-hf-id="hf-ech" id="end-headline">Coming<br data-hf-id="hf-ecbr">Soon.</div>
+      <div data-hf-id="hf-ecl" id="end-location">Experium Park, Hyderabad</div>
+      <div data-hf-id="hf-ecs" id="end-sub">Scan. Listen. Discover.</div>
+    </div>
+
+    <div data-hf-id="hf-ecbd" id="end-badges" class="clip" data-start="0.4" data-duration="4.6" data-track-index="3" data-layout-ignore>
+      <div data-hf-id="hf-ecbdr" id="end-badges-row">
+        <span data-hf-id="hf-ecb1" class="end-badge">No App Needed</span>
+        <span data-hf-id="hf-ecb2" class="end-badge">Audio Narration</span>
+        <span data-hf-id="hf-ecb3" class="end-badge">GPS Map</span>
+      </div>
+      <div data-hf-id="hf-ectg" id="end-tagline">Scan any marker to begin your story.</div>
+    </div>
+
+    <div data-hf-id="hf-ecf" id="end-fade" class="clip" data-start="0" data-duration="5" data-track-index="4" data-layout-ignore></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+
+      /* Fade in */
+      tl.fromTo('#end-fade', { opacity: 1 }, { opacity: 0, duration: 0.28, ease: 'power2.out' }, 0);
+
+      /* QR icon pops in with wobble */
+      tl.fromTo('#end-qr-wrap', { opacity: 0, scale: 0.72, y: 24 }, { opacity: 1, scale: 1, y: 0, duration: 0.42, ease: 'back.out(1.8)' }, 0.1);
+      tl.to('#end-qr-wrap', { rotation: 5, duration: 0.1, ease: 'power1.inOut' }, 0.52);
+      tl.to('#end-qr-wrap', { rotation: -4, duration: 0.1, ease: 'power1.inOut' }, 0.62);
+      tl.to('#end-qr-wrap', { rotation: 0, duration: 0.12, ease: 'power1.inOut' }, 0.72);
+
+      /* Text block slides up */
+      tl.fromTo('#end-text', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.38, ease: 'power3.out' }, 0.22);
+
+      /* Badges appear */
+      tl.fromTo('#end-badges', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.32, ease: 'power2.out' }, 0.45);
+      tl.fromTo('.end-badge', { opacity: 0, scale: 0.84, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.26, ease: 'back.out(1.4)', stagger: 0.07 }, 0.55);
+
+      /* QR float */
+      tl.to('#end-qr-wrap', { y: -8, duration: 1.8, ease: 'sine.inOut' }, 1.4);
+      tl.to('#end-qr-wrap', { y: 0, duration: 1.8, ease: 'sine.inOut' }, 3.2);
+
+      tl.seek(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines['scene-endcard'] = tl;
+    })();
+  </script>
+</template>

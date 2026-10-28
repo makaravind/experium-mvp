@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --forest: #588157;
+        --orange: #dda15e;
+        --ink: #2b2b2b;
+        --muted: #8a8a8a;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      #root {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      .scene-host {
+        position: absolute;
+        inset: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-sshj"
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="18"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- Scene 1: Carousel of app screens (0–14s) -->
+      <div data-hf-id="hf-cjmt"
+        id="scene-carousel"
+        class="scene-host clip"
+        data-composition-id="scene-carousel"
+        data-composition-src="compositions/scene-carousel.html"
+        data-start="0"
+        data-duration="14"
+        data-track-index="1"
+        data-width="1080"
+        data-height="1920"
+        data-track-kind="graphics"
+        style="z-index:1"
+      ></div>
+
+      <!-- Scene 2: End card (13–18s) -->
+      <div data-hf-id="hf-6k2i"
+        id="scene-endcard"
+        class="scene-host clip"
+        data-composition-id="scene-endcard"
+        data-composition-src="compositions/scene-endcard.html"
+        data-start="13"
+        data-duration="5"
+        data-track-index="2"
+        data-width="1080"
+        data-height="1920"
+        data-track-kind="graphics"
+        style="z-index:2"
+      ></div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,144 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      container-type: size;
+      background: #111a0d;
+    }
+
+    #hook-park {
+      position: absolute;
+      inset: -4%;
+      background: linear-gradient(
+        170deg,
+        #1a3012 0%,
+        #2d4a1e 18%,
+        #3f6b3a 38%,
+        #588157 58%,
+        #7a6040 76%,
+        #dda15e 100%
+      );
+    }
+    #hook-park-label {
+      position: absolute;
+      bottom: 24px;
+      left: 40px;
+      font-family: Nunito, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.28);
+    }
+
+    #hook-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(17, 26, 13, 0.15) 0%,
+        rgba(17, 26, 13, 0.55) 50%,
+        rgba(17, 26, 13, 0.82) 100%
+      );
+    }
+
+    /* Text block — lower 45% of frame, centered */
+    #hook-text {
+      position: absolute;
+      left: 60px;
+      right: 60px;
+      bottom: 260px;
+    }
+
+    .hook-line {
+      overflow: hidden;
+      line-height: 1.0;
+    }
+    .hook-line-inner {
+      display: block;
+      font-family: Outfit, sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #f8f7f4;
+    }
+
+    #hook-l1 .hook-line-inner { font-size: 52px; color: rgba(248,247,244,.7); margin-bottom: 2px; }
+    #hook-l2 .hook-line-inner { font-size: 100px; color: #dda15e; margin-bottom: 2px; }
+    #hook-l3 .hook-line-inner { font-size: 80px; }
+
+    #hook-hint {
+      margin-top: 36px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #hook-hint-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #588157;
+      flex-shrink: 0;
+    }
+    #hook-hint-line {
+      font-family: Nunito, sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: rgba(248,247,244,.45);
+    }
+
+    #hook-fade {
+      position: absolute;
+      inset: 0;
+      background: #111a0d;
+      pointer-events: none;
+    }
+  </style>
+
+  <div data-hf-id="hf-9s5r" id="root" data-composition-id="scene-hook" data-width="1080" data-height="1920">
+
+    <div data-hf-id="hf-s9ag" id="hook-park" class="clip" data-start="0" data-duration="7" data-track-index="0" data-layout-ignore="">
+      <div data-hf-id="hf-38yh" id="hook-park-label">[ PARK PHOTO — IMG-1 — Replace with wide establishing shot ]</div>
+    </div>
+
+    <div data-hf-id="hf-6sl9" id="hook-overlay" class="clip" data-start="0" data-duration="7" data-track-index="1" data-layout-ignore=""></div>
+
+    <div data-hf-id="hf-efu4" id="hook-text" class="clip" data-start="0" data-duration="7" data-track-index="2">
+      <div data-hf-id="hf-50o1" class="hook-line" id="hook-l1"><span data-hf-id="hf-aijr" class="hook-line-inner">You're at Experium.</span></div>
+      <div data-hf-id="hf-8ys2" class="hook-line" id="hook-l2"><span data-hf-id="hf-qi8v" class="hook-line-inner">More than 3 hrs! 100s of exhibits.</span></div>
+      <div data-hf-id="hf-cww3" class="hook-line" id="hook-l3"><span data-hf-id="hf-67do" class="hook-line-inner">Where do you start?</span></div>
+      <div data-hf-id="hf-uq8x" id="hook-hint" data-layout-ignore="">
+        <div data-hf-id="hf-g6q4" id="hook-hint-dot"></div>
+        <span data-hf-id="hf-51y7" id="hook-hint-line">Experium Park, Hyderabad</span>
+      </div>
+    </div>
+
+    <div data-hf-id="hf-tw8z" id="hook-fade" class="clip" data-start="0" data-duration="7" data-track-index="3" data-layout-ignore=""></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+
+      tl.fromTo('#hook-fade', { opacity: 1 }, { opacity: 0, duration: 0.4, ease: 'power2.out' }, 0);
+      tl.fromTo('#hook-park', { scale: 1.06 }, { scale: 1.0, duration: 7, ease: 'none' }, 0);
+
+      tl.fromTo('#hook-l1 .hook-line-inner', { yPercent: 110 }, { yPercent: 0, duration: 0.5, ease: 'power3.out' }, 0.3);
+      tl.fromTo('#hook-l2 .hook-line-inner', { yPercent: 110 }, { yPercent: 0, duration: 0.5, ease: 'power3.out' }, 0.65);
+      tl.fromTo('#hook-l3 .hook-line-inner', { yPercent: 110 }, { yPercent: 0, duration: 0.5, ease: 'power3.out' }, 1.1);
+
+      tl.fromTo('#hook-hint', { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.45, ease: 'power3.out' }, 2.2);
+      tl.fromTo('#hook-hint-dot', { scale: 1 }, { scale: 1.6, duration: 0.45, ease: 'sine.inOut', yoyo: true, repeat: 3 }, 2.6);
+
+      tl.fromTo('#hook-fade', { opacity: 0, immediateRender: false }, { opacity: 1, duration: 0.6, ease: 'power2.in' }, 6.4);
+
+      tl.seek(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines['scene-hook'] = tl;
+    })();
+  </script>
+</template>

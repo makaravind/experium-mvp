@@ -1,0 +1,377 @@
+<template>
+  <style>
+    #root {
+      position: absolute; inset: 0; overflow: hidden;
+      container-type: size; background: #0b1108;
+    }
+
+    #phone-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+      transform-origin: center center;
+    }
+
+    /* ── App overlay — positioned exactly over the blue phone screen ── */
+    #app-overlay {
+      position: absolute;
+      left: 139px; top: 174px;
+      width: 791px; height: 1640px;
+      border-radius: 80px;
+      overflow: hidden;
+      background: #0a0a10;
+    }
+
+    /* App background (cream) — fades in when screen "turns on" */
+    #app-bg {
+      position: absolute; inset: 0;
+      background: #f0ede8;
+    }
+
+    /* ── Header ── */
+    #app-header {
+      position: absolute; top: 52px; left: 0; right: 0; height: 74px;
+      background: #588157;
+      display: flex; align-items: center;
+      padding: 0 28px; justify-content: space-between;
+      gap: 12px;
+    }
+
+    #app-logo {
+      font-family: Outfit, sans-serif; font-size: 30px; font-weight: 800;
+      color: #fff; letter-spacing: -0.02em;
+    }
+
+    #app-header-right {
+      display: flex; align-items: center; gap: 16px;
+    }
+
+    #app-exhibits-pill {
+      background: rgba(255,255,255,0.2);
+      border-radius: 999px; padding: 6px 14px;
+      font-family: Nunito, sans-serif; font-size: 14px; font-weight: 700;
+      color: #fff; white-space: nowrap;
+    }
+
+    /* ── Map area ── */
+    #app-map {
+      position: absolute; top: 126px; left: 0; right: 0; bottom: 400px;
+      background:
+        radial-gradient(ellipse at 65% 38%, rgba(88,129,87,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse at 25% 68%, rgba(163,177,138,0.18) 0%, transparent 45%),
+        #e4eddf;
+      overflow: hidden;
+    }
+
+    /* Path lines */
+    .map-path {
+      position: absolute; background: rgba(88,129,87,0.28);
+      border-radius: 6px; transform-origin: top center;
+    }
+
+    /* Exhibit dots */
+    .map-dot {
+      position: absolute; border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+      border: 2.5px solid rgba(255,255,255,0.8);
+    }
+
+    /* GPS location indicator */
+    #gps-dot {
+      position: absolute;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #4a90d9;
+      left: 50%; top: 52%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.9), 0 0 0 6px rgba(74,144,217,0.35);
+      z-index: 5;
+    }
+
+    .gps-ring {
+      position: absolute;
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid rgba(74,144,217,0.7);
+      left: 50%; top: 52%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    #gps-label {
+      position: absolute;
+      left: 50%; top: calc(52% + 20px);
+      transform: translateX(-50%);
+      background: #fff; color: #2b2b2b;
+      font-family: Nunito, sans-serif; font-size: 15px; font-weight: 800;
+      padding: 5px 14px; border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.14);
+      white-space: nowrap; z-index: 6;
+      margin-top: 6px;
+    }
+
+    /* ── Audio card ── */
+    #app-card {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 400px;
+      background: #fff;
+      border-radius: 32px 32px 0 0;
+      padding: 20px 28px 28px;
+      box-shadow: 0 -6px 24px rgba(0,0,0,0.1);
+    }
+
+    #card-handle {
+      width: 44px; height: 5px; border-radius: 3px;
+      background: #ddd9d3; margin: 0 auto 18px;
+    }
+
+    #card-row1 {
+      display: flex; align-items: flex-start; gap: 16px; margin-bottom: 14px;
+    }
+
+    #card-icon {
+      width: 58px; height: 58px; border-radius: 14px;
+      background: linear-gradient(135deg, #588157 0%, #3f6b3a 100%);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    #card-icon-leaf {
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,0.9);
+      clip-path: ellipse(50% 50% at 50% 50%);
+      border-radius: 50% 0 50% 0;
+    }
+
+    #card-info { flex: 1; }
+
+    #card-eyebrow {
+      font-family: Nunito, sans-serif; font-size: 12px; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase; color: #588157;
+      margin-bottom: 4px;
+    }
+
+    #card-title {
+      font-family: Outfit, sans-serif; font-size: 26px; font-weight: 800;
+      color: #2b2b2b; letter-spacing: -0.02em; line-height: 1.1;
+      margin-bottom: 3px;
+    }
+
+    #card-sub {
+      font-family: Nunito, sans-serif; font-size: 14px; font-weight: 600;
+      color: #8a8a8a;
+    }
+
+    #card-progress-wrap { margin-bottom: 18px; }
+
+    #card-progress-track {
+      height: 5px; background: #ece9e3; border-radius: 3px; overflow: hidden;
+    }
+
+    #card-progress-fill {
+      height: 100%; width: 0%; background: #588157; border-radius: 3px;
+    }
+
+    #card-time-row {
+      display: flex; justify-content: space-between;
+      font-family: Nunito, sans-serif; font-size: 13px; font-weight: 600;
+      color: #bbb8b2; margin-top: 5px;
+    }
+
+    #card-controls {
+      display: flex; align-items: center; gap: 18px;
+    }
+
+    #card-play {
+      width: 62px; height: 62px; border-radius: 50%;
+      background: #588157;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(88,129,87,0.45);
+    }
+
+    #card-play-tri {
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 10px 0 10px 18px;
+      border-color: transparent transparent transparent #fff;
+      margin-left: 4px;
+    }
+
+    /* Waveform bars */
+    #waveform {
+      display: flex; align-items: center; gap: 4px;
+      margin-left: auto;
+    }
+
+    .wb {
+      width: 4px; border-radius: 2px; background: #a3b18a;
+      transform-origin: center bottom;
+    }
+
+    /* Status bar (covers notch area) */
+    #app-statusbar {
+      position: absolute; top: 0; left: 0; right: 0; height: 52px;
+      background: #0a0a10; z-index: 10;
+    }
+
+    /* Notch pill */
+    #app-notch {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 266px; height: 38px;
+      background: #0a0a10;
+      border-radius: 0 0 22px 22px;
+      z-index: 11;
+    }
+
+    #phone-fade {
+      position: absolute; inset: 0; background: #0b1108; pointer-events: none;
+    }
+  </style>
+
+  <div data-hf-id="hf-pr" id="root" data-composition-id="scene-phone" data-width="1080" data-height="1920">
+
+    <img data-hf-id="hf-pi" id="phone-img" class="clip" data-start="0" data-duration="10" data-track-index="0" data-layout-ignore="" src="../assets/phone-mockup.png" alt="">
+
+    <!-- App overlay over the phone screen -->
+    <div data-hf-id="hf-ao" id="app-overlay" class="clip" data-start="0" data-duration="10" data-track-index="1" data-layout-ignore="">
+
+      <!-- Screen-on background -->
+      <div data-hf-id="hf-ab" id="app-bg"></div>
+
+      <!-- Header bar -->
+      <div data-hf-id="hf-ah" id="app-header">
+        <div data-hf-id="hf-al" id="app-logo">Experium</div>
+        <div data-hf-id="hf-ahr" id="app-header-right">
+          <div data-hf-id="hf-aep" id="app-exhibits-pill">32 exhibits</div>
+        </div>
+      </div>
+
+      <!-- Map area -->
+      <div data-hf-id="hf-am" id="app-map">
+        <!-- Decorative path lines -->
+        <div data-hf-id="hf-mp1" class="map-path" style="width:5px;height:310px;top:60px;left:36%;transform:rotate(20deg)"></div>
+        <div data-hf-id="hf-mp2" class="map-path" style="width:5px;height:240px;top:180px;left:58%;transform:rotate(-18deg)"></div>
+        <div data-hf-id="hf-mp3" class="map-path" style="width:5px;height:190px;top:330px;left:22%;transform:rotate(38deg)"></div>
+        <div data-hf-id="hf-mp4" class="map-path" style="width:5px;height:200px;top:480px;left:68%;transform:rotate(12deg)"></div>
+
+        <!-- GPS rings (3 separate elements for staggered pulses) -->
+        <div data-hf-id="hf-gr1" class="gps-ring" id="gps-ring-1"></div>
+        <div data-hf-id="hf-gr2" class="gps-ring" id="gps-ring-2"></div>
+        <div data-hf-id="hf-gr3" class="gps-ring" id="gps-ring-3"></div>
+
+        <!-- GPS dot -->
+        <div data-hf-id="hf-gd" id="gps-dot"></div>
+        <div data-hf-id="hf-gl" id="gps-label">You are here</div>
+
+        <!-- Exhibit dots -->
+        <div data-hf-id="hf-md1" class="map-dot" style="width:22px;height:22px;background:#dda15e;left:29%;top:24%;"></div>
+        <div data-hf-id="hf-md2" class="map-dot" style="width:20px;height:20px;background:#588157;left:71%;top:19%;"></div>
+        <div data-hf-id="hf-md3" class="map-dot" style="width:24px;height:24px;background:#dda15e;left:74%;top:70%;"></div>
+        <div data-hf-id="hf-md4" class="map-dot" style="width:18px;height:18px;background:#3f6b3a;left:21%;top:76%;"></div>
+        <div data-hf-id="hf-md5" class="map-dot" style="width:16px;height:16px;background:#dda15e;left:45%;top:80%;"></div>
+      </div>
+
+      <!-- Audio card -->
+      <div data-hf-id="hf-ac" id="app-card">
+        <div data-hf-id="hf-ach" id="card-handle"></div>
+        <div data-hf-id="hf-acr" id="card-row1">
+          <div data-hf-id="hf-aci" id="card-icon">
+            <div data-hf-id="hf-acil" id="card-icon-leaf"></div>
+          </div>
+          <div data-hf-id="hf-acin" id="card-info">
+            <div data-hf-id="hf-ace" id="card-eyebrow">Now Playing</div>
+            <div data-hf-id="hf-act" id="card-title">Flower Meadow</div>
+            <div data-hf-id="hf-acs" id="card-sub">Gate 3 · Exhibit #12</div>
+          </div>
+        </div>
+        <div data-hf-id="hf-acpw" id="card-progress-wrap">
+          <div data-hf-id="hf-acpt" id="card-progress-track">
+            <div data-hf-id="hf-acpf" id="card-progress-fill"></div>
+          </div>
+          <div data-hf-id="hf-actr" id="card-time-row">
+            <span data-hf-id="hf-act1">1:24</span>
+            <span data-hf-id="hf-act2">3:50</span>
+          </div>
+        </div>
+        <div data-hf-id="hf-acctl" id="card-controls">
+          <div data-hf-id="hf-acpl" id="card-play">
+            <div data-hf-id="hf-acpt2" id="card-play-tri"></div>
+          </div>
+          <!-- Waveform -->
+          <div data-hf-id="hf-wf" id="waveform">
+            <div data-hf-id="hf-wb1" class="wb" id="wb-1" style="height:14px"></div>
+            <div data-hf-id="hf-wb2" class="wb" id="wb-2" style="height:26px"></div>
+            <div data-hf-id="hf-wb3" class="wb" id="wb-3" style="height:18px"></div>
+            <div data-hf-id="hf-wb4" class="wb" id="wb-4" style="height:30px"></div>
+            <div data-hf-id="hf-wb5" class="wb" id="wb-5" style="height:20px"></div>
+            <div data-hf-id="hf-wb6" class="wb" id="wb-6" style="height:24px"></div>
+            <div data-hf-id="hf-wb7" class="wb" id="wb-7" style="height:12px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status bar on top of everything -->
+      <div data-hf-studio-original-inline-translate="" style="translate: 4.684px -12.335px" data-hf-id="hf-asb" id="app-statusbar"></div>
+      <div data-hf-id="hf-an" id="app-notch"></div>
+    </div>
+
+    <div data-hf-id="hf-pf" id="phone-fade" class="clip" data-start="0" data-duration="10" data-track-index="2" data-layout-ignore=""></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+tl.set("#app-card", { y: 130, x: 4.684, data: "hf-hold" }, 0);
+
+      /* Scene fade in */
+      tl.fromTo('#phone-fade', { opacity: 1 }, { opacity: 0, duration: 0.4, ease: 'power2.out' }, 0);
+
+      /* Phone image slow zoom out for life */
+      tl.fromTo('#phone-img', { scale: 1.04 }, { scale: 1.0, duration: 10, ease: 'none' }, 0);
+
+      /* App overlay fades in (dark screen) */
+      tl.fromTo('#app-overlay', { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0.3);
+
+      /* Screen turns on — cream bg reveals */
+      tl.fromTo('#app-bg', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.inOut' }, 0.45);
+
+      /* Header slides down from top — appears by t=0.95s so it's visible during video dissolve */
+      tl.fromTo('#app-header', { y: -80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: 'power3.out' }, 0.75);
+
+      /* Map area fades + scales in */
+      tl.fromTo('#app-map', { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, 1.3);
+
+      /* Exhibit dots pop in with stagger */
+      tl.fromTo('.map-dot', { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'back.out(2.2)', stagger: 0.08 }, 1.9);
+
+      /* GPS rings — 3 separate elements, each pulses once at offset timing */
+      tl.fromTo('#gps-ring-1', { scale: 1, opacity: 0.7 }, { scale: 2.8, opacity: 0, duration: 1.1, ease: 'power1.out' }, 2.2);
+      tl.fromTo('#gps-ring-2', { scale: 1, opacity: 0.7, immediateRender: false }, { scale: 2.8, opacity: 0, duration: 1.1, ease: 'power1.out' }, 3.4);
+      tl.fromTo('#gps-ring-3', { scale: 1, opacity: 0.7, immediateRender: false }, { scale: 2.8, opacity: 0, duration: 1.1, ease: 'power1.out' }, 4.6);
+      tl.fromTo('#gps-ring-1', { scale: 1, opacity: 0.7, immediateRender: false }, { scale: 2.8, opacity: 0, duration: 1.1, ease: 'power1.out' }, 5.8);
+      tl.fromTo('#gps-ring-2', { scale: 1, opacity: 0.7, immediateRender: false }, { scale: 2.8, opacity: 0, duration: 1.1, ease: 'power1.out' }, 7.0);
+
+      /* Audio card slides up */
+      tl.to('#app-card', { keyframes: { "0%": { y: 130, opacity: 0, x: 4.684 }, "10.855%": { y: 0, opacity: 1, x: 4.684 }, "100%": { y: -24.67, opacity: 1, x: 9.368, ease: "none" }, easeEach: "power3.out" }, duration: 5.067 }, 2.6);
+
+      /* Progress bar fills in */
+      tl.fromTo('#card-progress-fill', { width: '0%' }, { width: '37%', duration: 0.9, ease: 'power2.out' }, 3.15);
+
+      /* Waveform bars animate (each bar oscillates at different rate) */
+      tl.fromTo('#wb-1', { scaleY: 1 }, { scaleY: 2.0, duration: 0.32, ease: 'sine.inOut', yoyo: true, repeat: 17 }, 3.3);
+      tl.fromTo('#wb-2', { scaleY: 1 }, { scaleY: 1.5, duration: 0.22, ease: 'sine.inOut', yoyo: true, repeat: 25 }, 3.3);
+      tl.fromTo('#wb-3', { scaleY: 1 }, { scaleY: 2.4, duration: 0.38, ease: 'sine.inOut', yoyo: true, repeat: 14 }, 3.3);
+      tl.fromTo('#wb-4', { scaleY: 1 }, { scaleY: 1.7, duration: 0.28, ease: 'sine.inOut', yoyo: true, repeat: 19 }, 3.3);
+      tl.fromTo('#wb-5', { scaleY: 1 }, { scaleY: 2.2, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 15 }, 3.3);
+      tl.fromTo('#wb-6', { scaleY: 1 }, { scaleY: 1.6, duration: 0.25, ease: 'sine.inOut', yoyo: true, repeat: 22 }, 3.3);
+      tl.fromTo('#wb-7', { scaleY: 1 }, { scaleY: 2.1, duration: 0.42, ease: 'sine.inOut', yoyo: true, repeat: 13 }, 3.3);
+
+      /* Scene fade out */
+      tl.fromTo('#phone-fade', { opacity: 0, immediateRender: false }, { opacity: 1, duration: 0.35, ease: 'power2.in' }, 9.65);
+
+      tl.seek(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines['scene-phone'] = tl;
+    })();
+  </script>
+</template>

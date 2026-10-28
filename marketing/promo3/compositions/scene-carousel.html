@@ -1,0 +1,526 @@
+<template>
+<style>
+/* ── Base tokens (shared by all 4 screens) ── */
+:root {
+  --forest: #588157; --forest-shadow: #3f6b3a;
+  --orange: #dda15e; --orange-shadow: #b8834a;
+  --sage: #a3b18a; --ink: #2b2b2b; --muted: #8a8a8a;
+  --bg: #f8f7f4; --border: #e8e5df; --paper: #ffffff;
+  --shadow-press-green: 0 4px 0 var(--forest-shadow);
+  --shadow-press-orange: 0 4px 0 var(--orange-shadow);
+  --shadow-soft: 0 2px 10px rgba(43,43,43,.08);
+  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Slush sticker decorations (fixed in corner margins, above strip) ── */
+.c-sticker {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid #000000;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ── Scene root ── */
+#root {
+  position: absolute; inset: 0;
+  background: #dceeff;
+  overflow: hidden;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Carousel strip ── */
+#c-strip {
+  position: absolute;
+  top: 0; left: 0;
+  display: flex;
+  width: 4320px;
+  height: 1920px;
+}
+
+/* ── Phone slot: one 1080px × 1920px cell ── */
+.c-slot {
+  position: relative;
+  width: 1080px;
+  height: 1920px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dceeff;
+}
+
+/* ── Scale wrapper: CSS base scale, NOT animated by GSAP ── */
+.c-base {
+  transform: scale(1.6);
+  transform-origin: center center;
+}
+
+/* ── Zoom wrapper: GSAP animates scale on this ── */
+.c-zoom {
+  transform-origin: center center;
+}
+
+/* ── Phone frame (shared) ── */
+.phone {
+  width: 390px; height: 788px;
+  background: #111;
+  border-radius: 52px;
+  padding: 11px;
+  box-shadow: 0 24px 60px rgba(43,43,43,.28);
+  position: relative;
+}
+.screen {
+  position: relative; width: 100%; height: 100%;
+  border-radius: 42px; overflow: hidden;
+  background: var(--bg);
+}
+.island {
+  position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 112px; height: 31px; background: #111; border-radius: 20px; z-index: 60;
+}
+.statusbar {
+  position: absolute; top: 0; left: 0; right: 0; height: 52px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 0 26px 8px; font-weight: 800; font-size: 14px;
+  color: var(--ink); z-index: 50;
+}
+.sb-icons { display: flex; gap: 6px; align-items: center; color: var(--ink); }
+.sb-icons svg { fill: currentColor; }
+.home-ind {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  width: 132px; height: 5px; border-radius: 3px; background: var(--ink); opacity: .28; z-index: 55;
+}
+
+/* ── Screen 1: Home ── */
+.content {
+  position: absolute; top: 52px; left: 0; right: 0; bottom: 0;
+  padding: 20px 22px 110px; display: flex; flex-direction: column;
+}
+.greet { font-family: var(--font-display); font-weight: 800; font-size: 24px; letter-spacing: -.01em; }
+.greet .leaf { color: var(--forest); }
+.greet-sub { color: var(--muted); font-size: 14px; font-weight: 600; margin-top: 2px; }
+.trail-card {
+  background: var(--paper); border: 1px solid var(--border); border-radius: 18px;
+  padding: 20px 18px; margin-top: 20px; box-shadow: var(--shadow-soft);
+}
+.trail-lead { font-family: var(--font-display); font-weight: 700; font-size: 16px; line-height: 1.3; }
+.trail-lead .hl { color: var(--forest); }
+.trail-lead .hlo { color: var(--orange-shadow); }
+.trail { display: flex; align-items: center; margin: 20px 4px 8px; position: relative; }
+.node {
+  width: 26px; height: 26px; border-radius: 50%; flex: 0 0 auto;
+  display: grid; place-items: center; position: relative; z-index: 2;
+  font-size: 11px; font-weight: 800; color: #fff;
+}
+.node.hollow { background: transparent; border: 2.5px solid var(--sage); color: var(--sage); }
+.node.done { background: var(--forest); box-shadow: 0 2px 0 var(--forest-shadow); }
+.node.done svg { width: 13px; height: 13px; stroke: #fff; fill: none; stroke-width: 3; }
+.node.target {
+  background: var(--orange);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--orange) 30%, transparent), 0 2px 0 var(--orange-shadow);
+}
+.seg { height: 4px; flex: 1; background: var(--border); position: relative; z-index: 1; margin: 0 -2px; }
+.seg.fill { background: var(--forest); }
+.trail-meta { font-size: 13px; color: var(--muted); font-weight: 600; margin-top: 12px; }
+.spacer { flex: 1; }
+.scan-now {
+  width: 100%; height: 66px; border: none; border-radius: 16px;
+  background: var(--orange); color: #fff; font-family: var(--font-body);
+  font-weight: 800; font-size: 19px; letter-spacing: .08em; text-transform: uppercase;
+  box-shadow: var(--shadow-press-orange); display: flex; align-items: center; justify-content: center; gap: 11px;
+}
+.scan-now svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2.3; }
+.explore {
+  width: 100%; height: 52px; margin-top: 14px; border: 1.5px solid var(--sage);
+  border-radius: 14px; background: var(--paper); color: var(--ink);
+  font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.ad { margin-top: auto; border-top: 1px solid var(--border); padding-top: 14px; display: flex; align-items: center; gap: 12px; }
+.ad-thumb { width: 44px; height: 44px; border-radius: 8px; background: linear-gradient(135deg,#d9c39a,#c9a86f); flex: 0 0 auto; }
+.ad-txt { flex: 1; min-width: 0; }
+.ad-tag { font-size: 9.5px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.ad-h { font-size: 13.5px; font-weight: 700; line-height: 1.25; margin-top: 1px; }
+.ad-cta { font-size: 12px; font-weight: 800; color: var(--orange); }
+.tabbar {
+  position: absolute; left: 16px; right: 16px; bottom: 26px; height: 66px;
+  background: var(--paper); border: 1px solid var(--border); border-radius: 28px;
+  box-shadow: 0 8px 26px rgba(43,43,43,.14);
+  display: flex; align-items: center; justify-content: space-around; z-index: 40;
+}
+.tab {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-weight: 800; font-size: 10.5px; color: var(--muted);
+  flex: 1; text-align: center; border: none; background: none; font-family: inherit; padding: 0;
+}
+.tab svg { width: 24px; height: 24px; stroke: var(--muted); fill: none; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+.tab.active { color: var(--forest); }
+.tab.active svg { stroke: var(--forest); }
+.tab.scan-tab { margin-top: -24px; flex: 0 0 auto; }
+.scan-btn {
+  width: 62px; height: 62px; border-radius: 50%; background: var(--orange);
+  display: grid; place-items: center;
+  box-shadow: var(--shadow-press-orange); border: 3px solid var(--paper);
+}
+.scan-btn svg { width: 28px; height: 28px; stroke: #fff; stroke-width: 2.3; fill: none; }
+.tab.scan-tab span { margin-top: 6px; color: var(--orange); }
+.leaf-i { width: 20px; height: 20px; stroke: var(--forest); fill: none; stroke-width: 2; vertical-align: -3px; }
+
+/* ── Screen 2: Audio Player ── */
+.player-scrim { position: absolute; inset: 0; background: rgba(43,43,43,.12); z-index: 34; }
+.player {
+  position: absolute; inset: 0; background: var(--paper); z-index: 35;
+  display: flex; flex-direction: column; padding: 60px 20px 0;
+}
+.close-btn {
+  position: absolute; top: 60px; right: 20px; width: 32px; height: 32px;
+  border-radius: 50%; background: var(--bg); display: grid; place-items: center;
+  color: var(--ink); z-index: 2; border: none; cursor: pointer;
+}
+.close-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2.4; fill: none; }
+.hero {
+  width: calc(100% + 40px); aspect-ratio: 1/1; border-radius: 0; overflow: hidden;
+  position: relative; background: linear-gradient(160deg,#6f9557,#456a3f); margin: 0 -20px;
+}
+.hero:after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 20%,rgba(255,255,255,.4),transparent 45%),
+              radial-gradient(circle at 80% 90%,rgba(43,43,43,.28),transparent 50%);
+}
+.gallery-counter {
+  position: absolute; bottom: 12px; right: 12px;
+  background: rgba(43,43,43,.52); backdrop-filter: blur(4px);
+  color: #fff; font-weight: 800; font-size: 12px;
+  padding: 5px 10px; border-radius: 999px; z-index: 3; letter-spacing: .04em;
+}
+.thumb-strip { display: flex; gap: 8px; padding: 10px 0; justify-content: center; }
+.t-thumb {
+  width: 60px; height: 48px; border-radius: 8px;
+  background: linear-gradient(135deg,#7fa06a,#4d6b46);
+  position: relative; overflow: hidden; cursor: pointer; border: 2px solid transparent; flex: 0 0 auto;
+}
+.t-thumb:after { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(120,170,90,.4),rgba(40,70,30,.3)); }
+.t-thumb.on { border-color: var(--forest); }
+.t-thumb:nth-child(2) { background: linear-gradient(135deg,#5c7e4e,#3d5836); }
+.t-thumb:nth-child(3) { background: linear-gradient(135deg,#7aa863,#4d6b42); }
+.t-thumb:nth-child(4) { background: linear-gradient(135deg,#8ab87a,#567a46); }
+.player-name { font-family: var(--font-display); font-weight: 700; font-size: 20px; margin-top: 4px; }
+.player-sci { font-style: italic; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.player-body { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.player-controls { display: flex; align-items: center; gap: 16px; }
+.ring-sm { position: relative; width: 80px; height: 80px; flex: 0 0 auto; }
+.ring-sm svg { transform: rotate(-90deg); }
+.ring-sm .track { fill: none; stroke: var(--border); stroke-width: 5; }
+.ring-sm .prog { fill: none; stroke: var(--forest); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 270; stroke-dashoffset: 145; }
+.play-sm {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 52px; height: 52px; border-radius: 50%; background: var(--forest);
+  display: grid; place-items: center; box-shadow: var(--shadow-press-green); border: none;
+}
+.play-sm svg { width: 22px; height: 22px; fill: #fff; }
+.controls-right { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.pbar-thin { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.pbar-thin-fill { width: 47%; height: 100%; background: var(--forest); border-radius: 2px; }
+.time { font-weight: 700; font-size: 14px; color: var(--muted); margin-top: 16px; font-variant-numeric: tabular-nums; }
+.time b { color: var(--ink); }
+.learn {
+  margin-top: 16px; font-weight: 700; font-size: 14px; color: var(--muted);
+  display: flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer;
+}
+.learn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; }
+
+/* ── Screen 3: Map ── */
+.map-fake {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 25% 20%,#e3ecd8 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 70%,#dbe6cc 0%, transparent 50%),
+    linear-gradient(160deg,#eef3e6 0%,#dfe9d2 100%);
+}
+.map-fake .blob { position: absolute; border-radius: 50%; background: #cfe0ba; opacity: .7; }
+.search-row {
+  position: absolute; left: 16px; right: 16px; top: 60px;
+  display: flex; gap: 10px; align-items: center; z-index: 20;
+}
+.search-pill {
+  flex: 1; height: 44px; display: flex; align-items: center; gap: 8px;
+  padding: 0 16px; border-radius: 999px; font-weight: 700; font-size: 14px;
+  background: var(--paper); border: 1px solid var(--border); color: var(--muted); box-shadow: var(--shadow-soft);
+}
+.search-pill svg { width: 17px; height: 17px; stroke: var(--muted); fill: none; stroke-width: 2.2; }
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--paper); border: 1px solid var(--border); color: var(--forest); box-shadow: var(--shadow-soft);
+  flex: 0 0 auto;
+}
+.icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+.marker {
+  position: absolute; transform: translate(-50%,-50%); z-index: 10;
+}
+.marker-dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 11px; color: #fff;
+  border: 2px solid rgba(255,255,255,.8); box-shadow: 0 2px 8px rgba(0,0,0,.22);
+}
+.marker-dot.green { background: var(--forest); }
+.marker-dot.orange { background: var(--orange); }
+.gps-dot {
+  position: absolute; width: 18px; height: 18px; border-radius: 50%;
+  background: #4a90d9; transform: translate(-50%,-50%);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.9), 0 0 0 7px rgba(74,144,217,.3);
+  z-index: 15; left: 48%; top: 54%;
+}
+
+/* ── Screen 4: Discovery Card ── */
+.s3 {
+  position: absolute; top: 52px; left: 0; right: 0; bottom: 0;
+  padding: 30px 22px; display: flex; flex-direction: column; align-items: center;
+}
+.s3-title { font-family: var(--font-display); font-weight: 800; font-size: 19px; text-align: center; }
+.s3-sub { color: var(--muted); font-size: 13px; font-weight: 600; margin-top: 2px; text-align: center; }
+.dcard {
+  width: 100%; aspect-ratio: 1/1; border-radius: 20px; margin: auto 0; position: relative;
+  overflow: hidden; box-shadow: 0 14px 34px rgba(43,43,43,.24);
+  background: linear-gradient(150deg,#6f8f56 0%,#4d6b46 55%,#b8834a 130%);
+}
+.dcard:after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 26% 22%,rgba(255,255,255,.28),transparent 46%);
+}
+.dcard-inner {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 26px; color: #fff; z-index: 2;
+}
+.dcard-badge {
+  width: 104px; height: 104px; border-radius: 50%;
+  border: 3px dashed rgba(255,255,255,.5); display: grid; place-items: center; margin-bottom: 18px;
+}
+.dcard-badge div {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: rgba(255,255,255,.16); border: 2px solid rgba(255,255,255,.4); display: grid; place-items: center;
+}
+.dcard-badge svg { width: 38px; height: 38px; stroke: #fff; fill: none; stroke-width: 1.8; }
+.dcard-count { font-family: var(--font-display); font-weight: 800; font-size: 40px; line-height: 1; }
+.dcard-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin-top: 8px; }
+.dcard-eyebrow { font-weight: 800; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.72); margin-top: 12px; }
+.btn-download {
+  width: 100%; height: 56px; margin-top: 22px; border: none; border-radius: 14px;
+  background: var(--forest); color: #fff; font-family: var(--font-body); font-weight: 800; font-size: 16px;
+  box-shadow: var(--shadow-press-green); display: flex; align-items: center; justify-content: center; gap: 9px;
+}
+.btn-download svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2.2; }
+
+/* ── Fade-to-sky overlay for endcard transition ── */
+#c-fade {
+  position: absolute; inset: 0;
+  background: #dceeff;
+  pointer-events: none;
+  z-index: 100;
+}
+</style>
+
+<div data-hf-id="hf-zfuz" id="root" data-composition-id="scene-carousel" data-width="1080" data-height="1920" data-layout-allow-overflow>
+
+  <!-- Slush sticker accents — in corner margins (phone occupies center 228–852px H, 330–1590px V) -->
+  <div data-hf-id="hf-u1o5" id="c-sk-1" class="c-sticker" style="width:150px;height:150px;background:#4da2ff;top:70px;left:30px" data-layout-ignore></div>
+  <div data-hf-id="hf-cqru" id="c-sk-2" class="c-sticker" style="width:100px;height:100px;background:#ffd731;top:200px;right:30px" data-layout-ignore></div>
+  <div data-hf-id="hf-0629" id="c-sk-3" class="c-sticker" style="width:90px;height:90px;background:#55db9c;bottom:220px;left:50px" data-layout-ignore></div>
+  <div data-hf-id="hf-1ba2" id="c-sk-4" class="c-sticker" style="width:130px;height:130px;background:#e9ccff;bottom:90px;right:30px" data-layout-ignore></div>
+
+  <div data-hf-id="hf-d4jo" id="c-strip" class="clip" data-start="0" data-duration="14" data-layout-allow-overflow>
+
+    <!-- ── Slot 1: Home Screen ── -->
+    <div data-hf-id="hf-wkg0" class="c-slot">
+      <div data-hf-id="hf-xw96" class="c-base" data-layout-ignore>
+        <div data-hf-id="hf-b0am" class="c-zoom" id="cz-1">
+          <div data-hf-id="hf-kda4" class="phone"><div data-hf-id="hf-cdmk" class="screen">
+            <div data-hf-id="hf-7sfr" class="island"></div>
+            <div data-hf-id="hf-sz55" class="statusbar"><span data-hf-id="hf-zwmt">9:41</span><span data-hf-id="hf-npt7" class="sb-icons"><svg data-hf-id="hf-5hfo" viewBox="0 0 20 13" width="18" height="12"><rect data-hf-id="hf-zrgi" x="0" y="8" width="3" height="5" rx="1"/><rect data-hf-id="hf-q20p" x="5" y="5" width="3" height="8" rx="1"/><rect data-hf-id="hf-u1ic" x="10" y="2" width="3" height="11" rx="1"/><rect data-hf-id="hf-fe11" x="15" y="0" width="3" height="13" rx="1"/></svg><svg data-hf-id="hf-zedr" viewBox="0 0 26 13" width="24" height="12"><rect data-hf-id="hf-ody0" x="1" y="1.5" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect data-hf-id="hf-ilsb" x="3.5" y="4" width="14" height="5" rx="1.5"/><rect data-hf-id="hf-qs19" x="23.5" y="4.5" width="2" height="4" rx="1"/></svg></span></div>
+            <div data-hf-id="hf-mcm7" class="content">
+              <div data-hf-id="hf-axl4" class="greet">Welcome back, <span data-hf-id="hf-ggts" class="leaf">Sam</span> <svg data-hf-id="hf-003i" class="leaf-i" viewBox="0 0 24 24"><path data-hf-id="hf-d8au" d="M12 2C7 7 5 11 5 15a7 7 0 0 0 14 0c0-4-2-8-7-13Z"/><path data-hf-id="hf-gw0p" d="M12 22V9"/></svg></div>
+              <div data-hf-id="hf-8qz9" class="greet-sub">You're on a roll — keep going.</div>
+              <div data-hf-id="hf-h67b" class="trail-card">
+                <div data-hf-id="hf-my8g" class="trail-lead"><span data-hf-id="hf-usjc" class="hl">7 of 50</span> discovered · <span data-hf-id="hf-k5l3" class="hlo">3 more to badge!</span></div>
+                <div data-hf-id="hf-83yc" class="trail">
+                  <div data-hf-id="hf-t798" class="node done"><svg data-hf-id="hf-ulu9" viewBox="0 0 24 24"><path data-hf-id="hf-zpv1" d="m5 13 4 4L19 7"/></svg></div><div data-hf-id="hf-j26u" class="seg fill"></div>
+                  <div data-hf-id="hf-kyno" class="node done"><svg data-hf-id="hf-1tol" viewBox="0 0 24 24"><path data-hf-id="hf-qsf5" d="m5 13 4 4L19 7"/></svg></div><div data-hf-id="hf-8ptm" class="seg fill"></div>
+                  <div data-hf-id="hf-jrql" class="node done"><svg data-hf-id="hf-30lo" viewBox="0 0 24 24"><path data-hf-id="hf-rzc8" d="m5 13 4 4L19 7"/></svg></div><div data-hf-id="hf-ta0z" class="seg"></div>
+                  <div data-hf-id="hf-8b92" class="node target">10</div><div data-hf-id="hf-xb43" class="seg"></div>
+                  <div data-hf-id="hf-4ezr" class="node hollow">20</div>
+                </div>
+                <div data-hf-id="hf-v3c7" class="trail-meta">Milestones 1 · 3 · 5 earned — 10 glows ahead.</div>
+              </div>
+              <div data-hf-id="hf-x5ec" class="spacer"></div>
+              <button data-hf-id="hf-sm0c" class="scan-now"><svg data-hf-id="hf-2man" viewBox="0 0 24 24"><path data-hf-id="hf-s4y5" d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M4 12h16"/></svg>Scan Now</button>
+              <button data-hf-id="hf-r55w" class="explore">Explore the Park →</button>
+              <div data-hf-id="hf-iusv" class="ad">
+                <div data-hf-id="hf-sh68" class="ad-thumb"></div>
+                <div data-hf-id="hf-0i7k" class="ad-txt"><div data-hf-id="hf-8sxb" class="ad-tag">Sponsored</div><div data-hf-id="hf-nssp" class="ad-h">Butterfly Garden — 20% off today</div></div>
+                <div data-hf-id="hf-oti8" class="ad-cta">Open →</div>
+              </div>
+            </div>
+            <nav data-hf-id="hf-emzu" class="tabbar">
+              <button data-hf-id="hf-rieg" type="button" class="tab active"><svg data-hf-id="hf-3t7q" viewBox="0 0 24 24"><path data-hf-id="hf-orgv" d="M3 11 12 3l9 8"/><path data-hf-id="hf-rfgg" d="M5 10v10h14V10"/></svg>Home</button>
+              <button data-hf-id="hf-48d4" type="button" class="tab scan-tab"><span data-hf-id="hf-es4h" class="scan-btn"><svg data-hf-id="hf-3ewp" viewBox="0 0 24 24"><path data-hf-id="hf-uwqp" d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M4 12h16"/></svg></span><span data-hf-id="hf-3uh8">Scan</span></button>
+              <button data-hf-id="hf-2so1" type="button" class="tab"><svg data-hf-id="hf-4lts" viewBox="0 0 24 24"><path data-hf-id="hf-xmti" d="M9 3 3 5v16l6-2 6 2 6-2V3l-6 2-6-2Z"/><path data-hf-id="hf-0z73" d="M9 3v16M15 5v16"/></svg>Map</button>
+            </nav>
+            <div data-hf-id="hf-3hn9" class="home-ind"></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Slot 2: Audio Player ── -->
+    <div data-hf-id="hf-ppbs" class="c-slot">
+      <div data-hf-id="hf-f7m6" class="c-base" data-layout-ignore>
+        <div data-hf-id="hf-726l" class="c-zoom" id="cz-2">
+          <div data-hf-id="hf-3kj8" class="phone"><div data-hf-id="hf-0hv8" class="screen">
+            <div data-hf-id="hf-b0dz" class="island"></div>
+            <div data-hf-id="hf-3l5p" class="statusbar"><span data-hf-id="hf-0p8v">9:43</span><span data-hf-id="hf-odhn" class="sb-icons"><svg data-hf-id="hf-37i4" viewBox="0 0 20 13" width="18" height="12"><rect data-hf-id="hf-r9ye" x="0" y="8" width="3" height="5" rx="1"/><rect data-hf-id="hf-6hl9" x="5" y="5" width="3" height="8" rx="1"/><rect data-hf-id="hf-6o64" x="10" y="2" width="3" height="11" rx="1"/><rect data-hf-id="hf-0uu1" x="15" y="0" width="3" height="13" rx="1"/></svg><svg data-hf-id="hf-pay7" viewBox="0 0 26 13" width="24" height="12"><rect data-hf-id="hf-um0g" x="1" y="1.5" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect data-hf-id="hf-3mej" x="3.5" y="4" width="14" height="5" rx="1.5"/><rect data-hf-id="hf-h0kh" x="23.5" y="4.5" width="2" height="4" rx="1"/></svg></span></div>
+            <div data-hf-id="hf-ihyy" class="player-scrim"></div>
+            <div data-hf-id="hf-ahjb" class="player">
+              <button data-hf-id="hf-fans" class="close-btn"><svg data-hf-id="hf-a7md" viewBox="0 0 24 24" fill="none"><path data-hf-id="hf-t2we" d="M6 6l12 12M18 6 6 18"/></svg></button>
+              <div data-hf-id="hf-hie8" class="hero"><div data-hf-id="hf-dgw5" class="gallery-counter">1 / 4</div></div>
+              <div data-hf-id="hf-cjxx" class="thumb-strip">
+                <button data-hf-id="hf-vphk" type="button" class="t-thumb on"></button>
+                <button data-hf-id="hf-a0m3" type="button" class="t-thumb"></button>
+                <button data-hf-id="hf-f55n" type="button" class="t-thumb"></button>
+                <button data-hf-id="hf-equm" type="button" class="t-thumb"></button>
+              </div>
+              <div data-hf-id="hf-8has" class="player-body">
+                <div data-hf-id="hf-yeow">
+                  <div data-hf-id="hf-6sev" class="player-name">Flame of the Forest</div>
+                  <div data-hf-id="hf-3f3l" class="player-sci">Butea monosperma</div>
+                </div>
+                <div data-hf-id="hf-gx2e" class="player-controls">
+                  <div data-hf-id="hf-3n7b" class="ring-sm">
+                    <svg data-hf-id="hf-i5c0" width="80" height="80" viewBox="0 0 96 96"><circle data-hf-id="hf-anzj" class="track" cx="48" cy="48" r="43"/><circle data-hf-id="hf-pssu" class="prog" cx="48" cy="48" r="43"/></svg>
+                    <button data-hf-id="hf-scwc" class="play-sm"><svg data-hf-id="hf-47ir" viewBox="0 0 24 24"><rect data-hf-id="hf-cxww" x="6" y="5" width="4" height="14" rx="1"/><rect data-hf-id="hf-4iir" x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+                  </div>
+                  <div data-hf-id="hf-4w33" class="controls-right">
+                    <div data-hf-id="hf-omgh" class="pbar-thin"><div data-hf-id="hf-vu99" class="pbar-thin-fill"></div></div>
+                    <div data-hf-id="hf-c84w" class="time"><b data-hf-id="hf-byow">0:34</b> / 1:12</div>
+                    <button data-hf-id="hf-jfgm" class="learn">Learn more <svg data-hf-id="hf-z1je" viewBox="0 0 24 24"><path data-hf-id="hf-zit5" d="m6 9 6 6 6-6"/></svg></button>
+                  </div>
+                </div>
+              </div>
+              <div data-hf-id="hf-pv8h" class="ad" style="position:absolute;left:0;right:0;bottom:0;border-top:1px solid var(--border);padding:12px 20px 26px;display:flex;align-items:center;gap:12px;background:var(--paper);z-index:2">
+                <div data-hf-id="hf-4zpk" class="ad-thumb"></div>
+                <div data-hf-id="hf-atjc" class="ad-txt"><div data-hf-id="hf-2w7j" class="ad-tag">Sponsored</div><div data-hf-id="hf-t6as" class="ad-h">Refuel at Green Leaf Cafe</div></div>
+                <div data-hf-id="hf-3oew" class="ad-cta">Open →</div>
+              </div>
+            </div>
+            <div data-hf-id="hf-437t" class="home-ind"></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Slot 3: Map ── -->
+    <div data-hf-id="hf-oiep" class="c-slot">
+      <div data-hf-id="hf-flx7" class="c-base" data-layout-ignore>
+        <div data-hf-id="hf-6ais" class="c-zoom" id="cz-3">
+          <div data-hf-id="hf-2dm5" class="phone"><div data-hf-id="hf-zay5" class="screen">
+            <div data-hf-id="hf-nsy8" class="map-fake">
+              <div data-hf-id="hf-x922" class="blob" style="width:220px;height:160px;top:120px;left:-40px"></div>
+              <div data-hf-id="hf-ljnj" class="blob" style="width:180px;height:140px;top:420px;left:220px"></div>
+              <div data-hf-id="hf-qxrv" class="blob" style="width:140px;height:110px;top:560px;left:40px"></div>
+            </div>
+            <div data-hf-id="hf-kb4a" class="gps-dot"></div>
+            <div data-hf-id="hf-3lhj" class="marker" style="left:28%;top:26%"><div data-hf-id="hf-7xr7" class="marker-dot orange">7</div></div>
+            <div data-hf-id="hf-cx35" class="marker" style="left:68%;top:20%"><div data-hf-id="hf-xzou" class="marker-dot green">12</div></div>
+            <div data-hf-id="hf-ymgm" class="marker" style="left:72%;top:68%"><div data-hf-id="hf-3we5" class="marker-dot orange">23</div></div>
+            <div data-hf-id="hf-ehy0" class="marker" style="left:22%;top:72%"><div data-hf-id="hf-h04t" class="marker-dot green">31</div></div>
+            <div data-hf-id="hf-nzfs" class="marker" style="left:45%;top:82%"><div data-hf-id="hf-j58p" class="marker-dot green">44</div></div>
+            <div data-hf-id="hf-am2y" class="island"></div>
+            <div data-hf-id="hf-4s2s" class="statusbar"><span data-hf-id="hf-rk89">9:41</span><span data-hf-id="hf-nz6m" class="sb-icons"><svg data-hf-id="hf-20l1" viewBox="0 0 20 13" width="18" height="12"><rect data-hf-id="hf-ro9f" x="0" y="8" width="3" height="5" rx="1"/><rect data-hf-id="hf-7oic" x="5" y="5" width="3" height="8" rx="1"/><rect data-hf-id="hf-5h91" x="10" y="2" width="3" height="11" rx="1"/><rect data-hf-id="hf-21r4" x="15" y="0" width="3" height="13" rx="1"/></svg></span></div>
+            <div data-hf-id="hf-ujgr" class="search-row">
+              <div data-hf-id="hf-f57w" class="icon-btn"><svg data-hf-id="hf-yn8d" viewBox="0 0 24 24"><path data-hf-id="hf-494f" d="M3 11 12 3l9 8"/><path data-hf-id="hf-g4qg" d="M5 10v10h14V10"/></svg></div>
+              <div data-hf-id="hf-awja" class="search-pill"><svg data-hf-id="hf-lxbj" viewBox="0 0 24 24"><circle data-hf-id="hf-r9ft" cx="11" cy="11" r="7"/><path data-hf-id="hf-6eqt" d="M21 21l-4.3-4.3"/></svg>Search exhibits</div>
+              <div data-hf-id="hf-2284" class="icon-btn"><svg data-hf-id="hf-mbmk" viewBox="0 0 24 24"><circle data-hf-id="hf-1iwn" cx="12" cy="12" r="9"/><path data-hf-id="hf-ot7d" d="M12 7l2 5-2 5-2-5z"/></svg></div>
+            </div>
+            <div data-hf-id="hf-5a4w" class="home-ind"></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Slot 4: Discovery Card ── -->
+    <div data-hf-id="hf-owpq" class="c-slot">
+      <div data-hf-id="hf-g088" class="c-base" data-layout-ignore>
+        <div data-hf-id="hf-ts0b" class="c-zoom" id="cz-4">
+          <div data-hf-id="hf-2rx6" class="phone"><div data-hf-id="hf-zp96" class="screen">
+            <div data-hf-id="hf-a7rx" class="island"></div>
+            <div data-hf-id="hf-4drr" class="statusbar"><span data-hf-id="hf-sr5c">9:41</span></div>
+            <div data-hf-id="hf-qnxu" class="s3">
+              <div data-hf-id="hf-m2ls" class="s3-title">Your Discovery Card</div>
+              <div data-hf-id="hf-f0dk" class="s3-sub">Save it or share it — no name attached.</div>
+              <div data-hf-id="hf-kd32" class="dcard">
+                <div data-hf-id="hf-kmql" class="dcard-inner">
+                  <div data-hf-id="hf-cos8" class="dcard-badge"><div data-hf-id="hf-y7yw"><svg data-hf-id="hf-l4ph" viewBox="0 0 24 24"><path data-hf-id="hf-7f4a" d="M12 2C7 7 5 11 5 15a7 7 0 0 0 14 0c0-4-2-8-7-13Z"/><path data-hf-id="hf-em7h" d="M12 22V9"/></svg></div></div>
+                  <div data-hf-id="hf-koph" class="dcard-count">10</div>
+                  <div data-hf-id="hf-7vpg" class="dcard-name">Experium Park Explorer</div>
+                  <div data-hf-id="hf-sqak" class="dcard-eyebrow">Exhibits discovered</div>
+                </div>
+              </div>
+              <button data-hf-id="hf-x8x4" class="btn-download"><svg data-hf-id="hf-lj0i" viewBox="0 0 24 24"><path data-hf-id="hf-uq7q" d="M12 3v13M7 11l5 5 5-5M5 21h14"/></svg>Download</button>
+            </div>
+            <div data-hf-id="hf-4vtv" class="home-ind"></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /c-strip -->
+
+  <!-- Fade-to-white for endcard transition -->
+  <div data-hf-id="hf-0om7" id="c-fade" class="clip" data-start="12.5" data-duration="1.5" data-layout-ignore></div>
+
+</div>
+
+<script>
+(function () {
+  var tl = gsap.timeline({ paused: true });
+
+  // ── Phone 1 (Home) — visible from frame 0, then zoom ──
+  // No fade-in so first frame shows content immediately
+  tl.fromTo('#cz-1', { scale: 1.0 }, { scale: 1.12, duration: 0.4, ease: 'power4.out' }, 0.3);
+  tl.fromTo('#cz-1', { scale: 1.12 }, { scale: 1.0, duration: 0.3, ease: 'power3.out', immediateRender: false }, 2.6);
+
+  // ── Slide 1 → 2 ──
+  tl.fromTo('#c-strip', { x: 0 }, { x: -1080, duration: 0.45, ease: 'power3.inOut' }, 3.05);
+
+  // ── Phone 2 (Audio) enter + zoom ──
+  tl.fromTo('#cz-2', { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 3.55);
+  tl.fromTo('#cz-2', { scale: 1.0 }, { scale: 1.12, duration: 0.4, ease: 'power4.out', immediateRender: false }, 3.85);
+  tl.fromTo('#cz-2', { scale: 1.12 }, { scale: 1.0, duration: 0.3, ease: 'power3.out', immediateRender: false }, 6.1);
+
+  // ── Slide 2 → 3 ──
+  tl.fromTo('#c-strip', { x: -1080 }, { x: -2160, duration: 0.45, ease: 'power3.inOut', immediateRender: false }, 6.55);
+
+  // ── Phone 3 (Map) enter + zoom ──
+  tl.fromTo('#cz-3', { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 7.05);
+  tl.fromTo('#cz-3', { scale: 1.0 }, { scale: 1.12, duration: 0.4, ease: 'power4.out', immediateRender: false }, 7.35);
+  tl.fromTo('#cz-3', { scale: 1.12 }, { scale: 1.0, duration: 0.3, ease: 'power3.out', immediateRender: false }, 9.6);
+
+  // ── Slide 3 → 4 ──
+  tl.fromTo('#c-strip', { x: -2160 }, { x: -3240, duration: 0.45, ease: 'power3.inOut', immediateRender: false }, 10.05);
+
+  // ── Phone 4 (Discovery Card) enter + zoom ──
+  tl.fromTo('#cz-4', { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 10.55);
+  tl.fromTo('#cz-4', { scale: 1.0 }, { scale: 1.12, duration: 0.4, ease: 'power4.out', immediateRender: false }, 10.85);
+
+  // ── Fade to white for endcard transition ──
+  tl.fromTo('#c-fade', { opacity: 0, immediateRender: false }, { opacity: 1, duration: 0.8, ease: 'power2.in' }, 13.2);
+
+  tl.seek(0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines['scene-carousel'] = tl;
+})();
+</script>
+</template>

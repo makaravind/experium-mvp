@@ -1,13 +1,13 @@
 ---
 name: experium-transcript
-description: Generate an EN audio transcript (~45s) for a single Experium Park exhibit. Reads owner's notes, applies the park's short-form explainer style, shows a draft for review, then writes to scripts/{exhibit_id}/en.md. Use when creating audio content for an exhibit.
+description: Generate EN + HI audio transcripts (~45s each) for a single Experium Park exhibit. Reads owner's notes, applies the park's short-form explainer style, shows drafts for review, then writes to scripts/{exhibit_id}/en.md and scripts/{exhibit_id}/hi.md. Use when creating audio content for an exhibit.
 argument-hint: '"Exhibit Name" path/to/owner-notes.md'
 arguments: "Exhibit name (quoted) + path to owner notes document"
 ---
 
-# Experium EN Audio Transcript
+# Experium EN + HI Audio Transcript
 
-Generate a ~45-second English audio script for one Experium Park exhibit, following the park's short-form explainer style.
+Generate ~45-second English and Hindi audio scripts for one Experium Park exhibit, following the park's short-form explainer style.
 
 ## Arguments
 
@@ -156,27 +156,66 @@ A listener cannot re-read. Every sentence must be understood on first hearing, w
 
 ---
 
-## Step 4: Show the draft
+## Step 4: Generate the Hindi draft
 
-Show the script under a `### Script` heading.
+Translate the English script from Step 3 into Hindi. This is not a word-for-word translation — it is a natural re-expression in Hindi that a park visitor would actually hear and enjoy.
 
-Below the script, show:
-- Word count
-- Estimated reading time (words ÷ 2.5 words/second, rounded to nearest 5s)
+### Hindi style rules
+- Use conversational, everyday Hindi (बोलचाल की हिंदी). Avoid overly literary or formal register.
+- Keep the same structure as the English script: Hook → Identity + Scale → Rapid Roll → Memorable Close.
+- Short, punchy sentences. One idea per sentence. Present tense throughout.
+- Simple vocabulary. A 12-year-old Hindi speaker should understand every sentence.
+- No English words unless there is genuinely no natural Hindi equivalent — and if you use one, prefer its spoken Hindi form.
+
+### Hindi TTS normalisation rules — STRICT
+
+- **Numbers:** Write as Hindi words — "आठ सौ", "पाँच हज़ार", not digits. Exception: years can stay as digits if universally known (e.g. "1947").
+- **Currency:** Write as spoken Hindi — "पचासी लाख रुपये", never the ₹ symbol or digit-only amounts.
+- **Dates:** Full spoken form — "पन्द्रह अगस्त, उन्नीस सौ सैंतालीस".
+- **No markdown or stage cues:** No `**bold**`, no `[beat]`, no `(pause)`, no `—`.
+- **Pause via punctuation:** Comma for short breath, period for full stop.
+- **Em dashes and ellipses:** Banned. Replace with a comma or split into two sentences.
+- **Foreign/brand words:** Write phonetically in Devanagari on first use, e.g. "एक्सपेरियम".
+
+### Grounding rules (same as English)
+Only use facts from the owner's notes or provided photos. Do not add anything not in those sources.
+
+---
+
+## Step 5: Show the drafts
+
+Show both scripts under separate headings.
+
+```
+### Script (English)
+[english script]
+
+Word count: X  |  ~Xs
+
+### Script (Hindi)
+[hindi script]
+
+Word count: X  |  ~Xs
+```
 
 Then ask:
 
 > **Approve, Revise, or Reject?**
-> - **Approve** — writes the file
-> - **Revise** — tell me what to change, I'll regenerate
-> - **Reject** — discards, no file written
+> - **Approve** — writes both files
+> - **Revise EN** — revise only the English script; tell me what to change
+> - **Revise HI** — revise only the Hindi script; tell me what to change
+> - **Reject** — discards both, no files written
 
 ---
 
-## Step 5: Handle the response
+## Step 6: Handle the response
 
-**Approve:** Write the script to `scripts/{exhibit_id}/en.md`, where `exhibit_id` is the exhibit name lowercased with spaces replaced by hyphens (e.g. "Penjing Garden" → `penjing-garden`). Confirm the path written.
+**Approve:** Write both scripts:
+- `scripts/{exhibit_id}/en.md` — English script
+- `scripts/{exhibit_id}/hi.md` — Hindi script
 
-**Revise:** Apply the user's feedback, regenerate the script, return to Step 3.
+where `exhibit_id` is the exhibit name lowercased with spaces replaced by hyphens (e.g. "Penjing Garden" → `penjing-garden`). Confirm both paths written.
 
-**Reject:** Acknowledge and stop. No file written.
+**Revise EN / Revise HI:** Apply the user's feedback to the relevant script, regenerate it, return to Step 5. The other script stays unchanged.
+
+**Reject:** Acknowledge and stop. No files written.

@@ -1,0 +1,257 @@
+<template>
+  <style>
+    #root {
+      position: absolute; inset: 0; overflow: hidden;
+      container-type: size; background: #060e06;
+    }
+
+    /* Dark nature gradient bg */
+    #aud-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(88,129,87,0.28) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, rgba(63,107,58,0.18) 0%, transparent 50%),
+        linear-gradient(180deg, #060e06 0%, #0c1a0c 50%, #060e06 100%);
+    }
+
+    /* Subtle texture lines */
+    #aud-lines {
+      position: absolute; inset: 0; overflow: hidden; opacity: 0.06;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 38px,
+        rgba(88,129,87,1) 38px, rgba(88,129,87,1) 39px
+      );
+    }
+
+    /* Album circle */
+    #aud-album-wrap {
+      position: absolute;
+      left: 50%; top: 320px;
+      margin-left: -120px;
+    }
+
+    #aud-album {
+      width: 240px; height: 240px; border-radius: 50%;
+      background: radial-gradient(ellipse at 38% 38%, #6fa86a 0%, #3f6b3a 55%, #243d20 100%);
+      box-shadow:
+        0 0 0 6px rgba(88,129,87,0.25),
+        0 0 0 12px rgba(88,129,87,0.10),
+        0 20px 60px rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+
+    /* Leaf icon (pure CSS) */
+    #aud-leaf {
+      width: 90px; height: 90px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50% 8% 50% 8%;
+      transform: rotate(-35deg);
+    }
+
+    #aud-leaf::after {
+      content: '';
+      position: absolute; top: 50%; left: 50%;
+      width: 3px; height: 68px;
+      background: rgba(63,107,58,0.6);
+      transform: translate(-50%, -50%) rotate(35deg);
+      border-radius: 2px;
+    }
+
+    /* Album glow ring (animated) */
+    #aud-album-ring {
+      position: absolute; inset: -16px;
+      border-radius: 50%;
+      border: 2px solid rgba(88,129,87,0.4);
+    }
+
+    /* Track info */
+    #aud-track {
+      position: absolute;
+      left: 60px; right: 60px;
+      top: 610px;
+      text-align: center;
+    }
+
+    #aud-eyebrow {
+      font-family: Nunito, sans-serif; font-size: 13px; font-weight: 800;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(163,177,138,0.8); margin-bottom: 14px;
+    }
+
+    #aud-title {
+      font-family: Outfit, sans-serif; font-size: 72px; font-weight: 900;
+      letter-spacing: -0.03em; color: #f0ede8; line-height: 0.95;
+      margin-bottom: 16px;
+    }
+
+    #aud-subtitle {
+      font-family: Nunito, sans-serif; font-size: 22px; font-weight: 600;
+      color: #838a7f;
+    }
+
+    /* Waveform — large, centered */
+    #aud-waveform-wrap {
+      position: absolute;
+      left: 50%; top: 1020px;
+      transform: translateX(-50%);
+      width: 840px;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+
+    .aw {
+      border-radius: 4px;
+      background: #588157;
+      transform-origin: center bottom;
+      flex-shrink: 0;
+    }
+
+    /* Progress area */
+    #aud-progress-wrap {
+      position: absolute;
+      left: 80px; right: 80px; top: 1280px;
+    }
+
+    #aud-progress-track {
+      height: 4px; background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden;
+    }
+
+    #aud-progress-fill {
+      height: 100%; width: 0%; background: #588157; border-radius: 2px;
+    }
+
+    #aud-times {
+      display: flex; justify-content: space-between; margin-top: 10px;
+      font-family: Nunito, sans-serif; font-size: 16px; font-weight: 700;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* Tag line at bottom */
+    #aud-tagline {
+      position: absolute;
+      left: 60px; right: 60px; bottom: 120px;
+      text-align: center;
+      font-family: Outfit, sans-serif; font-size: 38px; font-weight: 800;
+      color: rgba(240,237,232,0.75); letter-spacing: -0.02em; line-height: 1.2;
+    }
+
+    #aud-fade { position: absolute; inset: 0; background: #060e06; pointer-events: none; }
+  </style>
+
+  <div data-hf-id="hf-ar" id="root" data-composition-id="scene-audio-playing" data-width="1080" data-height="1920">
+
+    <div data-hf-id="hf-abg" id="aud-bg" class="clip" data-start="0" data-duration="4" data-track-index="0" data-layout-ignore></div>
+    <div data-hf-id="hf-aln" id="aud-lines" class="clip" data-start="0" data-duration="4" data-track-index="1" data-layout-ignore></div>
+
+    <!-- Album art -->
+    <div data-hf-id="hf-aaw" id="aud-album-wrap" class="clip" data-start="0" data-duration="4" data-track-index="2" data-layout-ignore>
+      <div data-hf-id="hf-aa" id="aud-album">
+        <div data-hf-id="hf-al2" id="aud-leaf"></div>
+      </div>
+      <div data-hf-id="hf-aar" id="aud-album-ring"></div>
+    </div>
+
+    <!-- Track info -->
+    <div data-hf-id="hf-at" id="aud-track" class="clip" data-start="0" data-duration="4" data-track-index="3" data-layout-allow-overlap>
+      <div data-hf-id="hf-ae" id="aud-eyebrow" data-layout-ignore>Now Playing</div>
+      <div data-hf-id="hf-ati" id="aud-title">3500 Year<br data-hf-id="hf-atbr">Old Kalpvriksh</div>
+      <div data-hf-id="hf-as" id="aud-subtitle">Gate 3 · Exhibit #12</div>
+    </div>
+
+    <!-- Waveform bars -->
+    <div data-hf-id="hf-aww" id="aud-waveform-wrap" class="clip" data-start="0" data-duration="4" data-track-index="4" data-layout-ignore>
+      <div data-hf-id="hf-aw1"  class="aw" id="aw-1"  style="width:14px;height:30px"></div>
+      <div data-hf-id="hf-aw2"  class="aw" id="aw-2"  style="width:14px;height:55px"></div>
+      <div data-hf-id="hf-aw3"  class="aw" id="aw-3"  style="width:14px;height:80px"></div>
+      <div data-hf-id="hf-aw4"  class="aw" id="aw-4"  style="width:14px;height:48px"></div>
+      <div data-hf-id="hf-aw5"  class="aw" id="aw-5"  style="width:14px;height:100px"></div>
+      <div data-hf-id="hf-aw6"  class="aw" id="aw-6"  style="width:14px;height:65px"></div>
+      <div data-hf-id="hf-aw7"  class="aw" id="aw-7"  style="width:14px;height:120px"></div>
+      <div data-hf-id="hf-aw8"  class="aw" id="aw-8"  style="width:14px;height:90px"></div>
+      <div data-hf-id="hf-aw9"  class="aw" id="aw-9"  style="width:14px;height:140px"></div>
+      <div data-hf-id="hf-aw10" class="aw" id="aw-10" style="width:14px;height:108px"></div>
+      <div data-hf-id="hf-aw11" class="aw" id="aw-11" style="width:14px;height:160px"></div>
+      <div data-hf-id="hf-aw12" class="aw" id="aw-12" style="width:14px;height:130px"></div>
+      <div data-hf-id="hf-aw13" class="aw" id="aw-13" style="width:14px;height:155px"></div>
+      <div data-hf-id="hf-aw14" class="aw" id="aw-14" style="width:14px;height:118px"></div>
+      <div data-hf-id="hf-aw15" class="aw" id="aw-15" style="width:14px;height:145px"></div>
+      <div data-hf-id="hf-aw16" class="aw" id="aw-16" style="width:14px;height:105px"></div>
+      <div data-hf-id="hf-aw17" class="aw" id="aw-17" style="width:14px;height:160px"></div>
+      <div data-hf-id="hf-aw18" class="aw" id="aw-18" style="width:14px;height:125px"></div>
+      <div data-hf-id="hf-aw19" class="aw" id="aw-19" style="width:14px;height:95px"></div>
+      <div data-hf-id="hf-aw20" class="aw" id="aw-20" style="width:14px;height:70px"></div>
+      <div data-hf-id="hf-aw21" class="aw" id="aw-21" style="width:14px;height:112px"></div>
+      <div data-hf-id="hf-aw22" class="aw" id="aw-22" style="width:14px;height:82px"></div>
+      <div data-hf-id="hf-aw23" class="aw" id="aw-23" style="width:14px;height:58px"></div>
+      <div data-hf-id="hf-aw24" class="aw" id="aw-24" style="width:14px;height:40px"></div>
+      <div data-hf-id="hf-aw25" class="aw" id="aw-25" style="width:14px;height:28px"></div>
+    </div>
+
+    <!-- Progress -->
+    <div data-hf-id="hf-apw" id="aud-progress-wrap" class="clip" data-start="0" data-duration="4" data-track-index="5" data-layout-ignore>
+      <div data-hf-id="hf-apt" id="aud-progress-track">
+        <div data-hf-id="hf-apf" id="aud-progress-fill"></div>
+      </div>
+      <div data-hf-id="hf-atm" id="aud-times">
+        <span data-hf-id="hf-at1">1:24</span>
+        <span data-hf-id="hf-at2">3:50</span>
+      </div>
+    </div>
+
+    <div data-hf-id="hf-atg" id="aud-tagline" class="clip" data-start="0" data-duration="4" data-track-index="6" data-layout-ignore>
+      Every marker tells a story.
+    </div>
+
+    <div data-hf-id="hf-af" id="aud-fade" class="clip" data-start="0" data-duration="4" data-track-index="7" data-layout-ignore></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+
+      /* Fade in */
+      tl.fromTo('#aud-fade', { opacity: 1 }, { opacity: 0, duration: 0.3, ease: 'power2.out' }, 0);
+
+      /* Album pops in */
+      tl.fromTo('#aud-album-wrap', { opacity: 0, scale: 0.78, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: 'back.out(1.6)' }, 0.2);
+
+      /* Album ring pulses */
+      tl.fromTo('#aud-album-ring', { scale: 1, opacity: 0.4 }, { scale: 1.18, opacity: 0, duration: 0.9, ease: 'power1.out' }, 0.7);
+      tl.fromTo('#aud-album-ring', { scale: 1, opacity: 0.4, immediateRender: false }, { scale: 1.18, opacity: 0, duration: 0.9, ease: 'power1.out' }, 1.7);
+      tl.fromTo('#aud-album-ring', { scale: 1, opacity: 0.4, immediateRender: false }, { scale: 1.18, opacity: 0, duration: 0.9, ease: 'power1.out' }, 2.7);
+
+      /* Track title slides up */
+      tl.fromTo('#aud-track', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' }, 0.4);
+
+      /* Waveform bars fade + animate in */
+      tl.fromTo('#aud-waveform-wrap', { opacity: 0, scaleY: 0.4 }, { opacity: 1, scaleY: 1, duration: 0.4, ease: 'power2.out', transformOrigin: 'bottom' }, 0.55);
+
+      /* Each bar oscillates independently */
+      var bars = ['aw-1','aw-2','aw-3','aw-4','aw-5','aw-6','aw-7','aw-8','aw-9','aw-10',
+                  'aw-11','aw-12','aw-13','aw-14','aw-15','aw-16','aw-17','aw-18','aw-19','aw-20',
+                  'aw-21','aw-22','aw-23','aw-24','aw-25'];
+      var speeds = [0.28,0.38,0.22,0.42,0.32,0.25,0.35,0.30,0.40,0.27,
+                    0.36,0.24,0.44,0.31,0.26,0.39,0.29,0.33,0.41,0.23,
+                    0.37,0.28,0.34,0.26,0.43];
+      bars.forEach(function(id, i) {
+        var rep = Math.floor(2.8 / (speeds[i] * 2));
+        tl.fromTo('#' + id, { scaleY: 0.3 }, { scaleY: 1, duration: speeds[i], ease: 'sine.inOut', yoyo: true, repeat: rep, transformOrigin: 'bottom' }, 0.55 + (i % 5) * 0.04);
+      });
+
+      /* Progress fills to current position */
+      tl.fromTo('#aud-progress-fill', { width: '33%' }, { width: '41%', duration: 3.0, ease: 'none' }, 0.6);
+
+      /* Tagline fades up */
+      tl.fromTo('#aud-tagline', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' }, 0.8);
+
+      /* Fade out */
+      tl.fromTo('#aud-fade', { opacity: 0, immediateRender: false }, { opacity: 1, duration: 0.35, ease: 'power2.in' }, 3.65);
+
+      tl.seek(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines['scene-audio-playing'] = tl;
+    })();
+  </script>
+</template>

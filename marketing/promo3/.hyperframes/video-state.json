@@ -1,0 +1,812 @@
+{
+  "version": 1,
+  "historyId": "7b5f11c6-e428-40f0-abda-b1edeffe8c2f",
+  "currentRevision": "457c0101-9bfa-4b14-9aef-a1adad47be88",
+  "pendingChanges": false,
+  "files": {
+    "AGENTS.md": {
+      "hash": "1b36171117cb7c18f4100a0db6a3782ff2e096115995733200445cc2e80a4060",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/1b/1b36171117cb7c18f4100a0db6a3782ff2e096115995733200445cc2e80a4060"
+    },
+    "CLAUDE.md": {
+      "hash": "1b36171117cb7c18f4100a0db6a3782ff2e096115995733200445cc2e80a4060",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/1b/1b36171117cb7c18f4100a0db6a3782ff2e096115995733200445cc2e80a4060"
+    },
+    "assets/screens/screen-audio.html": {
+      "hash": "73dfd6aa45d8f93d01b20f5bd9d8f7ee40caec0333d6c78eb9b1a89315f7ef74",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/73/73dfd6aa45d8f93d01b20f5bd9d8f7ee40caec0333d6c78eb9b1a89315f7ef74"
+    },
+    "assets/screens/screen-gamification.html": {
+      "hash": "dec789e440c20b5d210fdd1f5d6a601b3ad28ba7f92e59364ef50fe983967794",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/de/dec789e440c20b5d210fdd1f5d6a601b3ad28ba7f92e59364ef50fe983967794"
+    },
+    "assets/screens/screen-home.html": {
+      "hash": "3e9a23e02ffc5d3d5a980384ec27c027091eb29a1a4bf68640d659b3d629e6c2",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/3e/3e9a23e02ffc5d3d5a980384ec27c027091eb29a1a4bf68640d659b3d629e6c2"
+    },
+    "assets/screens/screen-map.html": {
+      "hash": "645e7f25fb1346ca6ae2f824961fd70acecd974871e2478b0c1eb23884819da0",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/64/645e7f25fb1346ca6ae2f824961fd70acecd974871e2478b0c1eb23884819da0"
+    },
+    "compositions/scene-carousel.html": {
+      "hash": "06615e3d115e983324090aff889dc674567650ebe87b056e3bc5fafb559e7352",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/06/06615e3d115e983324090aff889dc674567650ebe87b056e3bc5fafb559e7352"
+    },
+    "compositions/scene-endcard.html": {
+      "hash": "28fdcbd20913ff3bddcbfd01fee1d44994af726f80f47257fb138a002023f050",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/28/28fdcbd20913ff3bddcbfd01fee1d44994af726f80f47257fb138a002023f050"
+    },
+    "hyperframes.json": {
+      "hash": "53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/53/53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50"
+    },
+    "index.html": {
+      "hash": "94c396d6fbeb07a2a571818e014c9aebc1e2b3080e4ab4c72ead7457ae4d5546",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/94/94c396d6fbeb07a2a571818e014c9aebc1e2b3080e4ab4c72ead7457ae4d5546"
+    },
+    "meta.json": {
+      "hash": "55c0d5e415c25e78d88180b9de3e123fbad859f3c65dfb1294f9d984da74b7b1",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/55/55c0d5e415c25e78d88180b9de3e123fbad859f3c65dfb1294f9d984da74b7b1"
+    },
+    "package.json": {
+      "hash": "ff4ee67c954088cfb4671a474e886a382547ddbf274c9e8955c2010a20be5a2f",
+      "content": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/ff/ff4ee67c954088cfb4671a474e886a382547ddbf274c9e8955c2010a20be5a2f"
+    }
+  },
+  "revisions": {
+    "29604058-91ec-427d-ae49-3a104799eb1c": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1792890448026,
+      "endedAt": 1792890448028,
+      "files": {
+        "compositions/scene-carousel.html": {
+          "before": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/6a/6a5765a0cc91e58d9b7b0d8e6006d9d719c165a53d432999cd3e6aa16230a807",
+          "after": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/b9/b99f9bacbd96dad74f9357f538959e8d08f534c2370f75b6ee08f716c6e545d7"
+        },
+        "compositions/scene-endcard.html": {
+          "before": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/a8/a88e40c8956c8f8534d307ff50eb14843f4da31fcf796ad768cfc36cb4e46248",
+          "after": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/1a/1aebe39a0cfc64df80a88dca981acc3d97752f827754fbf1f36a2eced77fbe33"
+        }
+      }
+    },
+    "82e93f77-eff9-4a3d-baa8-fca8fd2ab262": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1792890462675,
+      "endedAt": 1792890462676,
+      "files": {
+        "compositions/scene-endcard.html": {
+          "before": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/1a/1aebe39a0cfc64df80a88dca981acc3d97752f827754fbf1f36a2eced77fbe33",
+          "after": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/01/0155e556fb532b52f88f52acc64d252058410c7cb982d9df7ea726d585b1dcf3"
+        }
+      }
+    },
+    "fcd3490e-372a-4ec2-bfeb-ceeedea035a2": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1792890769326,
+      "endedAt": 1792890769327,
+      "files": {
+        "compositions/scene-carousel.html": {
+          "before": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/b9/b99f9bacbd96dad74f9357f538959e8d08f534c2370f75b6ee08f716c6e545d7",
+          "after": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/e6/e6e309a7f83311165c98513e3d3068e6940356543a1c0a5601fea2fcfed1e822"
+        },
+        "compositions/scene-endcard.html": {
+          "before": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/01/0155e556fb532b52f88f52acc64d252058410c7cb982d9df7ea726d585b1dcf3",
+          "after": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/bf/bf9902c7802be21834e7e5e270d96e611dbcba74a17b5a40de91ddfdf6309f80"
+        }
+      }
+    },
+    "2edd6f7d-e3a8-4be7-b789-869b95959afd": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1792890801295,
+      "endedAt": 1792890801295,
+      "files": {
+        "compositions/scene-endcard.html": {
+          "before": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/bf/bf9902c7802be21834e7e5e270d96e611dbcba74a17b5a40de91ddfdf6309f80",
+          "after": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/c8/c8272a36260f86a4190d46330eff1bedd3f1861cd1e9896865175e4d74c070f8"
+        }
+      }
+    },
+    "0be6dc41-80e6-46a3-a8d3-480fdca0cfa7": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1792890873761,
+      "endedAt": 1792890873761,
+      "files": {
+        "compositions/scene-carousel.html": {
+          "before": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/e6/e6e309a7f83311165c98513e3d3068e6940356543a1c0a5601fea2fcfed1e822",
+          "after": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/b6/b69e30a8188b74c8f643739f4fe8c6dd5f8460d39481ad7ce1f09a508fa53626"
+        }
+      }
+    },
+    "457c0101-9bfa-4b14-9aef-a1adad47be88": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1792890903696,
+      "endedAt": 1792890903699,
+      "files": {
+        "compositions/scene-carousel.html": {
+          "before": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/b6/b69e30a8188b74c8f643739f4fe8c6dd5f8460d39481ad7ce1f09a508fa53626",
+          "after": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/06/06615e3d115e983324090aff889dc674567650ebe87b056e3bc5fafb559e7352"
+        },
+        "compositions/scene-endcard.html": {
+          "before": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/c8/c8272a36260f86a4190d46330eff1bedd3f1861cd1e9896865175e4d74c070f8",
+          "after": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/28/28fdcbd20913ff3bddcbfd01fee1d44994af726f80f47257fb138a002023f050"
+        },
+        "index.html": {
+          "before": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/70/7080d00e21da211433eca3d7063bbc0ac4d23e8fe4d5c4ded47667a29d9e736d",
+          "after": "/Users/ametku/.cache/hyperframes/history/7b5f11c6-e428-40f0-abda-b1edeffe8c2f/blobs/94/94c396d6fbeb07a2a571818e014c9aebc1e2b3080e4ab4c72ead7457ae4d5546"
+        }
+      }
+    }
+  },
+  "checks": {
+    "latest": {
+      "revision": "0be6dc41-80e6-46a3-a8d3-480fdca0cfa7",
+      "id": "38994760-f39e-41ae-a658-54c3920d25ee"
+    },
+    "revisions": {
+      "29604058-91ec-427d-ae49-3a104799eb1c": [
+        {
+          "id": "ea3d1aa6-d865-419f-9b8e-b7046ccaba1e",
+          "scope": "project",
+          "report": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/checks/ea3d1aa6-d865-419f-9b8e-b7046ccaba1e.json",
+          "metadata": {
+            "ok": true,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 3000,
+              "contrast": true,
+              "strict": false,
+              "snapshots": false,
+              "browserGpuMode": "auto"
+            }
+          },
+          "createdAt": 1792890450362,
+          "contentHash": "5566e07083f1b118120c59af7e6d3982dd1dfb2385d25a37b7fb255347250615",
+          "revision": "29604058-91ec-427d-ae49-3a104799eb1c",
+          "inputFingerprint": "a0a8f85321caac464207603d7f18294110739fd628c5672893e77fdff83cdb24",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ],
+      "fcd3490e-372a-4ec2-bfeb-ceeedea035a2": [
+        {
+          "id": "a231e27f-a42b-4d54-baad-d179ed3a54c3",
+          "scope": "project",
+          "report": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/checks/a231e27f-a42b-4d54-baad-d179ed3a54c3.json",
+          "metadata": {
+            "ok": false,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 3000,
+              "contrast": true,
+              "strict": false,
+              "snapshots": false,
+              "browserGpuMode": "auto"
+            }
+          },
+          "createdAt": 1792890773779,
+          "contentHash": "2826f5b337eeb802eeb84d052cf3b4c385ade5bcab08ab89a1130c30cb147911",
+          "revision": "fcd3490e-372a-4ec2-bfeb-ceeedea035a2",
+          "inputFingerprint": "7bd5e69ea326ab4a81c497bbdda967f48ff8da573140f346f06d65fc1b57a403",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ],
+      "2edd6f7d-e3a8-4be7-b789-869b95959afd": [
+        {
+          "id": "fd7dfa5e-0b2a-422c-8572-62758171b809",
+          "scope": "project",
+          "report": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/checks/fd7dfa5e-0b2a-422c-8572-62758171b809.json",
+          "metadata": {
+            "ok": true,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 3000,
+              "contrast": true,
+              "strict": false,
+              "snapshots": false,
+              "browserGpuMode": "auto"
+            }
+          },
+          "createdAt": 1792890803215,
+          "contentHash": "b2cdf441c007b2298c1d704611e87cb41d11f9e64359e19666beb8be254ee4a0",
+          "revision": "2edd6f7d-e3a8-4be7-b789-869b95959afd",
+          "inputFingerprint": "9c80cfdba94ba506e7a71132d2cd9ca2626456e21e98584cd7b0b7d1862665be",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ],
+      "0be6dc41-80e6-46a3-a8d3-480fdca0cfa7": [
+        {
+          "id": "38994760-f39e-41ae-a658-54c3920d25ee",
+          "scope": "project",
+          "report": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/checks/38994760-f39e-41ae-a658-54c3920d25ee.json",
+          "metadata": {
+            "ok": true,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 3000,
+              "contrast": true,
+              "strict": false,
+              "snapshots": false,
+              "browserGpuMode": "auto"
+            }
+          },
+          "createdAt": 1792890875572,
+          "contentHash": "b2cdf441c007b2298c1d704611e87cb41d11f9e64359e19666beb8be254ee4a0",
+          "revision": "0be6dc41-80e6-46a3-a8d3-480fdca0cfa7",
+          "inputFingerprint": "4b695af1e5aa05d83b01a782362f4c2f88b469ef37d171061ed87c0ffc910a5a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ]
+    },
+    "unversioned": [
+      {
+        "id": "b5f60c59-d352-4974-8160-031b5ad7b0c1",
+        "scope": "project",
+        "report": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/checks/b5f60c59-d352-4974-8160-031b5ad7b0c1.json",
+        "metadata": {
+          "ok": true,
+          "browserSkipped": false,
+          "options": {
+            "samples": 9,
+            "atTransitions": false,
+            "maxIssues": 80,
+            "collapseStatic": true,
+            "tolerance": 2,
+            "timeout": 3000,
+            "contrast": true,
+            "strict": false,
+            "snapshots": false,
+            "browserGpuMode": "auto"
+          }
+        },
+        "createdAt": 1792890391670,
+        "contentHash": "058f3fc4ad07ce3290935eb929edfd08b4b57a571897e87ceb532026a6074346",
+        "revision": null,
+        "inputFingerprint": "bc66fc2e60bbc199a60cb74cedbbff34e9b58b25358e63d807e087db70413ffc",
+        "inputScope": "local-project-files",
+        "attribution": "unversioned"
+      }
+    ]
+  },
+  "snapshots": {
+    "latest": {
+      "revision": "0be6dc41-80e6-46a3-a8d3-480fdca0cfa7",
+      "id": "dc45da64-9579-4fb1-911d-4be0c1371fe8-3"
+    },
+    "revisions": {
+      "82e93f77-eff9-4a3d-baa8-fca8fd2ab262": [
+        {
+          "scope": "full",
+          "id": "f316a911-ac54-4669-8cbf-4f366551a774-0",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/d745f8b6-1ff2-419b-bfbd-597654697129/frame-00-at-0s.png",
+          "time": 0,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890465240,
+          "contentHash": "758bae5522fdd676e7ef3a48a96ae5f6649baf1fc15621a57b9508bbf6e8632b",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "f316a911-ac54-4669-8cbf-4f366551a774-1",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/d745f8b6-1ff2-419b-bfbd-597654697129/frame-01-at-1s.png",
+          "time": 1,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890465241,
+          "contentHash": "9f1fc136d5e44677b0c3a754ebbe51918085b4f328c0d136b568a936267493f4",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "f316a911-ac54-4669-8cbf-4f366551a774-2",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/d745f8b6-1ff2-419b-bfbd-597654697129/frame-02-at-3.5s.png",
+          "time": 3.5,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890465241,
+          "contentHash": "d78697bfb553555b418af841c8ffd90bcc6ca77f8d489d1d926a16e3dfc316bb",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "f316a911-ac54-4669-8cbf-4f366551a774-3",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/d745f8b6-1ff2-419b-bfbd-597654697129/frame-03-at-7s.png",
+          "time": 7,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890465241,
+          "contentHash": "d78697bfb553555b418af841c8ffd90bcc6ca77f8d489d1d926a16e3dfc316bb",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "f316a911-ac54-4669-8cbf-4f366551a774-4",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/d745f8b6-1ff2-419b-bfbd-597654697129/frame-04-at-10.5s.png",
+          "time": 10.5,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890465241,
+          "contentHash": "d78697bfb553555b418af841c8ffd90bcc6ca77f8d489d1d926a16e3dfc316bb",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "f316a911-ac54-4669-8cbf-4f366551a774-5",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/d745f8b6-1ff2-419b-bfbd-597654697129/frame-05-at-14s.png",
+          "time": 14,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890465241,
+          "contentHash": "a7f30d8714b81baa7ee54bac51e77d0e113eb98824bbf2143d8ce2a852ba3473",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "f316a911-ac54-4669-8cbf-4f366551a774-6",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/d745f8b6-1ff2-419b-bfbd-597654697129/frame-06-at-16s.png",
+          "time": 16,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890465241,
+          "contentHash": "e4b69e7d31058a190d2f55fc7b5490faeb9bda6352d59615aedbadc481285ab5",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "f316a911-ac54-4669-8cbf-4f366551a774-7",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/d745f8b6-1ff2-419b-bfbd-597654697129/frame-07-at-17.46s.png",
+          "time": 17.46,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890465241,
+          "contentHash": "e4b69e7d31058a190d2f55fc7b5490faeb9bda6352d59615aedbadc481285ab5",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "24c0c4a2-7340-4acd-b6fa-7f363a40523d-0",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/44150409-a654-4043-9d32-79cc253365eb/frame-00-at-1.5s.png",
+          "time": 1.5,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890540805,
+          "contentHash": "9f1fc136d5e44677b0c3a754ebbe51918085b4f328c0d136b568a936267493f4",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "24c0c4a2-7340-4acd-b6fa-7f363a40523d-1",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/44150409-a654-4043-9d32-79cc253365eb/frame-01-at-5s.png",
+          "time": 5,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890540805,
+          "contentHash": "05e6a98ad0ca3809db8fa1ff4d69b16b6dc353dd9d5498524c4c3203a91a438e",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "24c0c4a2-7340-4acd-b6fa-7f363a40523d-2",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/44150409-a654-4043-9d32-79cc253365eb/frame-02-at-8.5s.png",
+          "time": 8.5,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890540805,
+          "contentHash": "b8bc7b840fe3b4d680bbc09440b9d73c06cddab4831ca79a0254da9dffe994c7",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "24c0c4a2-7340-4acd-b6fa-7f363a40523d-3",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/44150409-a654-4043-9d32-79cc253365eb/frame-03-at-12s.png",
+          "time": 12,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890540805,
+          "contentHash": "0ca1d1753dc5034fa11e652c1228a5cb63fd59068e2b78b17a20089016b4c075",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "24c0c4a2-7340-4acd-b6fa-7f363a40523d-4",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/44150409-a654-4043-9d32-79cc253365eb/frame-04-at-17.46s.png",
+          "time": 17.46,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890540805,
+          "contentHash": "e4b69e7d31058a190d2f55fc7b5490faeb9bda6352d59615aedbadc481285ab5",
+          "revision": "82e93f77-eff9-4a3d-baa8-fca8fd2ab262",
+          "inputFingerprint": "00d7f5b74fdcefd41ebde8beee918c891d6ae4907a3af37f196e47639c8d3e80",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ],
+      "2edd6f7d-e3a8-4be7-b789-869b95959afd": [
+        {
+          "scope": "full",
+          "id": "b3c41cad-f1c6-4f3f-ba00-246aef048aed-0",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/c2115cd6-4e06-41e0-af57-d181990e6178/frame-00-at-0s.png",
+          "time": 0,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890813382,
+          "contentHash": "83bbdfa9d9b53f12c2910e1f85e51c542a729ac1aa22e2900c4fce5e301b439f",
+          "revision": "2edd6f7d-e3a8-4be7-b789-869b95959afd",
+          "inputFingerprint": "9c80cfdba94ba506e7a71132d2cd9ca2626456e21e98584cd7b0b7d1862665be",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "b3c41cad-f1c6-4f3f-ba00-246aef048aed-1",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/c2115cd6-4e06-41e0-af57-d181990e6178/frame-01-at-1.5s.png",
+          "time": 1.5,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890813382,
+          "contentHash": "3a623908d3ae8454fda32b520ad33ae4d402b8f3c056b73f39bc9e503f0e346b",
+          "revision": "2edd6f7d-e3a8-4be7-b789-869b95959afd",
+          "inputFingerprint": "9c80cfdba94ba506e7a71132d2cd9ca2626456e21e98584cd7b0b7d1862665be",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "b3c41cad-f1c6-4f3f-ba00-246aef048aed-2",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/c2115cd6-4e06-41e0-af57-d181990e6178/frame-02-at-5s.png",
+          "time": 5,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890813382,
+          "contentHash": "fa2da405aa8a3a88ea43e86023a479f2cfdb4f876b2e08b871f1e1d9fddaadde",
+          "revision": "2edd6f7d-e3a8-4be7-b789-869b95959afd",
+          "inputFingerprint": "9c80cfdba94ba506e7a71132d2cd9ca2626456e21e98584cd7b0b7d1862665be",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "b3c41cad-f1c6-4f3f-ba00-246aef048aed-3",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/c2115cd6-4e06-41e0-af57-d181990e6178/frame-03-at-8.5s.png",
+          "time": 8.5,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890813382,
+          "contentHash": "18c3e7d3d4bd0f84979fc63bc80c0453241a219ba88b5210a14af43daa8499e5",
+          "revision": "2edd6f7d-e3a8-4be7-b789-869b95959afd",
+          "inputFingerprint": "9c80cfdba94ba506e7a71132d2cd9ca2626456e21e98584cd7b0b7d1862665be",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "b3c41cad-f1c6-4f3f-ba00-246aef048aed-4",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/c2115cd6-4e06-41e0-af57-d181990e6178/frame-04-at-12s.png",
+          "time": 12,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890813382,
+          "contentHash": "015368db1bcc7e920df190b3122be2bd20e3066b9fc20ecf0de39a34e1e13285",
+          "revision": "2edd6f7d-e3a8-4be7-b789-869b95959afd",
+          "inputFingerprint": "9c80cfdba94ba506e7a71132d2cd9ca2626456e21e98584cd7b0b7d1862665be",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "b3c41cad-f1c6-4f3f-ba00-246aef048aed-5",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/c2115cd6-4e06-41e0-af57-d181990e6178/frame-05-at-15s.png",
+          "time": 15,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890813382,
+          "contentHash": "9ad302b155a677b7022d1aca64e7bebeba4622868acdf1d62d8624df3284f6b0",
+          "revision": "2edd6f7d-e3a8-4be7-b789-869b95959afd",
+          "inputFingerprint": "9c80cfdba94ba506e7a71132d2cd9ca2626456e21e98584cd7b0b7d1862665be",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "b3c41cad-f1c6-4f3f-ba00-246aef048aed-6",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/c2115cd6-4e06-41e0-af57-d181990e6178/frame-06-at-17.46s.png",
+          "time": 17.46,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890813382,
+          "contentHash": "3b2dc30ec23449c3a7c268cd545a15151f9558c758aad7b44178534e401d6021",
+          "revision": "2edd6f7d-e3a8-4be7-b789-869b95959afd",
+          "inputFingerprint": "9c80cfdba94ba506e7a71132d2cd9ca2626456e21e98584cd7b0b7d1862665be",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ],
+      "0be6dc41-80e6-46a3-a8d3-480fdca0cfa7": [
+        {
+          "scope": "full",
+          "id": "dc45da64-9579-4fb1-911d-4be0c1371fe8-0",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/412a33f4-793e-4ef5-a03a-6e4e27a56142/frame-00-at-0s.png",
+          "time": 0,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890885910,
+          "contentHash": "6e6d72eaa906e83cca233e1fe8fdf15c7b8c82d3becc0d199d6b8498caf1045b",
+          "revision": "0be6dc41-80e6-46a3-a8d3-480fdca0cfa7",
+          "inputFingerprint": "4b695af1e5aa05d83b01a782362f4c2f88b469ef37d171061ed87c0ffc910a5a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "dc45da64-9579-4fb1-911d-4be0c1371fe8-1",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/412a33f4-793e-4ef5-a03a-6e4e27a56142/frame-01-at-5s.png",
+          "time": 5,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890885910,
+          "contentHash": "39a7d2e382be003b118fb9208b93f1fb45bd1b371fd5fbef0c56f872e545d1c8",
+          "revision": "0be6dc41-80e6-46a3-a8d3-480fdca0cfa7",
+          "inputFingerprint": "4b695af1e5aa05d83b01a782362f4c2f88b469ef37d171061ed87c0ffc910a5a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "dc45da64-9579-4fb1-911d-4be0c1371fe8-2",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/412a33f4-793e-4ef5-a03a-6e4e27a56142/frame-02-at-15s.png",
+          "time": 15,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890885910,
+          "contentHash": "ebb89490590a01b5e2d222a3edbd470fdee092e3035131a316b4fa9b2ce06d17",
+          "revision": "0be6dc41-80e6-46a3-a8d3-480fdca0cfa7",
+          "inputFingerprint": "4b695af1e5aa05d83b01a782362f4c2f88b469ef37d171061ed87c0ffc910a5a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "dc45da64-9579-4fb1-911d-4be0c1371fe8-3",
+          "image": "/Users/ametku/Documents/personal/experium-qr-code/marketing/promo3/.hyperframes/artifacts/snapshots/412a33f4-793e-4ef5-a03a-6e4e27a56142/frame-03-at-17.46s.png",
+          "time": 17.46,
+          "metadata": {
+            "width": 1080,
+            "height": 1920,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1792890885911,
+          "contentHash": "9c0ff52e0b4c9b4ae714f5b93712192d47318dd685a87aa5a3c43d1f70772d9f",
+          "revision": "0be6dc41-80e6-46a3-a8d3-480fdca0cfa7",
+          "inputFingerprint": "4b695af1e5aa05d83b01a782362f4c2f88b469ef37d171061ed87c0ffc910a5a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ]
+    },
+    "unversioned": []
+  }
+}

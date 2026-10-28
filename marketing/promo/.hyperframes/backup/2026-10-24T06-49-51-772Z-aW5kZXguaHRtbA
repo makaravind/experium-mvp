@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --forest: #588157;
+        --forest-shadow: #3f6b3a;
+        --orange: #dda15e;
+        --sage: #a3b18a;
+        --ink: #2b2b2b;
+        --muted: #8a8a8a;
+        --bg: #f8f7f4;
+        --border: #e8e5df;
+        --gps: #4a90d9;
+        --brand: #588157;
+        --accent: #4a90d9;
+        --font-display: "Outfit", sans-serif;
+        --font-body: "Nunito", sans-serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #111a0d;
+      }
+      #root {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+      }
+      .scene-host {
+        position: absolute;
+        inset: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-zshp"
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="51.2"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- Scene 1: Problem hook (0–7s) -->
+      <div data-hf-id="hf-ankb"
+        id="scene-hook"
+        class="scene-host clip"
+        data-composition-id="scene-hook"
+        data-composition-src="compositions/scene-hook.html"
+        data-start="0"
+        data-duration="7"
+        data-track-index="1"
+        data-width="1080"
+        data-height="1920"
+        style="z-index:1"
+      ></div>
+
+      <!-- Scene 2: Park scan video (6–13.2s) -->
+      <div
+        id="scene-parkscan"
+        class="scene-host clip"
+        data-composition-id="scene-parkscan"
+        data-composition-src="compositions/scene-parkscan.html"
+        data-start="6"
+        data-duration="7.2"
+        data-track-index="2"
+        data-width="1080"
+        data-height="1920"
+        style="z-index:2"
+      ></div>
+
+      <!-- Scene 3: QR reveal (12.2–19.2s) -->
+      <div data-hf-id="hf-zhsf"
+        id="scene-reveal"
+        class="scene-host clip"
+        data-composition-id="scene-reveal"
+        data-composition-src="compositions/scene-reveal.html"
+        data-start="12.2"
+        data-duration="7"
+        data-track-index="3"
+        data-width="1080"
+        data-height="1920"
+        style="z-index:3"
+      ></div>
+
+      <!-- Scene 4: Audio guide (18.2–28.2s) -->
+      <div data-hf-id="hf-rdcv"
+        id="scene-audio"
+        class="scene-host clip"
+        data-composition-id="scene-audio"
+        data-composition-src="compositions/scene-audio.html"
+        data-start="18.2"
+        data-duration="10"
+        data-track-index="4"
+        data-width="1080"
+        data-height="1920"
+        style="z-index:4"
+      ></div>
+
+      <!-- Scene 5: Map + gamification (27.2–40.2s) -->
+      <div data-hf-id="hf-baxh"
+        id="scene-features"
+        class="scene-host clip"
+        data-composition-id="scene-features"
+        data-composition-src="compositions/scene-features.html"
+        data-start="27.2"
+        data-duration="13"
+        data-track-index="5"
+        data-width="1080"
+        data-height="1920"
+        style="z-index:5"
+      ></div>
+
+      <!-- Scene 6: Claim payoff (39.2–46.2s) -->
+      <div data-hf-id="hf-o328"
+        id="scene-claim"
+        class="scene-host clip"
+        data-composition-id="scene-claim"
+        data-composition-src="compositions/scene-claim.html"
+        data-start="39.2"
+        data-duration="7"
+        data-track-index="6"
+        data-width="1080"
+        data-height="1920"
+        style="z-index:6"
+      ></div>
+
+      <!-- Scene 7: End card / Coming Soon (45.2–51.2s) -->
+      <div data-hf-id="hf-qzq6"
+        id="scene-endcard"
+        class="scene-host clip"
+        data-composition-id="scene-endcard"
+        data-composition-src="compositions/scene-endcard.html"
+        data-start="45.2"
+        data-duration="6"
+        data-track-index="7"
+        data-width="1080"
+        data-height="1920"
+        style="z-index:7"
+      ></div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
