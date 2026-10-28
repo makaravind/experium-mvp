@@ -40,7 +40,7 @@ const AUDIO_FILES = [
   { marker: '1',  code: 1 },
   { marker: '2',  code: 2 },
   { marker: '3',  code: 3 },
-  { marker: '8b', code: 8 },
+  { marker: '8',  code: 8 },
   { marker: '20', code: 20 },
   { marker: '24', code: 24 },
   { marker: '26', code: 26 },
