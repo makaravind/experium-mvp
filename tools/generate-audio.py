@@ -90,7 +90,7 @@ def to_tts_text(script: str) -> str:
 
 
 DEFAULT_VOICE = "af_bella"
-DEFAULT_SPEED = "0.95"
+DEFAULT_SPEED = "0.85"
 LANG = "en-us"
 
 

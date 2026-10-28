@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, height=788">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#588157; --forest-shadow:#3f6b3a;
+  --orange:#dda15e; --orange-shadow:#b8834a;
+  --sage:#a3b18a; --ink:#2b2b2b; --muted:#8a8a8a;
+  --bg:#f8f7f4; --border:#e8e5df; --paper:#ffffff;
+  --shadow-soft:0 2px 10px rgba(43,43,43,.08);
+  --r:12px;
+  --font-display:'Baloo 2','Outfit',system-ui,sans-serif;
+  --font-body:'Nunito',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  width:390px;height:788px;
+  background:transparent;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;
+}
+.phone{width:390px;height:788px;background:#111;border-radius:52px;padding:11px;box-shadow:0 24px 60px rgba(43,43,43,.22);position:relative}
+.screen{position:relative;width:100%;height:100%;border-radius:42px;overflow:hidden;background:var(--bg)}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:112px;height:31px;background:#111;border-radius:20px;z-index:60}
+.statusbar{position:absolute;top:0;left:0;right:0;height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 8px;font-weight:800;font-size:14px;z-index:50;color:var(--ink)}
+.sb-icons{display:flex;gap:6px;align-items:center}
+.sb-icons svg{fill:currentColor}
+.home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:132px;height:5px;border-radius:3px;background:var(--ink);opacity:.28;z-index:55}
+.map-fake{position:absolute;inset:0;background:
+    radial-gradient(ellipse at 25% 20%,#e3ecd8 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 70%,#dbe6cc 0%, transparent 50%),
+    linear-gradient(160deg,#eef3e6 0%,#dfe9d2 100%);}
+.map-fake .blob{position:absolute;border-radius:50%;background:#cfe0ba;opacity:.7}
+.search-row{position:absolute;left:16px;right:16px;top:60px;display:flex;gap:10px;align-items:center;z-index:20}
+.search-pill{flex:1;height:44px;display:flex;align-items:center;gap:8px;padding:0 16px;border-radius:999px;font-weight:700;font-size:14px;background:var(--paper);border:1px solid var(--border);color:var(--muted);box-shadow:var(--shadow-soft)}
+.search-pill svg{width:17px;height:17px;stroke:var(--muted);fill:none;stroke-width:2.2}
+.compass-btn,.home-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--paper);border:1px solid var(--border);color:var(--forest);box-shadow:var(--shadow-soft);flex:0 0 auto}
+.compass-btn svg,.home-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2}
+/* Exhibit markers on map */
+.marker{position:absolute;transform:translate(-50%,-50%);z-index:10}
+.marker-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-weight:800;font-size:11px;color:#fff;border:2px solid rgba(255,255,255,.8);box-shadow:0 2px 8px rgba(0,0,0,.22)}
+.marker-dot.green{background:var(--forest)}
+.marker-dot.orange{background:var(--orange)}
+/* GPS location */
+.gps-dot{position:absolute;width:18px;height:18px;border-radius:50%;background:#4a90d9;transform:translate(-50%,-50%);box-shadow:0 0 0 4px rgba(255,255,255,.9),0 0 0 7px rgba(74,144,217,.3);z-index:15;left:48%;top:54%}
+</style>
+</head>
+<body>
+<div class="phone"><div class="screen">
+  <div class="map-fake">
+    <div class="blob" style="width:220px;height:160px;top:120px;left:-40px"></div>
+    <div class="blob" style="width:180px;height:140px;top:420px;left:220px"></div>
+    <div class="blob" style="width:140px;height:110px;top:560px;left:40px"></div>
+  </div>
+  <!-- GPS dot -->
+  <div class="gps-dot"></div>
+  <!-- Exhibit markers -->
+  <div class="marker" style="left:28%;top:26%"><div class="marker-dot orange">7</div></div>
+  <div class="marker" style="left:68%;top:20%"><div class="marker-dot green">12</div></div>
+  <div class="marker" style="left:72%;top:68%"><div class="marker-dot orange">23</div></div>
+  <div class="marker" style="left:22%;top:72%"><div class="marker-dot green">31</div></div>
+  <div class="marker" style="left:45%;top:82%"><div class="marker-dot green">44</div></div>
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-icons"><svg viewBox="0 0 20 13" width="18" height="12"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="8" rx="1"/><rect x="10" y="2" width="3" height="11" rx="1"/><rect x="15" y="0" width="3" height="13" rx="1"/></svg></span></div>
+  <div class="search-row">
+    <div class="home-btn">
+      <svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8"/><path d="M5 10v10h14V10"/></svg>
+    </div>
+    <div class="search-pill">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      Search exhibits
+    </div>
+    <div class="compass-btn">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7l2 5-2 5-2-5z"/></svg>
+    </div>
+  </div>
+  <div class="home-ind"></div>
+</div></div>
+</body>
+</html>

@@ -1,0 +1,1857 @@
+{
+  "ok": false,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 6,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "css_transition_used",
+        "severity": "warning",
+        "message": "CSS declaration `transition: height 0.2s` runs on the browser clock and cannot be seeked deterministically across render workers.",
+        "selector": ".aud-bar",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-audio.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Keep the class or attribute swap for state; put the visual change on the paused GSAP timeline."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#aud-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#aud-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-audio.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#clm-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#clm-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-claim.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#feat-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#feat-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-features.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#hook-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#hook-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-hook.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#rev-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#rev-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-reveal.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      }
+    ],
+    "filesScanned": 7
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": false,
+    "errorCount": 2,
+    "warningCount": 5,
+    "infoCount": 4,
+    "findings": [
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 6.285,
+        "selector": "#hook-l2 > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 120,
+          "top": 650,
+          "right": 1159.23,
+          "bottom": 772,
+          "width": 1039.23,
+          "height": 122
+        },
+        "containerSelector": "#rev-plaque-num",
+        "text": "3 hours. 30 exhibits.",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-hook.html",
+        "bbox": {
+          "x": 120,
+          "y": 650,
+          "width": 1039.23,
+          "height": 122
+        },
+        "firstSeen": 6.285,
+        "lastSeen": 6.788,
+        "occurrences": 3,
+        "heldMs": 503.0000000000001,
+        "times": [
+          6.285,
+          6.536,
+          6.788
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.5,
+        "selector": "#aud-screen-bg-label",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1425,
+          "top": 874.38,
+          "right": 1665.52,
+          "bottom": 883.38,
+          "width": 240.52,
+          "height": 9
+        },
+        "containerSelector": "#aud-screen-overlay",
+        "text": "[ PARK PHOTO — IMG-3 — Replace with exhibit photo ]",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 1425,
+          "y": 874.38,
+          "width": 240.52,
+          "height": 9
+        },
+        "firstSeen": 12.5,
+        "lastSeen": 17.5,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          12.5,
+          17.5
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "warning",
+        "time": 21.62,
+        "selector": "#aud-eyebrow",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 120,
+          "top": 340,
+          "right": 236.72,
+          "bottom": 359,
+          "width": 116.72,
+          "height": 19
+        },
+        "containerSelector": "#feat-eyebrow",
+        "text": "AUDIO GUIDE",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 120,
+          "y": 340,
+          "width": 116.72,
+          "height": 19
+        },
+        "firstSeen": 21.62,
+        "lastSeen": 21.872,
+        "occurrences": 2,
+        "heldMs": 251.9999999999989,
+        "times": [
+          21.62,
+          21.872
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "warning",
+        "time": 21.62,
+        "selector": "#aud-headline",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 120,
+          "top": 368,
+          "right": 485.77,
+          "bottom": 469,
+          "width": 365.77,
+          "height": 101
+        },
+        "containerSelector": "#feat-headline",
+        "text": "Your park, with a voice.",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 120,
+          "y": 368,
+          "width": 365.77,
+          "height": 101
+        },
+        "firstSeen": 21.62,
+        "lastSeen": 21.872,
+        "occurrences": 2,
+        "heldMs": 251.9999999999989,
+        "times": [
+          21.62,
+          21.872
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "warning",
+        "time": 21.62,
+        "selector": "#aud-headline > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 120,
+          "top": 448,
+          "right": 558.25,
+          "bottom": 549,
+          "width": 438.25,
+          "height": 101
+        },
+        "containerSelector": "#feat-headline",
+        "text": "with a voice.",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 120,
+          "y": 448,
+          "width": 438.25,
+          "height": 101
+        },
+        "firstSeen": 21.62,
+        "lastSeen": 21.872,
+        "occurrences": 2,
+        "heldMs": 251.9999999999989,
+        "times": [
+          21.62,
+          21.872
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "warning",
+        "time": 21.62,
+        "selector": "#aud-app-title",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1494.73,
+          "top": 225,
+          "right": 1645.27,
+          "bottom": 241,
+          "width": 150.54,
+          "height": 16
+        },
+        "containerSelector": "#feat-map-title",
+        "text": "NATURE AUDIO TOUR",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 1494.73,
+          "y": 225,
+          "width": 150.54,
+          "height": 16
+        },
+        "firstSeen": 21.62,
+        "lastSeen": 21.872,
+        "occurrences": 2,
+        "heldMs": 251.9999999999989,
+        "times": [
+          21.62,
+          21.872
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "warning",
+        "time": 39.721,
+        "selector": "#clm-badge-mini > div:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1111.46,
+          "top": 380.48,
+          "right": 1132.55,
+          "bottom": 399.39,
+          "width": 21.09,
+          "height": 18.91
+        },
+        "containerSelector": "#end-eyebrow",
+        "text": "🦋",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-claim.html",
+        "bbox": {
+          "x": 1111.46,
+          "y": 380.48,
+          "width": 21.09,
+          "height": 18.91
+        },
+        "firstSeen": 39.721,
+        "lastSeen": 39.972,
+        "occurrences": 2,
+        "heldMs": 251.00000000000477,
+        "times": [
+          39.721,
+          39.972
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 7.5,
+        "selector": "#rev-plaque-label",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 876.25,
+          "top": 611,
+          "right": 1043.75,
+          "bottom": 629,
+          "width": 167.5,
+          "height": 18
+        },
+        "containerSelector": "div.csg-target",
+        "text": "Nature Audio Tour",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-reveal.html",
+        "bbox": {
+          "x": 876.25,
+          "y": 611,
+          "width": 167.5,
+          "height": 18
+        },
+        "firstSeen": 7.5,
+        "lastSeen": 12.5,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          7.5,
+          12.5
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 7.5,
+        "selector": "#rev-plaque-num",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 935.58,
+          "top": 645,
+          "right": 984.41,
+          "bottom": 705,
+          "width": 48.83,
+          "height": 60
+        },
+        "containerSelector": "div.csg-frame",
+        "text": "01",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-reveal.html",
+        "bbox": {
+          "x": 935.58,
+          "y": 645,
+          "width": 48.83,
+          "height": 60
+        },
+        "firstSeen": 7.5,
+        "lastSeen": 12.5,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          7.5,
+          12.5
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 12.5,
+        "selector": "#rev-caption-line",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 719.11,
+          "top": 787,
+          "right": 1200.88,
+          "bottom": 842,
+          "width": 481.77,
+          "height": 55
+        },
+        "containerSelector": "#aud-bg",
+        "text": "Scan. Your guide awaits.",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-reveal.html",
+        "bbox": {
+          "x": 719.11,
+          "y": 787,
+          "width": 481.77,
+          "height": 55
+        },
+        "firstSeen": 12.5,
+        "lastSeen": 12.5,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          12.5
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 12.5,
+        "selector": "#rev-caption-sub",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 801.67,
+          "top": 850,
+          "right": 1118.31,
+          "bottom": 880,
+          "width": 316.64,
+          "height": 30
+        },
+        "containerSelector": "#aud-bg",
+        "text": "No app download. No waiting.",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-reveal.html",
+        "bbox": {
+          "x": 801.67,
+          "y": 850,
+          "width": 316.64,
+          "height": 30
+        },
+        "firstSeen": 12.5,
+        "lastSeen": 12.5,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          12.5
+        ]
+      }
+    ],
+    "duration": 45,
+    "samples": [
+      2.5,
+      7.5,
+      12.5,
+      17.5,
+      22.5,
+      27.5,
+      32.5,
+      37.5,
+      42.5
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 11,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 29,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 1.08:1; WCAG AA requires 4.5:1.",
+        "text": "Nature Audio Tour",
+        "fg": "rgb(246,246,242)",
+        "bg": "rgb(238,238,231)",
+        "ratio": 1.08,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(108,108,106)",
+        "large": false,
+        "selector": "#rev-plaque-label",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-reveal.html",
+        "bbox": {
+          "x": 876.25,
+          "y": 611,
+          "width": 167.5,
+          "height": 18
+        },
+        "time": 12.5,
+        "times": [
+          12.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 1.13:1; WCAG AA requires 3:1.",
+        "text": "01",
+        "fg": "rgb(253,253,252)",
+        "bg": "rgb(239,240,233)",
+        "ratio": 1.13,
+        "requiredRatio": 3,
+        "suggestedColor": "rgb(138,138,137)",
+        "large": true,
+        "selector": "#rev-plaque-num",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-reveal.html",
+        "bbox": {
+          "x": 935.578125,
+          "y": 645,
+          "width": 48.828125,
+          "height": 60
+        },
+        "time": 12.5,
+        "times": [
+          12.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 1.05:1; WCAG AA requires 3:1.",
+        "text": "Scan. Your guide awaits.",
+        "fg": "rgb(248,247,244)",
+        "bg": "rgb(242,242,237)",
+        "ratio": 1.05,
+        "requiredRatio": 3,
+        "suggestedColor": "rgb(140,139,138)",
+        "large": true,
+        "selector": "#rev-caption-line",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-reveal.html",
+        "bbox": {
+          "x": 719.109375,
+          "y": 787,
+          "width": 481.765625,
+          "height": 55
+        },
+        "time": 12.5,
+        "times": [
+          12.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 1.02:1; WCAG AA requires 4.5:1.",
+        "text": "No app download. No waiting.",
+        "fg": "rgb(246,245,241)",
+        "bg": "rgb(244,243,238)",
+        "ratio": 1.02,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(112,111,110)",
+        "large": false,
+        "selector": "#rev-caption-sub",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-reveal.html",
+        "bbox": {
+          "x": 0,
+          "y": 850,
+          "width": 1920,
+          "height": 30
+        },
+        "time": 12.5,
+        "times": [
+          12.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 1.87:1; WCAG AA requires 4.5:1.",
+        "text": "[ PARK PHOTO — IMG-3 — Replace with exhibit photo ",
+        "fg": "rgb(122,131,119)",
+        "bg": "rgb(78,89,73)",
+        "ratio": 1.87,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(200,204,199)",
+        "large": false,
+        "selector": "#aud-screen-bg-label",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 1425,
+          "y": 874.3775024414062,
+          "width": 240.515625,
+          "height": 9
+        },
+        "time": 12.5,
+        "times": [
+          12.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.69:1; WCAG AA requires 4.5:1.",
+        "text": "Nature Audio Tour",
+        "fg": "rgb(195,201,192)",
+        "bg": "rgb(83,102,74)",
+        "ratio": 3.69,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(217,220,215)",
+        "large": false,
+        "selector": "#aud-app-title",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 1494.734375,
+          "y": 243.37750244140625,
+          "width": 150.53125,
+          "height": 16
+        },
+        "time": 12.5,
+        "times": [
+          12.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.39:1; WCAG AA requires 4.5:1.",
+        "text": "Exhibit 07",
+        "fg": "rgb(165,176,162)",
+        "bg": "rgb(91,112,86)",
+        "ratio": 2.39,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(233,236,232)",
+        "large": false,
+        "selector": "#aud-exhibit-num",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 1431,
+          "y": 674.1900024414062,
+          "width": 278,
+          "height": 15
+        },
+        "time": 12.5,
+        "times": [
+          12.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.91:1; WCAG AA requires 4.5:1.",
+        "text": "1:24",
+        "fg": "rgb(170,178,167)",
+        "bg": "rgb(84,100,79)",
+        "ratio": 2.91,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(215,219,214)",
+        "large": false,
+        "selector": "div > div:nth-of-type(3) > div > div:nth-of-type(3) > div > div:nth-of-type(2) > div:nth-of-type(4) > div:nth-of-type(4) > span:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 1431,
+          "y": 781.3775024414062,
+          "width": 20.484375,
+          "height": 14
+        },
+        "time": 12.5,
+        "times": [
+          12.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.86:1; WCAG AA requires 4.5:1.",
+        "text": "3:42",
+        "fg": "rgb(171,178,168)",
+        "bg": "rgb(86,101,81)",
+        "ratio": 2.86,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(217,221,216)",
+        "large": false,
+        "selector": "div > div:nth-of-type(3) > div > div:nth-of-type(3) > div > div:nth-of-type(2) > div:nth-of-type(4) > div:nth-of-type(4) > span:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 1688.515625,
+          "y": 781.3775024414062,
+          "width": 20.484375,
+          "height": 14
+        },
+        "time": 12.5,
+        "times": [
+          12.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.13:1; WCAG AA requires 4.5:1.",
+        "text": "Interactive Map",
+        "fg": "rgb(88,129,87)",
+        "bg": "rgb(246,246,242)",
+        "ratio": 4.13,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(84,122,83)",
+        "large": false,
+        "selector": "#feat-eyebrow",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 120,
+          "y": 340,
+          "width": 620,
+          "height": 19
+        },
+        "time": 22.5,
+        "times": [
+          22.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.22:1; WCAG AA requires 4.5:1.",
+        "text": "Tap a marker to listen",
+        "fg": "rgb(138,138,138)",
+        "bg": "rgb(248,247,244)",
+        "ratio": 3.22,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(113,113,113)",
+        "large": false,
+        "selector": "#feat-map-subtitle",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1449,
+          "y": 248,
+          "width": 282,
+          "height": 14
+        },
+        "time": 22.5,
+        "times": [
+          22.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.48:1; WCAG AA requires 4.5:1.",
+        "text": "1",
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(88,129,87)",
+        "ratio": 4.48,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(7,7,7)",
+        "large": false,
+        "selector": "#feat-m1",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1520.90625,
+          "y": 396.625,
+          "width": 28,
+          "height": 28
+        },
+        "time": 22.5,
+        "times": [
+          22.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.48:1; WCAG AA requires 4.5:1.",
+        "text": "2",
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(88,129,87)",
+        "ratio": 4.48,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(7,7,7)",
+        "large": false,
+        "selector": "#feat-m2",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1659.078125,
+          "y": 486.546875,
+          "width": 28,
+          "height": 28
+        },
+        "time": 22.5,
+        "times": [
+          22.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.48:1; WCAG AA requires 4.5:1.",
+        "text": "3",
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(88,129,87)",
+        "ratio": 4.48,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(7,7,7)",
+        "large": false,
+        "selector": "#feat-m3",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1627.671875,
+          "y": 621.4375,
+          "width": 28,
+          "height": 28
+        },
+        "time": 22.5,
+        "times": [
+          22.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.48:1; WCAG AA requires 4.5:1.",
+        "text": "4",
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(88,129,87)",
+        "ratio": 4.48,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(7,7,7)",
+        "large": false,
+        "selector": "#feat-m4",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1508.359375,
+          "y": 694.5,
+          "width": 28,
+          "height": 28
+        },
+        "time": 22.5,
+        "times": [
+          22.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.48:1; WCAG AA requires 4.5:1.",
+        "text": "5",
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(88,129,87)",
+        "ratio": 4.48,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(7,7,7)",
+        "large": false,
+        "selector": "#feat-m5",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1615.109375,
+          "y": 374.15625,
+          "width": 28,
+          "height": 28
+        },
+        "time": 22.5,
+        "times": [
+          22.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.18:1; WCAG AA requires 4.5:1.",
+        "text": "Nearby",
+        "fg": "rgb(88,129,87)",
+        "bg": "rgb(248,247,244)",
+        "ratio": 4.18,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(84,123,83)",
+        "large": false,
+        "selector": "#feat-nearby-title",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1445,
+          "y": 844,
+          "width": 290,
+          "height": 12
+        },
+        "time": 22.5,
+        "times": [
+          22.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.06:1; WCAG AA requires 4.5:1.",
+        "text": "Collect & Explore",
+        "fg": "rgb(221,161,94)",
+        "bg": "rgb(246,245,241)",
+        "ratio": 2.06,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(144,105,61)",
+        "large": false,
+        "selector": "#feat-eyebrow-game",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 120,
+          "y": 360,
+          "width": 620,
+          "height": 19
+        },
+        "time": 32.5,
+        "times": [
+          32.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.22:1; WCAG AA requires 4.5:1.",
+        "text": "5 exhibits discovered",
+        "fg": "rgb(138,138,138)",
+        "bg": "rgb(248,247,244)",
+        "ratio": 3.22,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(113,113,113)",
+        "large": false,
+        "selector": "#feat-progress-sub",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1529,
+          "y": 314.390625,
+          "width": 95.703125,
+          "height": 14
+        },
+        "time": 32.5,
+        "times": [
+          32.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.96:1; WCAG AA requires 4.5:1.",
+        "text": "🔒Night Trail",
+        "fg": "rgb(138,138,138)",
+        "bg": "rgb(240,237,232)",
+        "ratio": 2.96,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(107,107,107)",
+        "large": false,
+        "selector": "div > div:nth-of-type(4) > div > div:nth-of-type(4) > div > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(4)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1447,
+          "y": 459,
+          "width": 90,
+          "height": 90
+        },
+        "time": 32.5,
+        "times": [
+          32.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.96:1; WCAG AA requires 4.5:1.",
+        "text": "🔒Water Path",
+        "fg": "rgb(138,138,138)",
+        "bg": "rgb(240,237,232)",
+        "ratio": 2.96,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(107,107,107)",
+        "large": false,
+        "selector": "div > div:nth-of-type(4) > div > div:nth-of-type(4) > div > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(5)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1545,
+          "y": 459,
+          "width": 90,
+          "height": 90
+        },
+        "time": 32.5,
+        "times": [
+          32.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.96:1; WCAG AA requires 4.5:1.",
+        "text": "🔒Summit",
+        "fg": "rgb(138,138,138)",
+        "bg": "rgb(240,237,232)",
+        "ratio": 2.96,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(107,107,107)",
+        "large": false,
+        "selector": "div > div:nth-of-type(4) > div > div:nth-of-type(4) > div > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(6)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1643,
+          "y": 459,
+          "width": 90,
+          "height": 90
+        },
+        "time": 32.5,
+        "times": [
+          32.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.64:1; WCAG AA requires 4.5:1.",
+        "text": "🏆 Explorer Badge",
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(205,148,85)",
+        "ratio": 2.64,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(55,55,55)",
+        "large": false,
+        "selector": "#feat-trail-name",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1459,
+          "y": 569,
+          "width": 239,
+          "height": 20
+        },
+        "time": 32.5,
+        "times": [
+          32.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.16:1; WCAG AA requires 4.5:1.",
+        "text": "7 more to unlock",
+        "fg": "rgb(242,228,212)",
+        "bg": "rgb(203,146,84)",
+        "ratio": 2.16,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(56,53,49)",
+        "large": false,
+        "selector": "#feat-trail-progress",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1459,
+          "y": 589,
+          "width": 239,
+          "height": 12
+        },
+        "time": 32.5,
+        "times": [
+          32.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.79:1; WCAG AA requires 4.5:1.",
+        "text": "Experium · Nature Audio Tour",
+        "fg": "rgb(88,129,87)",
+        "bg": "rgb(234,237,231)",
+        "ratio": 3.79,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(79,116,78)",
+        "large": false,
+        "selector": "#end-eyebrow",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-endcard.html",
+        "bbox": {
+          "x": 785.046875,
+          "y": 380,
+          "width": 349.890625,
+          "height": 22
+        },
+        "time": 42.5,
+        "times": [
+          42.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.05:1; WCAG AA requires 4.5:1.",
+        "text": "Scan. Listen. Discover. No download required.",
+        "fg": "rgb(138,138,138)",
+        "bg": "rgb(241,241,237)",
+        "ratio": 3.05,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(110,110,110)",
+        "large": false,
+        "selector": "#end-sub",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-endcard.html",
+        "bbox": {
+          "x": 731.46875,
+          "y": 662.75,
+          "width": 457.046875,
+          "height": 30
+        },
+        "time": 42.5,
+        "times": [
+          42.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.71:1; WCAG AA requires 4.5:1.",
+        "text": "🎧 Audio Guide",
+        "fg": "rgb(88,129,87)",
+        "bg": "rgb(231,235,227)",
+        "ratio": 3.71,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(78,114,77)",
+        "large": false,
+        "selector": "div > div:nth-of-type(6) > div > div:nth-of-type(2) > div:nth-of-type(7) > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-endcard.html",
+        "bbox": {
+          "x": 709.640625,
+          "y": 732.75,
+          "width": 145.75,
+          "height": 45
+        },
+        "time": 42.5,
+        "times": [
+          42.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.68:1; WCAG AA requires 4.5:1.",
+        "text": "🗺️ Interactive Map",
+        "fg": "rgb(88,129,87)",
+        "bg": "rgb(231,234,227)",
+        "ratio": 3.68,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(78,114,77)",
+        "large": false,
+        "selector": "div > div:nth-of-type(6) > div > div:nth-of-type(2) > div:nth-of-type(7) > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-endcard.html",
+        "bbox": {
+          "x": 875.390625,
+          "y": 732.75,
+          "width": 167.03125,
+          "height": 45
+        },
+        "time": 42.5,
+        "times": [
+          42.5
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.71:1; WCAG AA requires 4.5:1.",
+        "text": "🏆 Gamification",
+        "fg": "rgb(88,129,87)",
+        "bg": "rgb(231,235,228)",
+        "ratio": 3.71,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(78,114,77)",
+        "large": false,
+        "selector": "div > div:nth-of-type(6) > div > div:nth-of-type(2) > div:nth-of-type(7) > div:nth-of-type(3)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-endcard.html",
+        "bbox": {
+          "x": 1062.421875,
+          "y": 732.75,
+          "width": 147.9375,
+          "height": 45
+        },
+        "time": 42.5,
+        "times": [
+          42.5
+        ]
+      }
+    ],
+    "enabled": true,
+    "samples": [
+      2.5,
+      12.5,
+      22.5,
+      32.5,
+      42.5
+    ],
+    "checked": 48,
+    "passed": 19
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 7,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "film_silent",
+        "severity": "warning",
+        "message": "This 45 s film has no sound source (no <audio>, no <video> with sound): add a music bed and sounds on the visible actions unless the person asked for silence; see references/sound.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 4.25 s (1.63–5.88 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 1.625,
+        "seconds": 4.25,
+        "floorSeconds": 3,
+        "until": 5.875
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 2 text elements stay under it for 0.5 s or more, the smallest \"Nature Audio Tour\" at 13 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Nature Audio Tour",
+        "selector": "#rev-plaque-label",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-reveal.html",
+        "bbox": {
+          "x": 876.25,
+          "y": 616.66,
+          "width": 167.5,
+          "height": 18
+        },
+        "time": 6.375,
+        "times": [
+          6.375,
+          9
+        ],
+        "fontPx": 13,
+        "floorPx": 28,
+        "seconds": 6.625,
+        "elements": [
+          {
+            "selector": "#rev-plaque-label",
+            "text": "Nature Audio Tour",
+            "fontPx": 13,
+            "time": 6.375,
+            "seconds": 6.625
+          },
+          {
+            "selector": "#rev-caption-sub",
+            "text": "No app download. No waiting.",
+            "fontPx": 22,
+            "time": 9,
+            "seconds": 4
+          }
+        ]
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 11 text elements stay under it for 0.5 s or more, the smallest \"[ PARK PHOTO — IMG-3 — Replace with e...\" at 7 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "[ PARK PHOTO — IMG-3 — Replace with exhibit photo ]",
+        "selector": "#aud-screen-bg-label",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 1425,
+          "y": 874.38,
+          "width": 240.52,
+          "height": 9
+        },
+        "time": 12.5,
+        "times": [
+          12.5,
+          12.5,
+          12.5,
+          12.5,
+          12.5,
+          12.5,
+          12.75,
+          12.75,
+          12.75,
+          12.75,
+          12.75
+        ],
+        "fontPx": 7,
+        "floorPx": 28,
+        "seconds": 9.5,
+        "elements": [
+          {
+            "selector": "#aud-screen-bg-label",
+            "text": "[ PARK PHOTO — IMG-3 — Replace with exhibit photo ]",
+            "fontPx": 7,
+            "time": 12.5,
+            "seconds": 9.5
+          },
+          {
+            "selector": "#aud-progress-row > span:nth-of-type(1)",
+            "text": "1:24",
+            "fontPx": 10,
+            "time": 12.5,
+            "seconds": 9.5
+          },
+          {
+            "selector": "#aud-progress-row > span:nth-of-type(2)",
+            "text": "3:42",
+            "fontPx": 10,
+            "time": 12.5,
+            "seconds": 9.5
+          },
+          {
+            "selector": "#aud-exhibit-num",
+            "text": "Exhibit 07",
+            "fontPx": 11,
+            "time": 12.5,
+            "seconds": 9.5
+          },
+          {
+            "selector": "#aud-app-title",
+            "text": "Nature Audio Tour",
+            "fontPx": 12,
+            "time": 12.5,
+            "seconds": 9.5
+          },
+          {
+            "selector": "#aud-eyebrow",
+            "text": "Audio Guide",
+            "fontPx": 14,
+            "time": 12.75,
+            "seconds": 9.25
+          },
+          {
+            "selector": "#aud-pills > span:nth-of-type(1)",
+            "text": "No app install",
+            "fontPx": 15,
+            "time": 12.75,
+            "seconds": 9.25
+          },
+          {
+            "selector": "#aud-pills > span:nth-of-type(2)",
+            "text": "Works offline",
+            "fontPx": 15,
+            "time": 12.75,
+            "seconds": 9.25
+          },
+          {
+            "selector": "#aud-pills > span:nth-of-type(3)",
+            "text": "12 languages",
+            "fontPx": 15,
+            "time": 12.75,
+            "seconds": 9.25
+          },
+          {
+            "selector": "#aud-exhibit-name",
+            "text": "Butterflies Garden",
+            "fontPx": 22,
+            "time": 12.5,
+            "seconds": 9.5
+          },
+          {
+            "selector": "#aud-sub",
+            "text": "Scan any marker — your personal audio tour starts instantly. No download. No login.",
+            "fontPx": 26,
+            "time": 12.75,
+            "seconds": 9.25
+          }
+        ]
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 26 text elements stay under it for 0.5 s or more, the smallest \"Night Trail\" at 8 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Night Trail",
+        "selector": "#feat-badge-grid > div:nth-of-type(4)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 1473.03,
+          "y": 510.66,
+          "width": 37.93,
+          "height": 10.36
+        },
+        "time": 28.25,
+        "times": [
+          21.375,
+          21.375,
+          21.375,
+          21.375,
+          21.375,
+          21.375,
+          21.375,
+          21.375,
+          21.375,
+          21.5,
+          21.5,
+          27.625,
+          27.625,
+          27.625,
+          27.625,
+          27.625,
+          27.625,
+          27.625,
+          28,
+          28,
+          28.125,
+          28.25,
+          28.25,
+          28.25,
+          28.375,
+          28.375
+        ],
+        "fontPx": 7.54,
+        "floorPx": 28,
+        "seconds": 5.75,
+        "elements": [
+          {
+            "selector": "#feat-badge-grid > div:nth-of-type(4)",
+            "text": "Night Trail",
+            "fontPx": 7.54,
+            "time": 28.25,
+            "seconds": 5.75
+          },
+          {
+            "selector": "#feat-badge-grid > div:nth-of-type(6)",
+            "text": "Summit",
+            "fontPx": 7.66,
+            "time": 28.375,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#feat-badge-grid > div:nth-of-type(1)",
+            "text": "Butterflies",
+            "fontPx": 7.89,
+            "time": 28.125,
+            "seconds": 5.875
+          },
+          {
+            "selector": "#feat-badge-grid > div:nth-of-type(3)",
+            "text": "Bird Walk",
+            "fontPx": 7.96,
+            "time": 28.25,
+            "seconds": 5.75
+          },
+          {
+            "selector": "#feat-badge-grid > div:nth-of-type(2)",
+            "text": "Botanist",
+            "fontPx": 8,
+            "time": 28.25,
+            "seconds": 5.75
+          },
+          {
+            "selector": "#feat-badge-grid > div:nth-of-type(5)",
+            "text": "Water Path",
+            "fontPx": 8,
+            "time": 28.375,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#feat-nearby-title",
+            "text": "Nearby",
+            "fontPx": 9,
+            "time": 21.375,
+            "seconds": 6.25
+          },
+          {
+            "selector": "#feat-trail-progress",
+            "text": "7 more to unlock",
+            "fontPx": 9,
+            "time": 27.625,
+            "seconds": 6.375
+          },
+          {
+            "selector": "#feat-map-subtitle",
+            "text": "Tap a marker to listen",
+            "fontPx": 10,
+            "time": 21.375,
+            "seconds": 6.25
+          },
+          {
+            "selector": "#feat-progress-sub",
+            "text": "5 exhibits discovered",
+            "fontPx": 10,
+            "time": 27.625,
+            "seconds": 6.375
+          },
+          {
+            "selector": "#feat-m1",
+            "text": "1",
+            "fontPx": 11,
+            "time": 21.375,
+            "seconds": 6.25
+          },
+          {
+            "selector": "#feat-m2",
+            "text": "2",
+            "fontPx": 11,
+            "time": 21.375,
+            "seconds": 6.25
+          },
+          {
+            "selector": "#feat-m3",
+            "text": "3",
+            "fontPx": 11,
+            "time": 21.375,
+            "seconds": 6.25
+          },
+          {
+            "selector": "#feat-m4",
+            "text": "4",
+            "fontPx": 11,
+            "time": 21.375,
+            "seconds": 6.25
+          },
+          {
+            "selector": "#feat-m5",
+            "text": "5",
+            "fontPx": 11,
+            "time": 21.375,
+            "seconds": 6.25
+          },
+          {
+            "selector": "#feat-nearby-text",
+            "text": "Butterflies Garden — 40 m away",
+            "fontPx": 11,
+            "time": 21.375,
+            "seconds": 6.25
+          },
+          {
+            "selector": "#feat-trail-name",
+            "text": "🏆 Explorer Badge",
+            "fontPx": 12,
+            "time": 27.625,
+            "seconds": 6.375
+          },
+          {
+            "selector": "#feat-eyebrow",
+            "text": "Interactive Map",
+            "fontPx": 14,
+            "time": 21.5,
+            "seconds": 5.875
+          },
+          {
+            "selector": "#feat-progress-pct",
+            "text": "5/12",
+            "fontPx": 14,
+            "time": 27.625,
+            "seconds": 6.375
+          },
+          {
+            "selector": "#feat-progress-main",
+            "text": "Explorer Trail",
+            "fontPx": 14,
+            "time": 27.625,
+            "seconds": 6.375
+          },
+          {
+            "selector": "#feat-eyebrow-game",
+            "text": "Collect & Explore",
+            "fontPx": 14,
+            "time": 28,
+            "seconds": 6
+          },
+          {
+            "selector": "#feat-map-title",
+            "text": "Experium Park",
+            "fontPx": 18,
+            "time": 21.375,
+            "seconds": 6.25
+          },
+          {
+            "selector": "#feat-game-title",
+            "text": "Your Trail",
+            "fontPx": 18,
+            "time": 27.625,
+            "seconds": 6.375
+          },
+          {
+            "selector": "#feat-trail-badge",
+            "text": "🎖️",
+            "fontPx": 22,
+            "time": 27.625,
+            "seconds": 6.375
+          },
+          {
+            "selector": "#feat-sub",
+            "text": "GPS-aware map shows you exactly where you are and what's nearby.",
+            "fontPx": 24,
+            "time": 21.5,
+            "seconds": 5.875
+          },
+          {
+            "selector": "#feat-sub-game",
+            "text": "Unlock badges. Reveal discovery cards. Complete the trail.",
+            "fontPx": 24,
+            "time": 28,
+            "seconds": 6
+          }
+        ]
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 8 text elements stay under it for 0.5 s or more, the smallest \"[ PARK PHOTO — IMG-4 ]\" at 5 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "[ PARK PHOTO — IMG-4 ]",
+        "selector": "#clm-screen-audio-bg-label",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-claim.html",
+        "bbox": {
+          "x": 749.85,
+          "y": 725.73,
+          "width": 67.61,
+          "height": 6.79
+        },
+        "time": 33.375,
+        "times": [
+          33.375,
+          33.375,
+          33.375,
+          33.375,
+          33.375,
+          33.375,
+          33.375,
+          35
+        ],
+        "fontPx": 4.85,
+        "floorPx": 28,
+        "seconds": 6.625,
+        "elements": [
+          {
+            "selector": "#clm-screen-audio-bg-label",
+            "text": "[ PARK PHOTO — IMG-4 ]",
+            "fontPx": 4.85,
+            "time": 33.375,
+            "seconds": 6.625
+          },
+          {
+            "selector": "#clm-aud-num",
+            "text": "Exhibit 07",
+            "fontPx": 6.79,
+            "time": 33.375,
+            "seconds": 6.625
+          },
+          {
+            "selector": "#clm-mm1",
+            "text": "1",
+            "fontPx": 8,
+            "time": 33.375,
+            "seconds": 6.625
+          },
+          {
+            "selector": "#clm-mm2",
+            "text": "2",
+            "fontPx": 8,
+            "time": 33.375,
+            "seconds": 6.625
+          },
+          {
+            "selector": "#clm-mm3",
+            "text": "3",
+            "fontPx": 8,
+            "time": 33.375,
+            "seconds": 6.625
+          },
+          {
+            "selector": "#clm-game-title",
+            "text": "Your Trail",
+            "fontPx": 13,
+            "time": 33.375,
+            "seconds": 6.625
+          },
+          {
+            "selector": "#clm-aud-name",
+            "text": "Butterflies Garden",
+            "fontPx": 13.57,
+            "time": 33.375,
+            "seconds": 6.625
+          },
+          {
+            "selector": "#clm-wordmark",
+            "text": "Experium · Nature Audio Tour",
+            "fontPx": 18,
+            "time": 35,
+            "seconds": 5
+          }
+        ]
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 5 text elements stay under it for 0.5 s or more, the smallest \"🗺️ Interactive Map\" at 14 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "🗺️ Interactive Map",
+        "selector": "#end-badges > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-endcard.html",
+        "bbox": {
+          "x": 898.62,
+          "y": 753.71,
+          "width": 120.58,
+          "height": 18.32
+        },
+        "time": 41.375,
+        "times": [
+          39.75,
+          41,
+          41.375,
+          41.375,
+          41.5
+        ],
+        "fontPx": 13.5,
+        "floorPx": 28,
+        "seconds": 3.625,
+        "elements": [
+          {
+            "selector": "#end-badges > div:nth-of-type(2)",
+            "text": "🗺️ Interactive Map",
+            "fontPx": 13.5,
+            "time": 41.375,
+            "seconds": 3.625
+          },
+          {
+            "selector": "#end-badges > div:nth-of-type(3)",
+            "text": "🏆 Gamification",
+            "fontPx": 13.78,
+            "time": 41.5,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#end-badges > div:nth-of-type(1)",
+            "text": "🎧 Audio Guide",
+            "fontPx": 14,
+            "time": 41.375,
+            "seconds": 3.625
+          },
+          {
+            "selector": "#end-eyebrow",
+            "text": "Experium · Nature Audio Tour",
+            "fontPx": 16,
+            "time": 39.75,
+            "seconds": 5.25
+          },
+          {
+            "selector": "#end-sub",
+            "text": "Scan. Listen. Discover. No download required.",
+            "fontPx": 22,
+            "time": 41,
+            "seconds": 4
+          }
+        ]
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 360
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

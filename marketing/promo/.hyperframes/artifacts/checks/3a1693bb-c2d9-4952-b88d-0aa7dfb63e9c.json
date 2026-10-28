@@ -1,0 +1,505 @@
+{
+  "ok": true,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 5,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#aud-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#aud-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-audio.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#clm-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#clm-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-claim.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#feat-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#feat-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-features.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#hook-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#hook-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-hook.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#rev-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#rev-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo/compositions/scene-reveal.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      }
+    ],
+    "filesScanned": 7
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 1,
+    "findings": [
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 33.184,
+        "selector": "#feat-headline-game",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 60,
+          "top": 226,
+          "right": 414.61,
+          "bottom": 389,
+          "width": 354.61,
+          "height": 163
+        },
+        "containerSelector": "#clm-l1 > span:nth-of-type(1)",
+        "text": "Stories you collect.",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 60,
+          "y": 226,
+          "width": 354.61,
+          "height": 163
+        },
+        "firstSeen": 33.184,
+        "lastSeen": 33.184,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          33.184
+        ]
+      }
+    ],
+    "duration": 45,
+    "samples": [
+      2.5,
+      7.5,
+      12.5,
+      17.5,
+      22.5,
+      27.5,
+      32.5,
+      37.5,
+      42.5
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 1,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": true,
+    "samples": [
+      2.5,
+      12.5,
+      22.5,
+      32.5,
+      42.5
+    ],
+    "checked": 22,
+    "passed": 22
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 9,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "film_silent",
+        "severity": "warning",
+        "message": "This 45 s film has no sound source (no <audio>, no <video> with sound): add a music bed and sounds on the visible actions unless the person asked for silence; see references/sound.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and \"Experium Park, Hyderabad\" renders at 22 px for 4.63 s: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Experium Park, Hyderabad",
+        "selector": "#hook-hint-line",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-hook.html",
+        "bbox": {
+          "x": 79.8,
+          "y": 1630,
+          "width": 294.08,
+          "height": 30
+        },
+        "time": 2.375,
+        "times": [
+          2.375
+        ],
+        "fontPx": 22,
+        "floorPx": 28,
+        "seconds": 4.625,
+        "elements": [
+          {
+            "selector": "#hook-hint-line",
+            "text": "Experium Park, Hyderabad",
+            "fontPx": 22,
+            "time": 2.375,
+            "seconds": 4.625
+          }
+        ]
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 4 text elements stay under it for 0.5 s or more, the smallest \"Audio Guide\" at 15 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Audio Guide",
+        "selector": "#aud-eyebrow",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio.html",
+        "bbox": {
+          "x": 60,
+          "y": 191.71,
+          "width": 125.06,
+          "height": 20
+        },
+        "time": 12.375,
+        "times": [
+          12.375,
+          12.375,
+          13.625,
+          13.625
+        ],
+        "fontPx": 15,
+        "floorPx": 28,
+        "seconds": 9.625,
+        "elements": [
+          {
+            "selector": "#aud-eyebrow",
+            "text": "Audio Guide",
+            "fontPx": 15,
+            "time": 12.375,
+            "seconds": 9.625
+          },
+          {
+            "selector": "#aud-pills > span:nth-of-type(1)",
+            "text": "No app install",
+            "fontPx": 15,
+            "time": 13.625,
+            "seconds": 8.375
+          },
+          {
+            "selector": "#aud-pills > span:nth-of-type(2)",
+            "text": "Works offline",
+            "fontPx": 15,
+            "time": 13.625,
+            "seconds": 8.375
+          },
+          {
+            "selector": "#aud-sub",
+            "text": "Scan any marker — instant audio. No download. No login.",
+            "fontPx": 24,
+            "time": 12.375,
+            "seconds": 9.625
+          }
+        ]
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 6.88 s (14.00–20.88 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 14,
+        "seconds": 6.875,
+        "floorSeconds": 3,
+        "until": 20.875
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 4 text elements stay under it for 0.5 s or more, the smallest \"Interactive Map\" at 15 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Interactive Map",
+        "selector": "#feat-eyebrow",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-features.html",
+        "bbox": {
+          "x": 60,
+          "y": 193.09,
+          "width": 169.7,
+          "height": 20
+        },
+        "time": 21.375,
+        "times": [
+          21.375,
+          21.375,
+          28,
+          28
+        ],
+        "fontPx": 15,
+        "floorPx": 28,
+        "seconds": 6,
+        "elements": [
+          {
+            "selector": "#feat-eyebrow",
+            "text": "Interactive Map",
+            "fontPx": 15,
+            "time": 21.375,
+            "seconds": 6
+          },
+          {
+            "selector": "#feat-eyebrow-game",
+            "text": "Collect & Explore",
+            "fontPx": 15,
+            "time": 28,
+            "seconds": 6
+          },
+          {
+            "selector": "#feat-sub",
+            "text": "GPS-aware map shows where you are and what's nearby.",
+            "fontPx": 24,
+            "time": 21.375,
+            "seconds": 6
+          },
+          {
+            "selector": "#feat-sub-game",
+            "text": "Unlock badges. Reveal discovery cards. Complete the trail.",
+            "fontPx": 24,
+            "time": 28,
+            "seconds": 6
+          }
+        ]
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 5.00 s (22.00–27.00 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 22,
+        "seconds": 5,
+        "floorSeconds": 3,
+        "until": 27
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 4.75 s (28.13–32.88 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 28.125,
+        "seconds": 4.75,
+        "floorSeconds": 3,
+        "until": 32.875
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 4.88 s (34.00–38.88 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 34,
+        "seconds": 4.875,
+        "floorSeconds": 3,
+        "until": 38.875
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 6 text elements stay under it for 0.5 s or more, the smallest \"Nature Audio Tour\" at 14 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Nature Audio Tour",
+        "selector": "#end-eyebrow",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-endcard.html",
+        "bbox": {
+          "x": 442.67,
+          "y": 464.59,
+          "width": 194.66,
+          "height": 19
+        },
+        "time": 39.5,
+        "times": [
+          39.5,
+          39.5,
+          40,
+          40.125,
+          40.25,
+          40.25
+        ],
+        "fontPx": 14,
+        "floorPx": 28,
+        "seconds": 5.5,
+        "elements": [
+          {
+            "selector": "#end-eyebrow",
+            "text": "Nature Audio Tour",
+            "fontPx": 14,
+            "time": 39.5,
+            "seconds": 5.5
+          },
+          {
+            "selector": "#end-badges-row > span:nth-of-type(3)",
+            "text": "GPS Map",
+            "fontPx": 14.58,
+            "time": 40.25,
+            "seconds": 4.75
+          },
+          {
+            "selector": "#end-badges-row > span:nth-of-type(1)",
+            "text": "No App Needed",
+            "fontPx": 14.84,
+            "time": 40.125,
+            "seconds": 4.875
+          },
+          {
+            "selector": "#end-badges-row > span:nth-of-type(2)",
+            "text": "Audio Narration",
+            "fontPx": 15,
+            "time": 40.25,
+            "seconds": 4.75
+          },
+          {
+            "selector": "#end-tagline",
+            "text": "Scan any marker to begin your story.",
+            "fontPx": 18,
+            "time": 40,
+            "seconds": 5
+          },
+          {
+            "selector": "#end-sub",
+            "text": "Scan. Listen. Discover.",
+            "fontPx": 22,
+            "time": 39.5,
+            "seconds": 5.5
+          }
+        ]
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 360
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

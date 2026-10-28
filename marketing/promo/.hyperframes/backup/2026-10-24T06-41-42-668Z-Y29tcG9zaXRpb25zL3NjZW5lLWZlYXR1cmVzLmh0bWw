@@ -1,0 +1,312 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      container-type: size;
+      background: #f8f7f4;
+    }
+
+    #feat-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 20%, rgba(163,177,138,.16) 0%, transparent 65%), #f8f7f4;
+    }
+
+    /* ── Feature text — top zone ── */
+    #feat-text {
+      position: absolute;
+      left: 60px; right: 60px; top: 200px;
+    }
+    #feat-eyebrow {
+      font-family: Nunito, sans-serif; font-size: 15px; font-weight: 800;
+      letter-spacing: .14em; text-transform: uppercase; color: #3f5e3d; margin-bottom: 16px;
+    }
+    #feat-headline {
+      font-family: Outfit, sans-serif; font-size: 72px; font-weight: 900;
+      letter-spacing: -0.03em; color: #2b2b2b; line-height: 1.0; margin-bottom: 20px;
+    }
+    #feat-sub {
+      font-family: Nunito, sans-serif; font-size: 24px; font-weight: 600;
+      color: #6e6e6e; line-height: 1.4;
+    }
+
+    /* Gamification text (second half) */
+    #feat-text-game {
+      position: absolute;
+      left: 60px; right: 60px; top: 200px;
+      opacity: 0;
+    }
+    #feat-eyebrow-game {
+      font-family: Nunito, sans-serif; font-size: 15px; font-weight: 800;
+      letter-spacing: .14em; text-transform: uppercase; color: #7a4e1e; margin-bottom: 16px;
+    }
+    #feat-headline-game {
+      font-family: Outfit, sans-serif; font-size: 72px; font-weight: 900;
+      letter-spacing: -0.03em; color: #2b2b2b; line-height: 1.0; margin-bottom: 20px;
+    }
+    #feat-sub-game {
+      font-family: Nunito, sans-serif; font-size: 24px; font-weight: 600;
+      color: #6e6e6e; line-height: 1.4;
+    }
+
+    /* ── Phone — centered in lower 65% ── */
+    #feat-phone-wrap {
+      position: absolute;
+      left: 50%;
+      top: 570px;
+      margin-left: -205px;
+    }
+    #feat-phone {
+      width: 410px; height: 888px;
+      border-radius: 56px;
+      background: linear-gradient(160deg, #3c4049 0%, #17191e 44%, #08090c 100%);
+      border: 1px solid rgba(255,255,255,.28);
+      padding: 13px;
+      box-shadow: 0 36px 90px rgba(0,0,0,.45), 0 12px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
+      position: relative;
+    }
+    #feat-island {
+      position: absolute; top: 22px; left: 50%;
+      width: 100px; height: 28px; margin-left: -50px;
+      background: #050607; border-radius: 14px; z-index: 10;
+    }
+    #feat-screen {
+      width: 100%; height: 100%;
+      border-radius: 44px; overflow: hidden;
+      background: #f8f7f4; position: relative;
+    }
+
+    /* ── MAP SCREEN ── */
+    #feat-map-screen {
+      position: absolute; inset: 0;
+      background: #f8f7f4;
+      display: flex; flex-direction: column;
+    }
+    #feat-map-topbar {
+      padding: 60px 18px 12px;
+      background: #f8f7f4; border-bottom: 1px solid #e8e5df;
+    }
+    #feat-map-title {
+      font-family: Outfit, sans-serif; font-size: 20px; font-weight: 900;
+      color: #2b2b2b; letter-spacing: -0.02em;
+    }
+    #feat-map-subtitle {
+      font-family: Nunito, sans-serif; font-size: 11px; font-weight: 700; color: #8a8a8a;
+    }
+    #feat-map-canvas {
+      flex: 1; position: relative;
+      background: linear-gradient(135deg, #d4edcc 0%, #b8d4b0 50%, #c8dfc0 100%);
+      overflow: hidden;
+    }
+    #feat-map-canvas::before {
+      content: '';
+      position: absolute; top: 25%; left: 10%; right: 10%; bottom: 20%;
+      border: 2px dashed rgba(88,129,87,.3); border-radius: 50%;
+    }
+    #feat-gps-dot {
+      position: absolute; width: 18px; height: 18px; border-radius: 50%;
+      background: #4a90d9; box-shadow: 0 0 0 5px rgba(74,144,217,.25), 0 2px 8px rgba(0,0,0,.25);
+      top: 52%; left: 48%; margin-left: -9px; margin-top: -9px;
+    }
+    #feat-gps-ring {
+      position: absolute; width: 40px; height: 40px; border-radius: 50%;
+      border: 2px solid rgba(74,144,217,.4);
+      top: 52%; left: 48%; margin-left: -20px; margin-top: -20px;
+    }
+    .feat-marker {
+      position: absolute; width: 32px; height: 32px; border-radius: 50%;
+      background: #588157; box-shadow: 0 2px 0 #3f6b3a, 0 4px 12px rgba(88,129,87,.35);
+      display: flex; align-items: center; justify-content: center;
+      font-family: Outfit, sans-serif; font-size: 13px; font-weight: 900; color: #fff;
+    }
+    #feat-m1 { top: 20%; left: 26%; }
+    #feat-m2 { top: 35%; left: 70%; }
+    #feat-m3 { top: 60%; left: 60%; }
+    #feat-m4 { top: 72%; left: 22%; }
+    #feat-m5 { top: 16%; left: 55%; }
+    #feat-nearby {
+      padding: 10px 14px;
+      background: #f8f7f4; border-top: 1px solid #e8e5df;
+    }
+    #feat-nearby-title {
+      font-family: Nunito, sans-serif; font-size: 10px; font-weight: 800;
+      letter-spacing: .1em; text-transform: uppercase; color: #588157; margin-bottom: 4px;
+    }
+    #feat-nearby-item { display: flex; align-items: center; gap: 7px; }
+    #feat-nearby-dot { width: 9px; height: 9px; border-radius: 50%; background: #dda15e; flex-shrink: 0; }
+    #feat-nearby-text { font-family: Nunito, sans-serif; font-size: 12px; font-weight: 700; color: #2b2b2b; }
+
+    /* ── GAMIFICATION SCREEN ── */
+    #feat-game-screen {
+      position: absolute; inset: 0;
+      background: #f8f7f4; overflow: hidden;
+    }
+    #feat-game-header {
+      padding: 60px 18px 16px;
+      background: #f8f7f4; border-bottom: 1px solid #e8e5df;
+    }
+    #feat-game-title {
+      font-family: Outfit, sans-serif; font-size: 20px; font-weight: 900;
+      color: #2b2b2b; letter-spacing: -0.02em;
+    }
+    #feat-progress-wrap {
+      display: flex; align-items: center; gap: 18px; padding: 18px 16px;
+    }
+    #feat-progress-ring {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: conic-gradient(#588157 0% 42%, #e8e5df 42% 100%);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative;
+    }
+    #feat-progress-ring::after {
+      content: ''; position: absolute; inset: 9px;
+      border-radius: 50%; background: #f8f7f4;
+    }
+    #feat-progress-pct {
+      position: relative; z-index: 1;
+      font-family: Outfit, sans-serif; font-size: 15px; font-weight: 900; color: #2b2b2b;
+    }
+    #feat-progress-main { font-family: Nunito, sans-serif; font-size: 16px; font-weight: 800; color: #2b2b2b; }
+    #feat-progress-sub { font-family: Nunito, sans-serif; font-size: 11px; font-weight: 600; color: #717171; }
+    #feat-badge-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; padding: 0 16px;
+    }
+    .feat-badge {
+      aspect-ratio: 1; border-radius: 14px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 5px; font-family: Nunito, sans-serif; font-size: 9px; font-weight: 800;
+      text-align: center; padding: 10px 4px; border: 1.5px solid transparent;
+    }
+    .feat-badge.unlocked {
+      background: linear-gradient(135deg, #588157, #3f6b3a); color: #fff;
+      border-color: #588157; box-shadow: 0 2px 0 #3f6b3a, 0 4px 14px rgba(88,129,87,.25);
+    }
+    .feat-badge.locked { background: #f0ede8; color: #717171; border-color: #e8e5df; }
+    .feat-badge-icon { font-size: 20px; }
+    #feat-trail-card {
+      margin: 12px 16px 0;
+      background: linear-gradient(135deg, #dda15e, #b8834a);
+      border-radius: 14px; padding: 12px 14px;
+      display: flex; align-items: center;
+      box-shadow: 0 2px 0 #b8834a;
+    }
+    #feat-trail-text { flex: 1; }
+    #feat-trail-name { font-family: Outfit, sans-serif; font-size: 14px; font-weight: 900; color: #fff; }
+    #feat-trail-progress { font-family: Nunito, sans-serif; font-size: 10px; font-weight: 700; color: rgba(255,255,255,.75); }
+    #feat-trail-badge { font-size: 26px; }
+
+    #feat-fade {
+      position: absolute; inset: 0; background: #f8f7f4; pointer-events: none;
+    }
+  </style>
+
+  <div data-hf-id="hf-3imf" id="root" data-composition-id="scene-features" data-width="1080" data-height="1920">
+
+    <div data-hf-id="hf-ryo7" id="feat-bg" class="clip" data-start="0" data-duration="13" data-track-index="0" data-layout-ignore=""></div>
+
+    <div data-hf-id="hf-e3pm" id="feat-text" class="clip" data-start="0" data-duration="7" data-track-index="1">
+      <div data-hf-id="hf-ulac" id="feat-eyebrow" data-layout-ignore="">Interactive Map</div>
+      <div data-hf-id="hf-p9y5" id="feat-headline">Navigate<br data-hf-id="hf-x5px">every corner.</div>
+      <div data-hf-id="hf-r4mf" id="feat-sub">GPS-aware map shows where you are and what's nearby.</div>
+    </div>
+
+    <div data-hf-id="hf-7oti" id="feat-text-game" class="clip" data-start="7" data-duration="6" data-track-index="2">
+      <div data-hf-id="hf-jc0c" id="feat-eyebrow-game" data-layout-ignore="">Collect &amp; Explore</div>
+      <div data-hf-id="hf-vxll" id="feat-headline-game">Stories you<br data-hf-id="hf-rsrt">collect.</div>
+      <div data-hf-id="hf-l8ld" id="feat-sub-game">Unlock badges. Reveal discovery cards. Complete the trail.</div>
+    </div>
+
+    <div data-hf-id="hf-gm5j" id="feat-phone-wrap" class="clip" data-start="0" data-duration="13" data-track-index="3" data-layout-ignore="" data-hold="">
+      <div data-hf-id="hf-s8y2" id="feat-phone">
+        <div data-hf-id="hf-zvyp" id="feat-island"></div>
+        <div data-hf-id="hf-ofau" id="feat-screen">
+          <div data-hf-id="hf-x3nd" id="feat-map-screen">
+            <div data-hf-id="hf-fh5x" id="feat-map-topbar">
+              <div data-hf-id="hf-pz9k" id="feat-map-title">Experium Park</div>
+              <div data-hf-id="hf-nzhp" id="feat-map-subtitle">Tap a marker to listen</div>
+            </div>
+            <div data-hf-id="hf-eo5l" id="feat-map-canvas">
+              <div data-hf-id="hf-4q05" id="feat-gps-ring"></div>
+              <div data-hf-id="hf-8h2c" id="feat-gps-dot"></div>
+              <div data-hf-id="hf-hoav" class="feat-marker" id="feat-m1">1</div>
+              <div data-hf-id="hf-7w4f" class="feat-marker" id="feat-m2">2</div>
+              <div data-hf-id="hf-w75b" class="feat-marker" id="feat-m3">3</div>
+              <div data-hf-id="hf-s3q7" class="feat-marker" id="feat-m4">4</div>
+              <div data-hf-id="hf-1jfr" class="feat-marker" id="feat-m5">5</div>
+            </div>
+            <div data-hf-id="hf-1hz3" id="feat-nearby">
+              <div data-hf-id="hf-dtsp" id="feat-nearby-title">Nearby</div>
+              <div data-hf-id="hf-27lp" id="feat-nearby-item">
+                <div data-hf-id="hf-3gi5" id="feat-nearby-dot"></div>
+                <div data-hf-id="hf-zpf2" id="feat-nearby-text">J Garden — 40 m away</div>
+              </div>
+            </div>
+          </div>
+
+          <div data-hf-id="hf-farp" id="feat-game-screen">
+            <div data-hf-id="hf-ma3q" id="feat-game-header"><div data-hf-id="hf-7r8e" id="feat-game-title">Your Trail</div></div>
+            <div data-hf-id="hf-gxdk" id="feat-progress-wrap">
+              <div data-hf-id="hf-m2lu" id="feat-progress-ring"><div data-hf-id="hf-5re6" id="feat-progress-pct">5/12</div></div>
+              <div data-hf-id="hf-mfgm" id="feat-progress-label">
+                <div data-hf-id="hf-sgds" id="feat-progress-main">Explorer Trail</div>
+                <div data-hf-id="hf-qy7l" id="feat-progress-sub">5 exhibits discovered</div>
+              </div>
+            </div>
+            <div data-hf-id="hf-dvjk" id="feat-badge-grid">
+              <div data-hf-id="hf-vthk" class="feat-badge unlocked"><span data-hf-id="hf-6tik" class="feat-badge-icon">🦋</span>Butterflies</div>
+              <div data-hf-id="hf-uwwf" class="feat-badge unlocked"><span data-hf-id="hf-c87y" class="feat-badge-icon">🌿</span>Botanist</div>
+              <div data-hf-id="hf-5yyv" class="feat-badge unlocked"><span data-hf-id="hf-pn70" class="feat-badge-icon">🐦</span>Bird Walk</div>
+              <div data-hf-id="hf-qlzm" class="feat-badge locked"><span data-hf-id="hf-3uwg" class="feat-badge-icon">🔒</span>Night Trail</div>
+              <div data-hf-id="hf-9pfu" class="feat-badge locked"><span data-hf-id="hf-5tzc" class="feat-badge-icon">🔒</span>Water Path</div>
+              <div data-hf-id="hf-m063" class="feat-badge locked"><span data-hf-id="hf-4n29" class="feat-badge-icon">🔒</span>Summit</div>
+            </div>
+            <div data-hf-id="hf-x0hp" id="feat-trail-card">
+              <div data-hf-id="hf-3jru" id="feat-trail-text">
+                <div data-hf-id="hf-m570" id="feat-trail-name">🏆 Explorer Badge</div>
+                <div data-hf-id="hf-1prf" id="feat-trail-progress">7 more to unlock</div>
+              </div>
+              <div data-hf-id="hf-115v" id="feat-trail-badge">🎖️</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-hf-id="hf-n808" id="feat-fade" class="clip" data-start="0" data-duration="13" data-track-index="4" data-layout-ignore=""></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+
+      tl.fromTo('#feat-fade', { opacity: 1 }, { opacity: 0, duration: 0.4, ease: 'power2.out' }, 0);
+
+      tl.fromTo('#feat-text', { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }, 0.25);
+      tl.fromTo('#feat-phone-wrap', { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.3);
+      tl.to('#feat-phone-wrap', { y: -7, duration: 0.18, ease: 'power2.out' }, 0.9);
+      tl.to('#feat-phone-wrap', { y: 0, duration: 0.22, ease: 'power2.inOut' }, 1.08);
+
+      tl.fromTo('#feat-gps-ring', { scale: 1, opacity: 0.8 }, { scale: 1.9, opacity: 0, duration: 1.2, ease: 'power2.out', repeat: 3 }, 1.5);
+
+      /* Map → Game transition at 6s */
+      tl.to('#feat-map-screen', { opacity: 0, duration: 0.4, ease: 'power2.in' }, 6.2);
+      tl.fromTo('#feat-game-screen', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' }, 6.5);
+      tl.to('#feat-text', { opacity: 0, y: -16, duration: 0.35, ease: 'power2.in' }, 6.0);
+      tl.fromTo('#feat-text-game', { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }, 6.6);
+      tl.fromTo('.feat-badge', { opacity: 0, scale: 0.85, y: 12 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'back.out(1.4)', stagger: 0.06 }, 7.0);
+
+      tl.to('#feat-phone-wrap', { y: -10, duration: 3, ease: 'sine.inOut' }, 4);
+      tl.to('#feat-phone-wrap', { y: 0, duration: 3, ease: 'sine.inOut' }, 7);
+
+      tl.fromTo('#feat-fade', { opacity: 0, immediateRender: false }, { opacity: 1, duration: 0.6, ease: 'power2.in' }, 12.4);
+
+      tl.seek(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines['scene-features'] = tl;
+    })();
+  </script>
+</template>

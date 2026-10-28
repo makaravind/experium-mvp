@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --forest: #588157;
+        --orange: #dda15e;
+        --bg: #f8f7f4;
+        --ink: #2b2b2b;
+        --font-display: "Outfit", sans-serif;
+        --font-body: "Nunito", sans-serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #0b1108;
+      }
+      #root {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+      }
+      .scene-host {
+        position: absolute;
+        inset: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-p2root"
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="20"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- Scene 1: Full park video (0–8s) — character searches, finds QR, scans -->
+      <div data-hf-id="hf-p2s1"
+        id="scene-vid"
+        class="scene-host clip"
+        data-composition-id="scene-vid"
+        data-composition-src="compositions/scene-vid.html"
+        data-start="0"
+        data-duration="8"
+        data-track-index="1"
+        data-width="1080"
+        data-height="1920"
+        style="z-index:1"
+      ></div>
+
+      <!-- Scene 2: Phone mockup with app (7–13s) -->
+      <div data-hf-id="hf-p2s2"
+        id="scene-phone"
+        class="scene-host clip"
+        data-composition-id="scene-phone"
+        data-composition-src="compositions/scene-phone.html"
+        data-start="7"
+        data-duration="5"
+        data-track-index="2"
+        data-width="1080"
+        data-height="1920"
+        data-hold
+        style="z-index:2"
+       data-playback-start="0"></div>
+
+      <!-- Scene 3: Audio playing (12–16s) -->
+      <div data-hf-id="hf-p2s3"
+        id="scene-audio-playing"
+        class="scene-host clip"
+        data-composition-id="scene-audio-playing"
+        data-composition-src="compositions/scene-audio-playing.html"
+        data-start="12"
+        data-duration="4"
+        data-track-index="3"
+        data-width="1080"
+        data-height="1920"
+        style="z-index:3"
+      ></div>
+
+      <!-- Scene 4: Coming Soon (15–20s) -->
+      <div data-hf-id="hf-p2s4"
+        id="scene-endcard"
+        class="scene-host clip"
+        data-composition-id="scene-endcard"
+        data-composition-src="compositions/scene-endcard.html"
+        data-start="15"
+        data-duration="5"
+        data-track-index="4"
+        data-width="1080"
+        data-height="1920"
+        style="z-index:4"
+      ></div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

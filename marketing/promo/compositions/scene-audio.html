@@ -1,0 +1,283 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      container-type: size;
+      background: #f8f7f4;
+    }
+
+    #aud-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 30%, rgba(163,177,138,.18) 0%, transparent 65%), #f8f7f4;
+    }
+
+    /* ── Text block — top zone (168–520px) ── */
+    #aud-text {
+      position: absolute;
+      left: 60px;
+      right: 60px;
+      top: 200px;
+    }
+    #aud-eyebrow {
+      font-family: Nunito, sans-serif;
+      font-size: 15px; font-weight: 800;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: #3f6b3a; margin-bottom: 16px;
+    }
+    #aud-headline {
+      font-family: Outfit, sans-serif;
+      font-size: 72px; font-weight: 900;
+      letter-spacing: -0.03em; color: #2b2b2b;
+      line-height: 1.0; margin-bottom: 20px;
+    }
+    #aud-headline span { color: #588157; }
+    #aud-sub {
+      font-family: Nunito, sans-serif;
+      font-size: 24px; font-weight: 600;
+      color: #6e6e6e; line-height: 1.4;
+    }
+
+    /* ── Phone — centered in lower 65% ── */
+    #aud-phone-wrap {
+      position: absolute;
+      left: 50%;
+      top: 570px;
+      margin-left: -205px;
+    }
+    #aud-phone {
+      width: 410px;
+      height: 888px;
+      border-radius: 56px;
+      background: linear-gradient(160deg, #3c4049 0%, #17191e 44%, #08090c 100%);
+      border: 1px solid rgba(255,255,255,.28);
+      padding: 13px;
+      box-shadow:
+        0 36px 90px rgba(0,0,0,.45),
+        0 12px 28px rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.18);
+      position: relative;
+    }
+    #aud-island {
+      position: absolute;
+      top: 22px; left: 50%;
+      width: 100px; height: 28px;
+      margin-left: -50px;
+      background: #050607;
+      border-radius: 14px;
+      z-index: 10;
+    }
+    #aud-screen {
+      width: 100%; height: 100%;
+      border-radius: 44px;
+      overflow: hidden;
+      background: #0f1912;
+      position: relative;
+    }
+    #aud-screen-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(170deg, #1a3012 0%, #2d4a1e 30%, #3f6b3a 60%, #6b8f60 100%);
+    }
+    #aud-screen-bg-label {
+      position: absolute; bottom: 8px; left: 14px;
+      font-family: Nunito, sans-serif; font-size: 7px; font-weight: 700;
+      color: rgba(255,255,255,.2); letter-spacing: .08em; text-transform: uppercase;
+    }
+    #aud-screen-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 35%, rgba(11,22,8,.85) 100%);
+    }
+
+    #aud-topbar {
+      position: absolute; top: 64px; left: 0; right: 0;
+      padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    #aud-back-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #aud-back-btn::after { content:'‹'; color:#fff; font-size:20px; line-height:1; margin-top:-1px; }
+    #aud-app-title {
+      font-family: Nunito, sans-serif; font-size: 13px; font-weight: 800;
+      letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.65);
+    }
+    #aud-menu-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    }
+    #aud-menu-btn::before, #aud-menu-btn::after {
+      content: ''; width: 13px; height: 2px; background: rgba(255,255,255,.8); border-radius: 1px;
+    }
+
+    #aud-player {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 24px 22px 36px;
+    }
+    #aud-exhibit-num {
+      font-family: Nunito, sans-serif; font-size: 12px; font-weight: 800;
+      letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: 4px;
+    }
+    #aud-exhibit-name {
+      font-family: Outfit, sans-serif; font-size: 26px; font-weight: 800;
+      color: #fff; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 20px;
+    }
+    #aud-wave {
+      display: flex; align-items: center; gap: 3px; height: 40px; margin-bottom: 14px;
+    }
+    .aud-bar { flex: 1; border-radius: 3px; background: rgba(88,129,87,.45); min-height: 4px; }
+    .aud-bar.active { background: #588157; }
+    #aud-progress-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+    }
+    #aud-progress-track {
+      flex: 1; height: 3px; background: rgba(255,255,255,.18); border-radius: 2px; position: relative;
+    }
+    #aud-progress-fill {
+      position: absolute; top: 0; left: 0; width: 38%; height: 100%;
+      background: #588157; border-radius: 2px;
+    }
+    .aud-time { font-family: Nunito, sans-serif; font-size: 11px; font-weight: 700; color: rgba(255,255,255,.5); }
+    #aud-controls { display: flex; align-items: center; justify-content: center; gap: 24px; }
+    #aud-play-btn {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: #588157; box-shadow: 0 4px 0 #3f6b3a, 0 10px 24px rgba(88,129,87,.35);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #aud-play-btn::after {
+      content: ''; width: 0; height: 0;
+      border-style: solid; border-width: 11px 0 11px 18px;
+      border-color: transparent transparent transparent #fff; margin-left: 3px;
+    }
+    .aud-skip-btn {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: rgba(255,255,255,.12);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #aud-skip-back::after { content:'⏮'; font-size:16px; color:rgba(255,255,255,.7); }
+    #aud-skip-fwd::after  { content:'⏭'; font-size:16px; color:rgba(255,255,255,.7); }
+
+    /* Pills below phone */
+    #aud-pills {
+      position: absolute;
+      left: 50%;
+      bottom: 200px;
+      transform: translateX(-50%);
+      display: flex; gap: 12px; white-space: nowrap;
+    }
+    .aud-pill {
+      font-family: Nunito, sans-serif; font-size: 15px; font-weight: 800;
+      letter-spacing: .04em; color: #3f6b3a;
+      background: rgba(63,107,58,.10); border: 1.5px solid rgba(63,107,58,.25);
+      border-radius: 999px; padding: 9px 18px;
+    }
+
+    #aud-fade {
+      position: absolute; inset: 0; background: #f8f7f4; pointer-events: none;
+    }
+  </style>
+
+  <div data-hf-id="hf-pheu" id="root" data-composition-id="scene-audio" data-width="1080" data-height="1920">
+
+    <div data-hf-id="hf-cl98" id="aud-bg" class="clip" data-start="0" data-duration="4" data-track-index="0" data-layout-ignore=""></div>
+
+    <!-- Feature text top -->
+    <div data-hf-id="hf-47xg" id="aud-text" class="clip" data-start="0" data-duration="4" data-track-index="1" data-layout-allow-overlap="">
+      <div data-hf-id="hf-q9te" id="aud-eyebrow" data-layout-ignore="">Audio Guide</div>
+      <div data-hf-id="hf-hged" id="aud-headline">Your park,<br data-hf-id="hf-x5px"><span data-hf-id="hf-75dm">with a voice.</span></div>
+      <div data-hf-id="hf-v1dr" id="aud-sub">Scan any marker — instant audio. No download. No login.</div>
+    </div>
+
+    <!-- Phone centered -->
+    <div data-hf-id="hf-ryin" id="aud-phone-wrap" class="clip" data-start="0" data-duration="4" data-track-index="2" data-layout-ignore="" data-hold="">
+      <div data-hf-id="hf-hlwm" id="aud-phone">
+        <div data-hf-id="hf-453p" id="aud-island"></div>
+        <div data-hf-id="hf-80oq" id="aud-screen">
+          <div data-hf-id="hf-lzhi" id="aud-screen-bg">
+            <div data-hf-id="hf-xk23" id="aud-screen-bg-label">[ PARK PHOTO — IMG-3 — Replace with exhibit photo ]</div>
+          </div>
+          <div data-hf-id="hf-ufqd" id="aud-screen-overlay"></div>
+          <div data-hf-id="hf-d65a" id="aud-topbar">
+            <div data-hf-id="hf-wgyk" id="aud-back-btn"></div>
+            <div data-hf-id="hf-etyz" id="aud-app-title">Nature Audio Tour</div>
+            <div data-hf-id="hf-1uag" id="aud-menu-btn"></div>
+          </div>
+          <div data-hf-id="hf-88tt" id="aud-player">
+            <div data-hf-id="hf-zo5k" id="aud-exhibit-num">Exhibit 07</div>
+            <div data-hf-id="hf-0llb" id="aud-exhibit-name">Japanese Garden</div>
+            <div data-hf-id="hf-sfch" id="aud-wave">
+              <div data-hf-id="hf-qaes" class="aud-bar active" style="height:60%"></div>
+              <div data-hf-id="hf-7nhe" class="aud-bar active" style="height:80%"></div>
+              <div data-hf-id="hf-4y1t" class="aud-bar active" style="height:45%"></div>
+              <div data-hf-id="hf-1nfs" class="aud-bar active" style="height:95%"></div>
+              <div data-hf-id="hf-3w3p" class="aud-bar active" style="height:70%"></div>
+              <div data-hf-id="hf-kpfw" class="aud-bar active" style="height:55%"></div>
+              <div data-hf-id="hf-rfbx" class="aud-bar active" style="height:85%"></div>
+              <div data-hf-id="hf-2xqc" class="aud-bar" style="height:40%"></div>
+              <div data-hf-id="hf-bwz5" class="aud-bar" style="height:65%"></div>
+              <div data-hf-id="hf-3ms5" class="aud-bar" style="height:50%"></div>
+              <div data-hf-id="hf-lzz0" class="aud-bar" style="height:75%"></div>
+              <div data-hf-id="hf-ww9c" class="aud-bar" style="height:35%"></div>
+              <div data-hf-id="hf-i0ka" class="aud-bar" style="height:55%"></div>
+              <div data-hf-id="hf-e2xb" class="aud-bar" style="height:45%"></div>
+              <div data-hf-id="hf-0zpk" class="aud-bar" style="height:80%"></div>
+            </div>
+            <div data-hf-id="hf-7tv8" id="aud-progress-row">
+              <span data-hf-id="hf-gk6w" class="aud-time">1:24</span>
+              <div data-hf-id="hf-hgn9" id="aud-progress-track"><div data-hf-id="hf-azcj" id="aud-progress-fill"></div></div>
+              <span data-hf-id="hf-b0dq" class="aud-time">3:42</span>
+            </div>
+            <div data-hf-id="hf-kk3o" id="aud-controls">
+              <div data-hf-id="hf-y1sn" class="aud-skip-btn" id="aud-skip-back"></div>
+              <div data-hf-id="hf-mfcj" id="aud-play-btn"></div>
+              <div data-hf-id="hf-ba09" class="aud-skip-btn" id="aud-skip-fwd"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pills -->
+    <div data-hf-id="hf-80v3" id="aud-pills" class="clip" data-start="0.6" data-duration="3.4" data-track-index="3">
+      <span data-hf-id="hf-mu0w" class="aud-pill">No app install</span>
+      <span data-hf-id="hf-xgwk" class="aud-pill">Works offline</span>
+    </div>
+
+    <div data-hf-id="hf-y2n7" id="aud-fade" class="clip" data-start="0" data-duration="4" data-track-index="4" data-layout-ignore=""></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+
+      tl.fromTo('#aud-fade', { opacity: 1 }, { opacity: 0, duration: 0.25, ease: 'power2.out' }, 0);
+
+      tl.fromTo('#aud-text', { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out' }, 0.1);
+      tl.fromTo('#aud-phone-wrap', { opacity: 0, y: 60, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'power3.out' }, 0.2);
+      tl.to('#aud-phone-wrap', { y: -7, duration: 0.14, ease: 'power2.out' }, 0.6);
+      tl.to('#aud-phone-wrap', { y: 0, duration: 0.18, ease: 'power2.inOut' }, 0.74);
+
+      tl.fromTo('#aud-pills', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }, 0.6);
+
+      var bars = document.querySelectorAll('.aud-bar.active');
+      bars.forEach(function(bar, i) {
+        tl.to(bar, { scaleY: 1.35, duration: 0.25, ease: 'sine.inOut', yoyo: true, repeat: 4 }, 0.8 + i * 0.04);
+      });
+
+      tl.to('#aud-phone-wrap', { y: -8, duration: 1.5, ease: 'sine.inOut' }, 1.5);
+      tl.to('#aud-phone-wrap', { y: 0, duration: 1.5, ease: 'sine.inOut' }, 3);
+
+      tl.fromTo('#aud-fade', { opacity: 0, immediateRender: false }, { opacity: 1, duration: 0.35, ease: 'power2.in' }, 3.65);
+
+      tl.seek(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines['scene-audio'] = tl;
+    })();
+  </script>
+</template>

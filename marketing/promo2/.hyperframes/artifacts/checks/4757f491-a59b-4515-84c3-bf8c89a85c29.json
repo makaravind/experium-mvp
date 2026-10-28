@@ -1,0 +1,400 @@
+{
+  "ok": false,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 4,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#aud-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#aud-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo2/compositions/scene-audio-playing.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "3 tl.fromTo() calls target \"#aud-album-ring\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#aud-album-ring",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo2/compositions/scene-audio-playing.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0.7s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#phone-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#phone-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo2/compositions/scene-phone.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      },
+      {
+        "code": "gsap_repeated_fromto_without_baseline",
+        "severity": "warning",
+        "message": "2 tl.fromTo() calls target \"#vid-fade\" with no stable baseline. The last-authored fromTo \"from\" values become the element's resting state for any seek before the first tween actually runs, because GSAP applies fromTo from-values at authoring time (immediateRender), not at tween position.",
+        "selector": "#vid-fade",
+        "dataAttributes": {},
+        "sourceFile": "/Users/ametku/Documents/personal/experium-qr-code/promo2/compositions/scene-vid.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Add `immediateRender: false` to every fromTo except the earliest-positioned one (at 0s), so pre-first-tween seeks keep its \"from\" values. A hiding `tl.set(..., 0)` baseline trips gsap_timeline_set_initial_hide, and a `gsap.set` authored before the fromTo calls is overwritten by them."
+      }
+    ],
+    "filesScanned": 5
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": false,
+    "errorCount": 2,
+    "warningCount": 0,
+    "infoCount": 1,
+    "findings": [
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 15.375,
+        "selector": "#aud-eyebrow",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 479.63,
+          "top": 610,
+          "right": 600.36,
+          "bottom": 628,
+          "width": 120.73,
+          "height": 18
+        },
+        "containerSelector": "#end-headline",
+        "text": "NOW PLAYING",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {
+          "data-hf-id": "hf-ae"
+        },
+        "sourceFile": "compositions/scene-audio-playing.html",
+        "bbox": {
+          "x": 479.63,
+          "y": 610,
+          "width": 120.73,
+          "height": 18
+        },
+        "firstSeen": 15.375,
+        "lastSeen": 15.875,
+        "occurrences": 5,
+        "heldMs": 500,
+        "times": [
+          15.375,
+          15.5,
+          15.625,
+          15.75,
+          15.875
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 15.375,
+        "selector": "#aud-title",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 400.67,
+          "top": 630,
+          "right": 679.31,
+          "bottom": 789.39,
+          "width": 278.64,
+          "height": 159.39
+        },
+        "containerSelector": "#end-headline",
+        "text": "Flower Meadow",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {
+          "data-hf-id": "hf-ati"
+        },
+        "sourceFile": "compositions/scene-audio-playing.html",
+        "bbox": {
+          "x": 400.67,
+          "y": 630,
+          "width": 278.64,
+          "height": 159.39
+        },
+        "firstSeen": 15.375,
+        "lastSeen": 15.875,
+        "occurrences": 5,
+        "heldMs": 500,
+        "times": [
+          15.375,
+          15.5,
+          15.625,
+          15.75,
+          15.875
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 15.375,
+        "selector": "#aud-subtitle",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 441.02,
+          "top": 794.78,
+          "right": 638.98,
+          "bottom": 824.78,
+          "width": 197.96,
+          "height": 30
+        },
+        "containerSelector": "#end-headline",
+        "text": "Gate 3 · Exhibit #12",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {
+          "data-hf-id": "hf-as"
+        },
+        "sourceFile": "compositions/scene-audio-playing.html",
+        "bbox": {
+          "x": 441.02,
+          "y": 794.78,
+          "width": 197.96,
+          "height": 30
+        },
+        "firstSeen": 15.375,
+        "lastSeen": 15.375,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          15.375
+        ]
+      }
+    ],
+    "duration": 20,
+    "samples": [
+      1.111,
+      3.333,
+      5.556,
+      7.778,
+      10,
+      12.222,
+      14.444,
+      16.667,
+      18.889
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 3,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.47:1; WCAG AA requires 4.5:1.",
+        "text": "Gate 3 · Exhibit #12",
+        "fg": "rgb(130,137,126)",
+        "bg": "rgb(20,37,20)",
+        "ratio": 4.47,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(131,138,127)",
+        "large": false,
+        "selector": "#aud-subtitle",
+        "dataAttributes": {
+          "data-hf-id": "hf-as"
+        },
+        "sourceFile": "compositions/scene-audio-playing.html",
+        "bbox": {
+          "x": 60,
+          "y": 794.78125,
+          "width": 960,
+          "height": 30
+        },
+        "time": 14.444,
+        "times": [
+          14.444
+        ]
+      }
+    ],
+    "enabled": true,
+    "samples": [
+      1.111,
+      5.556,
+      10,
+      14.444,
+      18.889
+    ],
+    "checked": 10,
+    "passed": 9
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 2,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 2 text elements stay under it for 0.5 s or more, the smallest \"Now Playing\" at 13 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Now Playing",
+        "selector": "#aud-eyebrow",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-audio-playing.html",
+        "bbox": {
+          "x": 479.63,
+          "y": 616.96,
+          "width": 120.73,
+          "height": 18
+        },
+        "time": 12.5,
+        "times": [
+          12.5,
+          12.5
+        ],
+        "fontPx": 13,
+        "floorPx": 28,
+        "seconds": 3.5,
+        "elements": [
+          {
+            "selector": "#aud-eyebrow",
+            "text": "Now Playing",
+            "fontPx": 13,
+            "time": 12.5,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#aud-subtitle",
+            "text": "Gate 3 · Exhibit #12",
+            "fontPx": 22,
+            "time": 12.5,
+            "seconds": 3.5
+          }
+        ]
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 5 text elements stay under it for 0.5 s or more, the smallest \"GPS Map\" at 15 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "GPS Map",
+        "selector": "#end-badges-row > span:nth-of-type(3)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/scene-endcard.html",
+        "bbox": {
+          "x": 686.47,
+          "y": 1650.92,
+          "width": 65.23,
+          "height": 20.54
+        },
+        "time": 15.75,
+        "times": [
+          15.375,
+          15.625,
+          15.625,
+          15.75,
+          15.75
+        ],
+        "fontPx": 14.93,
+        "floorPx": 28,
+        "seconds": 4.25,
+        "elements": [
+          {
+            "selector": "#end-badges-row > span:nth-of-type(3)",
+            "text": "GPS Map",
+            "fontPx": 14.93,
+            "time": 15.75,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#end-badges-row > span:nth-of-type(1)",
+            "text": "No App Needed",
+            "fontPx": 15.1,
+            "time": 15.625,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#end-badges-row > span:nth-of-type(2)",
+            "text": "Audio Narration",
+            "fontPx": 16,
+            "time": 15.75,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#end-tagline",
+            "text": "Scan any marker to begin your story.",
+            "fontPx": 18,
+            "time": 15.625,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#end-sub",
+            "text": "Scan. Listen. Discover.",
+            "fontPx": 24,
+            "time": 15.375,
+            "seconds": 4.625
+          }
+        ]
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 160
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

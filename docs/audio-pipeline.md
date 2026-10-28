@@ -98,7 +98,7 @@ Output files land in `tools/output/` as `{pdf_marker}-en.wav`.
 | Engine | kokoro-tts 2.3.2 | Local ONNX inference, no API key |
 | Model | kokoro-v1.0.onnx | ~310 MB |
 | Voice | `af_bella` | American English female |
-| Speed | `0.95` | Slightly slower than default for clarity |
+| Speed | `0.85` | Slower than default for clarity |
 | Language | `en-us` | |
 | Format | WAV | ~1.5–2 MB per exhibit |
 

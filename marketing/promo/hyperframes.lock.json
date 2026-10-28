@@ -1,0 +1,6 @@
+{
+  "compositions/components/camera-scan-gate.html": "51ef99326f8e4f3353d1019fac5ec5a5cd8aee250dde3f7c319b3f917790a326",
+  "compositions/components/device-frame-stage.html": "8c9ab0e2278a01b88f70dc47e51e6a4960533fcda5b1f0b95d7e41dd1a0bb6cf",
+  "compositions/components/parallax-device-dive.html": "45cdb2196398c2b0b76fde7c65a73d1da86075aee2c3399ecf808e78f3216b35",
+  "compositions/components/store-badge-lockup.html": "82f0f1eb2652f474648d4918dceca03f52ff073a8aa594a24c894ed9c949f367"
+}

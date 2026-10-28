@@ -1,0 +1,157 @@
+<template>
+<style>
+#root {
+  position: absolute; inset: 0;
+  background: #dceeff;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: 'Nunito', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* Slush sticker decorations */
+.ec-sk {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid #000000;
+  pointer-events: none;
+}
+
+#ec-inner {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  padding: 0 80px;
+}
+
+#ec-eyebrow {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 28px; font-weight: 800;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: #000000;
+  margin-bottom: 32px;
+}
+
+#ec-brand {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-weight: 900; font-size: 180px;
+  letter-spacing: -.04em; line-height: 0.80;
+  color: #000000;
+  margin-bottom: 28px;
+}
+
+#ec-tagline {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-weight: 700; font-size: 52px;
+  letter-spacing: -.02em; line-height: 1.2;
+  color: #000000;
+  margin-bottom: 52px;
+}
+
+#ec-tagline .hl {
+  color: #5c4ade;
+}
+
+#ec-badge {
+  display: inline-flex; align-items: center; gap: 14px;
+  background: #ffffff;
+  border: 1.5px solid #000000;
+  border-radius: 1600px;
+  padding: 16px 40px;
+  margin-bottom: 24px;
+}
+
+#ec-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #4da2ff;
+}
+
+#ec-badge-text {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-weight: 800; font-size: 28px;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: #000000;
+}
+
+#ec-location {
+  font-size: 28px; font-weight: 700;
+  color: #555555; letter-spacing: .02em;
+}
+
+#ec-scan-icon {
+  position: absolute; bottom: 100px;
+  width: 100px; height: 100px;
+  opacity: .12;
+}
+
+#ec-scan-icon svg {
+  width: 100%; height: 100%;
+  stroke: #000000; fill: none; stroke-width: 2;
+}
+
+#ec-veil {
+  position: absolute; inset: 0;
+  background: #dceeff;
+  z-index: 50;
+  pointer-events: none;
+}
+</style>
+
+<div data-hf-id="hf-cxpf" id="root" data-composition-id="scene-endcard" data-width="1080" data-height="1920">
+
+  <!-- Slush sticker accents -->
+  <div data-hf-id="hf-0k35" id="ec-sk-1" class="ec-sk clip" data-start="0" data-duration="5" data-layout-ignore
+       style="width:200px;height:200px;background:#4da2ff;top:60px;left:-50px"></div>
+  <div data-hf-id="hf-ttpy" id="ec-sk-2" class="ec-sk clip" data-start="0" data-duration="5" data-layout-ignore
+       style="width:130px;height:130px;background:#ffd731;top:180px;right:-30px"></div>
+  <div data-hf-id="hf-2l6t" id="ec-sk-3" class="ec-sk clip" data-start="0" data-duration="5" data-layout-ignore
+       style="width:110px;height:110px;background:#fb4903;bottom:220px;left:-20px"></div>
+  <div data-hf-id="hf-x9gb" id="ec-sk-4" class="ec-sk clip" data-start="0" data-duration="5" data-layout-ignore
+       style="width:160px;height:160px;background:#e9ccff;bottom:100px;right:-50px"></div>
+  <div data-hf-id="hf-7yl5" id="ec-sk-5" class="ec-sk clip" data-start="0" data-duration="5" data-layout-ignore
+       style="width:70px;height:70px;background:#55db9c;top:340px;left:60px"></div>
+
+  <div data-hf-id="hf-t1ci" id="ec-inner">
+    <div data-hf-id="hf-fz4h" id="ec-eyebrow" class="clip" data-start="0.6" data-duration="4.4">Nature Audio Tour</div>
+    <div data-hf-id="hf-x8nr" id="ec-brand" class="clip" data-start="0.8" data-duration="4.2">Experium</div>
+    <div data-hf-id="hf-luy6" id="ec-tagline" class="clip" data-start="1.2" data-duration="3.8">Your Park.<br data-hf-id="hf-x5px"><span data-hf-id="hf-rqh6" class="hl">With Stories.</span></div>
+    <div data-hf-id="hf-zrq8" id="ec-badge" class="clip" data-start="1.8" data-duration="3.2">
+      <div data-hf-id="hf-xl87" id="ec-dot"></div>
+      <div data-hf-id="hf-e2wh" id="ec-badge-text">Coming Soon</div>
+    </div>
+    <div data-hf-id="hf-c98w" id="ec-location" class="clip" data-start="2.1" data-duration="2.9">Experium Park · Hyderabad</div>
+  </div>
+
+  <div data-hf-id="hf-ykit" id="ec-scan-icon" class="clip" data-start="2.5" data-duration="2.5" data-layout-ignore>
+    <svg data-hf-id="hf-ulu9" viewBox="0 0 24 24"><path data-hf-id="hf-nveh" d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M4 12h16M8 8h1M15 8h1M8 15h1M15 15h1"/></svg>
+  </div>
+
+  <div data-hf-id="hf-jwee" id="ec-veil" class="clip" data-start="0" data-duration="1.5" data-layout-ignore></div>
+
+</div>
+
+<script>
+(function () {
+  var tl = gsap.timeline({ paused: true });
+
+  tl.fromTo('#ec-veil', { opacity: 1 }, { opacity: 0, duration: 0.5, ease: 'power2.out' }, 0.0);
+
+  tl.fromTo('#ec-eyebrow', { opacity: 0, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.35, ease: 'power3.out' }, 0.6);
+
+  tl.fromTo('#ec-brand', { opacity: 0, filter: 'blur(16px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.5, ease: 'power4.out' }, 0.85);
+
+  tl.fromTo('#ec-tagline', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out', immediateRender: false }, 1.25);
+
+  tl.fromTo('#ec-badge', { opacity: 0, scale: 0.88 }, { opacity: 1, scale: 1.0, duration: 0.35, ease: 'back.out(1.8)', immediateRender: false }, 1.85);
+
+  tl.fromTo('#ec-location', { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out', immediateRender: false }, 2.15);
+
+  tl.fromTo('#ec-scan-icon', { opacity: 0 }, { opacity: 0.12, duration: 0.4, ease: 'power2.out', immediateRender: false }, 2.55);
+
+  tl.seek(0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines['scene-endcard'] = tl;
+})();
+</script>
+</template>
