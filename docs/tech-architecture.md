@@ -18,7 +18,7 @@
 
 ```
 Production:  https://{domain}/s/{code}
-Example:     https://natureaudiotour.in/s/A7X3
+Example:     https://experium.aikyatechnology.in/s/A7X3
 
 /s/{code}  → visitor experience (resolve + render)
 /admin     → admin dashboard (protected)
@@ -43,16 +43,25 @@ The `/s/{code}` endpoint:
 | Audio/Files | Supabase Storage (built-in CDN via Fastly) | Fewer components — no separate AWS account/S3/CloudFront |
 | State Mgmt | Zustand | Single store (~50 lines), handles audio + progress + language pref |
 | Styling | Tailwind CSS + shadcn/ui | Fast iteration, accessible components, zero runtime overhead |
-| Map | Mapbox GL JS v3 + drone orthophoto tileset | Real ortho raster over Mapbox basemap; exhibit pins as GeoJSON; GPS "you are here" via watchPosition() |
-| Trail routing | `@turf/along` + `@turf/length` + custom BFS | Segment graph in `public/data/trails.geojson`; BFS chains segments for A→B routing; no third-party routing API |
-| PWA / Offline | `next-pwa` (full upfront ~25MB download) | Offline-first after initial load; all audio cached via service worker |
+| Map | MapLibre GL v4 + drone orthophoto tileset | Open-source Mapbox GL fork (no API key); ortho raster tiles; exhibit pins as GeoJSON; GPS "you are here" via watchPosition() |
+| Map tiles | PMTiles (`pmtiles`) | Single-file tile archive served from Supabase Storage; no tile server needed |
+| 3D / visualization | Three.js (`three`) | Used for 3D map elements and exhibit visualizations |
+| 360° panorama | `@photo-sphere-viewer/core` + `virtual-tour-plugin` + `markers-plugin` | Node graph navigation with nav arrows + exhibit pin markers; `preload: true` prefetches adjacent nodes; plain equirect in v1, tile pyramid (via `equirectangular-tiles-adapter`) deferred to v2 |
+| Panorama images | 4096×2048 JPEG 85% (~2.8MB/image) | Resized locally from 12K masters via `sips`; hosted on Supabase Storage; `tour_nodes.tiles_url` (production) or direct URL (v1) |
+| Trail routing | Custom BFS (planned) | Segment graph in `public/data/trails.geojson`; BFS chains segments for A→B routing — `@turf/*` not yet installed |
+| Animation | Framer Motion | All UI transitions, sheet open/close, menu animations |
+| PWA / Offline | `@serwist/next` (full upfront ~25MB download) | Offline-first after initial load; all audio cached via service worker |
 | Auth (admin) | Supabase Auth (magic link) | Already in stack, RLS integration, no password management |
-| Auth (visitor) | None in v1 (optional info capture, no OTP) | Plain inputs stored locally, synced to server when online |
+| Auth (visitor) | FingerprintJS + optional info capture | `@fingerprintjs/fingerprintjs` for persistent identity without login; plain inputs stored locally, synced to server when online |
+| UI primitives | `@base-ui/react` + shadcn/ui | Base UI for headless accessible primitives; shadcn for pre-styled components |
 | Admin UI | Supabase dashboard (no custom admin in v1) | Table editor + RLS = sufficient for solo dev + maintainer |
-| Analytics | Custom (DB writes) | Simple scan logging, no third-party needed |
+| Analytics | Custom (DB writes) + Vercel Analytics | Scan logging in DB; `@vercel/analytics` for page-level traffic |
 | TTS | Deferred (ElevenLabs / Google TTS per batch) | Not a runtime dep — manual content pipeline step |
+| DNS / Email | Cloudflare (Email Routing, free tier) | DNS for `aikyatechnology.in`; subdomain `experium.aikyatechnology.in` for app; forwards `experium@aikyatechnology.in` → Gmail for visitor feedback |
+| Testing (unit) | Vitest + Testing Library | Component and hook tests |
+| Testing (E2E) | Playwright (Chromium + WebKit) | Full flow tests on every PR to main; Supabase mocked via `page.route` |
 
-**External services: 2** — Vercel (hosting) + Supabase (everything else).
+**External services: 3** — Vercel (hosting) + Supabase (DB/storage/auth) + Cloudflare (DNS + email routing).
 
 ## Database Schema (High-Level)
 

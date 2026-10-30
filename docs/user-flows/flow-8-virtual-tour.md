@@ -50,8 +50,11 @@ Visitor enters a panoramic street view anchored to a park exhibit → navigates 
 ### S1: Tour Viewer (`/app/tour/page.tsx`)
 
 - **Route:** standalone page outside the `(map)` layout group — no MapShell, no tab bar
-- **Technology:** `@photo-sphere-viewer/core` (equirectangular panorama viewer)
-- **Panorama source:** `tour_nodes.panorama_url` (remote URL, no precache)
+- **Technology:** `@photo-sphere-viewer/core` + `virtual-tour-plugin` + `markers-plugin`
+- **Panorama source:** `tour_nodes.tiles_url` (direct image URL in v1; tile config in v2 via `equirectangular-tiles-adapter`)
+- **Image spec:** 4096×2048 JPEG 85% (~2.8MB/image); resized locally from 12K masters via `sips`, hosted on Supabase Storage
+- **Preload:** `preload: true` on `VirtualTourPlugin` — prefetches all adjacent nodes' panoramas on node enter; nav transitions feel instant
+- **v2 tiling:** `EquirectangularTilesAdapter` set at Viewer level; nodes pass a tile config object (preview + level URLs) instead of a plain URL; storage size unchanged (~2.9MB/image in tiles vs 2.8MB single JPEG) but first render drops from 2–3s to <0.5s (PSV loads 15KB preview + ~6 visible tiles immediately)
 - **Initial heading:** `tour_heading` URL param (compass bearing, degrees) — only on entry; node transitions default to direction of travel
 - **Data loading:** all `tour_nodes` + `tour_edges` fetched upfront on mount (single query, small dataset)
 - **Nav arrows:** marker hotspots for each outgoing edge from the current node; positioned at `tour_edges.bearing` (admin-specified yaw, 0–359°)
@@ -91,7 +94,7 @@ The existing "Explore the Park →" button is renamed to **"360° Virtual Tour �
 ```sql
 CREATE TABLE tour_nodes (
   id            UUID     PRIMARY KEY DEFAULT gen_random_uuid(),
-  panorama_url  TEXT     NOT NULL,
+  tiles_url     TEXT     NOT NULL,  -- URL to PSV tile manifest JSON (tile pyramid on Supabase Storage)
   is_lobby      BOOLEAN  NOT NULL DEFAULT false
   -- lat/lng not stored; exhibit nodes use exhibits.gps_lat/lng; path-only nodes need no GPS
 );
@@ -128,7 +131,7 @@ ALTER TABLE exhibits
 
 ### exhibit_photos — unchanged
 
-Panorama URLs live on `tour_nodes.panorama_url`, not in `exhibit_photos`. The `exhibit_photos` table remains pure (regular exhibit images only).
+Tile manifests live on `tour_nodes.tiles_url`, not in `exhibit_photos`. The `exhibit_photos` table remains pure (regular exhibit images only).
 
 ### CachedExhibit type additions (app types)
 

@@ -133,6 +133,55 @@ tools/
   pipeline.sh        — Runs full pipeline end-to-end
 ```
 
+## Panorama Processing Pipeline (Virtual Tour)
+
+Separate from the audio pipeline. Run once per 360° photo batch.
+
+```
+[12K equirect PNG from camera] → [Resize + encode] → [Upload to Supabase Storage] → [Seed tour_nodes.tiles_url]
+```
+
+### Encoding spec
+
+| Setting | Value | Rationale |
+|---------|-------|-----------|
+| Resolution | 4096×2048 | 4K — good quality on mobile, ~4.5× smaller than 12K source |
+| Format | JPEG | Better compression than PNG; no transparency needed |
+| Quality | 85% | Sharp enough for 360 viewer zoom; ~2.8MB per image |
+
+### Local resize command (macOS `sips`)
+
+```bash
+sips -z 2048 4096 --setProperty format jpeg --setProperty formatOptions 85 \
+  input.png --out output.jpg
+```
+
+### Upload
+
+Upload to `panoramas/<node-label>/pano.jpg` in Supabase Storage. Copy the public URL into `tour_nodes.tiles_url` (column name is `tiles_url` to stay compatible with future v2 tile manifest upgrade).
+
+### Estimated size (40 nodes)
+
+40 images × ~2.8MB = **~112MB** — well within Supabase free tier (1GB).
+
+### v2: Tile pyramid (deferred)
+
+Storage size is nearly identical (~2.9MB/image as tiles vs 2.8MB single JPEG). The UX benefit is load time — PSV renders a 15KB preview instantly then fetches only the ~6 tiles in the current viewport (~400KB), so first render drops from 2–3s to <0.5s on mobile LTE.
+
+Tile pyramid per image (512×512 tiles, 4K source):
+
+| Level | Grid | Tiles | ~Size |
+|-------|------|-------|-------|
+| Preview | 1×1 | 1 | 15KB |
+| Low (1K) | 2×1 | 2 | 50KB |
+| Mid (2K) | 4×2 | 8 | 320KB |
+| Full (4K) | 8×4 | 32 | 2.5MB |
+| **Total** | | **43** | **~2.9MB** |
+
+Tiling script and `EquirectangularTilesAdapter` integration tracked in issue #127.
+
+---
+
 ## Updating Content
 
 Same pipeline, just re-run from the changed step:

@@ -1,5 +1,14 @@
 # Operations — Physical Marker Management
 
+## Feedback Email
+
+- **Address:** `experium@aikyatechnology.in`
+- **Forwards to:** `makaravind11195@gmail.com`
+- **Setup:** Cloudflare Email Routing on `aikyatechnology.in`
+  - Domain registrar: GoDaddy (nameservers delegated to Cloudflare: `april.ns.cloudflare.com`, `sterling.ns.cloudflare.com`)
+  - Routing rule: `experium` → `makaravind11195@gmail.com` (Active)
+- **Used in:** "Send feedback" option in the app's 3-dot menu (`UserMenu.tsx`)
+
 ## Marker Specification
 
 - **Material:** Aluminum or ACM (aluminum composite material)
