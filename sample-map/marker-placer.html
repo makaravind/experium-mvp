@@ -153,6 +153,59 @@
       line-height: 1;
     }
 
+    .pin.unsectioned { background: #64748b; }
+    .pin span { white-space: nowrap; }
+
+    /* sections */
+    #sections-wrap { border-bottom: 1px solid #334155; padding: 8px 12px; }
+    #sections-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    #sections-head button { padding: 5px 10px; font-size: 12px; }
+    #sections-list { max-height: 110px; overflow-y: auto; font-size: 13px; }
+    .sec-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; }
+    .sec-row:hover { color: #fff; }
+    .sec-swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+    .sec-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sec-count { color: #64748b; font-variant-numeric: tabular-nums; }
+    .icon-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    .icon-btn:hover, .icon-btn.active { color: #38bdf8; }
+    .sec-row.editing { color: #38bdf8; }
+    .vertex-handle {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #0ea5e9;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+      cursor: grab;
+    }
+    .vertex-handle:active { cursor: grabbing; }
+    .sec-label {
+      pointer-events: none;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+      white-space: nowrap;
+    }
+    tbody tr.unsectioned td:first-child { color: #fbbf24; }
+    #status { padding: 6px 16px 0; font-size: 12px; color: #fbbf24; }
+    #status:empty { display: none; }
+
     /* number input popup */
     #popup {
       position: fixed;
@@ -191,15 +244,22 @@
 
 <div id="sidebar">
   <h1>Marker Placer</h1>
-  <div id="hint">Click map to place a marker · Drag to reposition.</div>
+  <div id="hint"></div>
+  <div id="sections-wrap">
+    <div id="sections-head">
+      <span>Sections</span>
+      <button class="secondary" id="draw-btn">Draw section</button>
+    </div>
+    <div id="sections-list"></div>
+  </div>
   <div id="search-wrap">
-    <input type="text" id="search-input" placeholder="Search by marker #…">
+    <input type="text" id="search-input" placeholder="Search by marker (e.g. A3)…">
   </div>
   <div id="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>#</th>
+          <th>ID</th>
           <th>Latitude</th>
           <th>Longitude</th>
           <th></th>
@@ -208,6 +268,7 @@
       <tbody id="tbody"></tbody>
     </table>
   </div>
+  <div id="status"></div>
   <div id="actions">
     <button class="primary" id="export-btn" disabled>Export JSON</button>
     <button class="secondary" id="import-btn">Import JSON</button>
@@ -218,7 +279,7 @@
 
 <!-- number entry popup -->
 <div id="popup">
-  <label>Marker number</label>
+  <label id="popup-label">Marker number</label>
   <input type="number" id="popup-input" min="1" step="1" placeholder="e.g. 42">
   <div id="popup-actions">
     <button id="popup-confirm">Add</button>
@@ -264,9 +325,264 @@
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left')
 
   // ── State ──────────────────────────────────────────────────────────────────
-  const markers = []          // { number, lat, lng, mapMarker }
+  const COLORS = ['#38bdf8', '#a78bfa', '#34d399', '#fbbf24', '#f472b6', '#fb923c', '#22d3ee', '#a3e635']
+  const sections = []         // { id, polygon: [[lng, lat], ...], color, label }
+  const markers = []          // { section (id | null), number, lat, lng, mapMarker, el }
   let pendingLngLat = null    // lngLat waiting for number input
+  let pendingSection = null   // section the pending marker will belong to
+  let drawing = null          // [[lng, lat], ...] while drawing a section, else null
+  let editing = null          // { sec, handles } while reshaping a section, else null
   let searchQuery = ''
+
+  const hint = document.getElementById('hint')
+  const drawBtn = document.getElementById('draw-btn')
+
+  function updateHint() {
+    hint.style.color = ''
+    hint.textContent = drawing
+      ? 'Drawing: click to add points · click first point or Enter to finish · Esc cancels'
+      : editing
+        ? `Editing ${editing.sec.id}: drag the points to reshape · Esc or ⬡ to finish`
+        : 'Click inside a section to place a marker · Drag to reposition.'
+  }
+
+  function flashHint(msg) {
+    hint.style.color = '#f97316'
+    hint.textContent = msg
+    setTimeout(updateHint, 2500)
+  }
+  updateHint()
+
+  // ── Geometry ───────────────────────────────────────────────────────────────
+  function pointInPolygon(lng, lat, poly) {
+    let inside = false
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const [xi, yi] = poly[i], [xj, yj] = poly[j]
+      if ((yi > lat) !== (yj > lat) && lng < (xj - xi) * (lat - yi) / (yj - yi) + xi) inside = !inside
+    }
+    return inside
+  }
+
+  // overlapping sections: first one in the list wins
+  function sectionAt(lng, lat) {
+    return sections.find(s => pointInPolygon(lng, lat, s.polygon)) ?? null
+  }
+
+  function nextNumber(sectionId) {
+    const nums = markers.filter(m => m.section === sectionId).map(m => m.number)
+    return (nums.length ? Math.max(...nums) : 0) + 1
+  }
+
+  // ── Section layers ─────────────────────────────────────────────────────────
+  const EMPTY = { type: 'FeatureCollection', features: [] }
+
+  map.on('load', () => {
+    map.addSource('sections', { type: 'geojson', data: EMPTY })
+    map.addLayer({ id: 'sections-fill', type: 'fill', source: 'sections',
+      paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.18 } })
+    map.addLayer({ id: 'sections-line', type: 'line', source: 'sections',
+      paint: { 'line-color': ['get', 'color'], 'line-width': 2 } })
+    map.addSource('draft', { type: 'geojson', data: EMPTY })
+    map.addLayer({ id: 'draft-line', type: 'line', source: 'draft',
+      filter: ['==', ['geometry-type'], 'LineString'],
+      paint: { 'line-color': '#fff', 'line-width': 2, 'line-dasharray': [2, 2] } })
+    map.addLayer({ id: 'draft-pts', type: 'circle', source: 'draft',
+      filter: ['==', ['geometry-type'], 'Point'],
+      paint: { 'circle-radius': 5, 'circle-color': '#fff', 'circle-stroke-color': '#0ea5e9', 'circle-stroke-width': 2 } })
+    refreshSections()
+    refreshDraft()
+  })
+
+  function refreshSections() {
+    map.getSource('sections')?.setData({
+      type: 'FeatureCollection',
+      features: sections.map(s => ({
+        type: 'Feature',
+        properties: { color: s.color },
+        geometry: { type: 'Polygon', coordinates: [[...s.polygon, s.polygon[0]]] },
+      })),
+    })
+  }
+
+  function refreshDraft() {
+    const pts = drawing ?? []
+    const features = pts.map(c => ({ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: c } }))
+    if (pts.length > 1) features.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: pts } })
+    map.getSource('draft')?.setData({ type: 'FeatureCollection', features })
+  }
+
+  // ── Sections ───────────────────────────────────────────────────────────────
+  const centroid = (polygon) =>
+    polygon.reduce(([x, y], [lng, lat]) => [x + lng, y + lat], [0, 0]).map(v => v / polygon.length)
+
+  function addSection(id, polygon) {
+    const color = COLORS[sections.length % COLORS.length]
+    const el = document.createElement('div')
+    el.className = 'sec-label'
+    el.textContent = id
+    const label = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(centroid(polygon)).addTo(map)
+    sections.push({ id, polygon, color, label })
+    refreshSections()
+    renderSections()
+  }
+
+  // changes the letter; its markers are re-IDed (A3 → C3), numbers stay
+  function renameSection(id) {
+    const sec = sections.find(s => s.id === id)
+    if (!sec) return
+    const input = prompt(`New letter for section ${id}`, id)
+    if (input === null) return
+    const newId = input.trim().toUpperCase()
+    if (newId === id) return
+    if (!/^[A-Z]+$/.test(newId) || sections.some(s => s.id === newId)) {
+      alert('Section letter must be letters only and unique.')
+      return
+    }
+    markers.filter(m => m.section === id).forEach(m => { m.section = newId; refreshPin(m) })
+    sec.id = newId
+    sec.label.getElement().textContent = newId
+    updateHint()
+    sortMarkers()
+    renderTable()
+  }
+
+  // ── Reshape section: drag its points ───────────────────────────────────────
+  function startEditing(sec) {
+    if (drawing) return
+    stopEditing()
+    const handles = sec.polygon.map((coord, i) => {
+      const el = document.createElement('div')
+      el.className = 'vertex-handle'
+      el.addEventListener('click', (e) => e.stopPropagation())
+      const handle = new maplibregl.Marker({ element: el, draggable: true }).setLngLat(coord).addTo(map)
+      let before = coord
+      handle.on('dragstart', () => { before = sec.polygon[i] })
+      handle.on('drag', () => {
+        const { lng, lat } = handle.getLngLat()
+        sec.polygon[i] = [lng, lat]
+        sec.label.setLngLat(centroid(sec.polygon))
+        refreshSections()
+      })
+      handle.on('dragend', () => {
+        // every marker must stay inside its section
+        const stranded = markers.filter(m => m.section === sec.id && !pointInPolygon(m.lng, m.lat, sec.polygon))
+        if (stranded.length) {
+          sec.polygon[i] = before
+          handle.setLngLat(before)
+          sec.label.setLngLat(centroid(sec.polygon))
+          refreshSections()
+          flashHint(`Would leave ${stranded.map(labelOf).join(', ')} outside ${sec.id}`)
+        }
+      })
+      return handle
+    })
+    editing = { sec, handles }
+    updateHint()
+    renderSections()
+  }
+
+  function stopEditing() {
+    if (!editing) return
+    editing.handles.forEach(h => h.remove())
+    editing = null
+    updateHint()
+    renderSections()
+  }
+
+  function removeSection(id) {
+    const idx = sections.findIndex(s => s.id === id)
+    if (idx === -1) return
+    if (markers.some(m => m.section === id)) {
+      alert(`Section ${id} still has markers. Remove or move them first.`)
+      return
+    }
+    if (editing?.sec === sections[idx]) stopEditing()
+    sections[idx].label.remove()
+    sections.splice(idx, 1)
+    refreshSections()
+    renderSections()
+  }
+
+  function renderSections() {
+    const list = document.getElementById('sections-list')
+    list.innerHTML = sections.map(s => `
+      <div class="sec-row${editing?.sec === s ? ' editing' : ''}" data-id="${s.id}">
+        <span class="sec-swatch" style="background:${s.color}"></span>
+        <span class="sec-name">${s.id}</span>
+        <span class="sec-count">${markers.filter(m => m.section === s.id).length}</span>
+        <button class="icon-btn rename-btn" data-id="${s.id}" title="Change letter">✎</button>
+        <button class="icon-btn edit-btn${editing?.sec === s ? ' active' : ''}" data-id="${s.id}" title="Reshape section">⬡</button>
+        <button class="del-btn" data-id="${s.id}" title="Delete section">✕</button>
+      </div>
+    `).join('')
+    list.querySelectorAll('.rename-btn').forEach(btn => {
+      btn.addEventListener('click', () => renameSection(btn.dataset.id))
+    })
+    list.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sec = sections.find(x => x.id === btn.dataset.id)
+        if (editing?.sec === sec) stopEditing()
+        else startEditing(sec)
+      })
+    })
+    list.querySelectorAll('.sec-row').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return
+        const s = sections.find(x => x.id === row.dataset.id)
+        if (!s) return
+        const lngs = s.polygon.map(p => p[0]), lats = s.polygon.map(p => p[1])
+        map.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: 60 })
+      })
+    })
+    list.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', () => removeSection(btn.dataset.id))
+    })
+  }
+
+  // ── Draw section ───────────────────────────────────────────────────────────
+  function startDrawing() {
+    stopEditing()
+    drawing = []
+    map.doubleClickZoom.disable()
+    drawBtn.textContent = 'Finish'
+    updateHint()
+    refreshDraft()
+  }
+
+  function stopDrawing() {
+    drawing = null
+    map.doubleClickZoom.enable()
+    drawBtn.textContent = 'Draw section'
+    updateHint()
+    refreshDraft()
+  }
+
+  function finishDrawing() {
+    if (drawing.length < 3) { flashHint('Need at least 3 points'); return }
+    const idInput = prompt('Section letter (e.g. A)')
+    if (idInput === null) return
+    const id = idInput.trim().toUpperCase()
+    if (!/^[A-Z]+$/.test(id) || sections.some(s => s.id === id)) {
+      alert('Section letter must be letters only and unique.')
+      return
+    }
+    const polygon = drawing
+    stopDrawing()
+    addSection(id, polygon)
+    assignUnsectioned()
+  }
+
+  drawBtn.addEventListener('click', () => (drawing ? finishDrawing() : startDrawing()))
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return
+    if (drawing) {
+      if (e.key === 'Enter') finishDrawing()
+      if (e.key === 'Escape') stopDrawing()
+    } else if (editing && e.key === 'Escape') {
+      stopEditing()
+    }
+  })
 
   // ── Popup logic ────────────────────────────────────────────────────────────
   const popup   = document.getElementById('popup')
@@ -289,18 +605,32 @@
   function hidePopup() {
     popup.style.display = 'none'
     pendingLngLat = null
+    pendingSection = null
   }
 
   // ── Map click ─────────────────────────────────────────────────────────────
   map.on('click', (e) => {
+    if (drawing) {
+      if (drawing.length >= 3) {
+        const first = map.project(drawing[0])
+        if (Math.hypot(first.x - e.point.x, first.y - e.point.y) < 12) return finishDrawing()
+      }
+      drawing.push([e.lngLat.lng, e.lngLat.lat])
+      refreshDraft()
+      return
+    }
+
+    if (editing) return
+
+    const sec = sectionAt(e.lngLat.lng, e.lngLat.lat)
+    if (!sec) { flashHint('Click inside a section to place a marker'); return }
+
     // figure out pixel position of click for popup placement
     const rect = map.getCanvas().getBoundingClientRect()
-    const px = rect.left + e.point.x
-    const py = rect.top  + e.point.y
-
     pendingLngLat = e.lngLat
-    const nextNum = (markers.length > 0 ? Math.max(...markers.map(m => m.number)) : 0) + 1
-    showPopup(px, py, nextNum)
+    pendingSection = sec
+    document.getElementById('popup-label').textContent = `Marker number in section ${sec.id}`
+    showPopup(rect.left + e.point.x, rect.top + e.point.y, nextNumber(sec.id))
   })
 
   confirm.addEventListener('click', commitMarker)
@@ -312,97 +642,140 @@
 
   function commitMarker() {
     const num = parseInt(input.value, 10)
-    if (!pendingLngLat || isNaN(num) || num < 1) return
-    addMarker(num, pendingLngLat.lat, pendingLngLat.lng)
+    if (!pendingLngLat || !pendingSection || isNaN(num) || num < 1) return
+    addMarker(pendingSection.id, num, pendingLngLat.lat, pendingLngLat.lng)
     hidePopup()
   }
 
-  // ── Add marker ────────────────────────────────────────────────────────────
-  function addMarker(num, lat, lng) {
-    // remove existing marker with same number if present
-    const existing = markers.findIndex(m => m.number === num)
+  // ── Markers ───────────────────────────────────────────────────────────────
+  const labelOf = (m) => m.section ? `${m.section}${m.number}` : `#${m.number}`
+
+  function refreshPin(m) {
+    m.el.className = m.section ? 'pin' : 'pin unsectioned'
+    m.el.innerHTML = `<span>${labelOf(m)}</span>`
+    m.el.title = `${labelOf(m)} — drag to move · click to remove`
+  }
+
+  // section = null → not yet in a section (legacy import); must be resolved before export
+  function addMarker(section, num, lat, lng) {
+    // replace existing marker with same section + number if present
+    const existing = markers.findIndex(m => m.section === section && m.number === num)
     if (existing !== -1) {
       markers[existing].mapMarker.remove()
       markers.splice(existing, 1)
     }
 
     const el = document.createElement('div')
-    el.className = 'pin'
-    el.innerHTML = `<span>${num}</span>`
-    el.title = `#${num} — drag to move · click to remove`
+    const entry = { section, number: num, lat, lng, mapMarker: null, el }
+    refreshPin(entry)
 
     let wasDragged = false
     el.addEventListener('click', (e) => {
       e.stopPropagation()
       if (wasDragged) { wasDragged = false; return }
-      removeMarker(num)
+      removeMarker(entry)
     })
 
     const mapMarker = new maplibregl.Marker({ element: el, anchor: 'bottom-left', draggable: true })
       .setLngLat([lng, lat])
       .addTo(map)
+    entry.mapMarker = mapMarker
 
     mapMarker.on('dragstart', () => { wasDragged = true })
     mapMarker.on('dragend', () => {
       const pos = mapMarker.getLngLat()
-      const entry = markers.find(m => m.number === num)
-      if (entry) { entry.lat = pos.lat; entry.lng = pos.lng }
+      const sec = sectionAt(pos.lng, pos.lat)
+      if (entry.section !== null && !sec) {
+        mapMarker.setLngLat([entry.lng, entry.lat])
+        flashHint('Markers must stay inside a section')
+        return
+      }
+      if (sec && sec.id !== entry.section) {
+        entry.number = nextNumber(sec.id)
+        entry.section = sec.id
+        refreshPin(entry)
+      }
+      entry.lat = pos.lat
+      entry.lng = pos.lng
+      sortMarkers()
       renderTable()
     })
 
-    markers.push({ number: num, lat, lng, mapMarker })
-    markers.sort((a, b) => a.number - b.number)
+    markers.push(entry)
+    sortMarkers()
     renderTable()
   }
 
-  function removeMarker(num) {
-    const idx = markers.findIndex(m => m.number === num)
+  function removeMarker(entry) {
+    const idx = markers.indexOf(entry)
     if (idx === -1) return
-    markers[idx].mapMarker.remove()
+    entry.mapMarker.remove()
     markers.splice(idx, 1)
+    renderTable()
+  }
+
+  // unsectioned first, then by section order, then number
+  function sortMarkers() {
+    const rank = (m) => sections.findIndex(s => s.id === m.section)
+    markers.sort((a, b) => rank(a) - rank(b) || a.number - b.number)
+  }
+
+  // give each unsectioned marker the next free number in the section it sits in
+  function assignUnsectioned() {
+    markers.filter(m => m.section === null).sort((a, b) => a.number - b.number).forEach(m => {
+      const sec = sectionAt(m.lng, m.lat)
+      if (!sec) return
+      m.number = nextNumber(sec.id)
+      m.section = sec.id
+      refreshPin(m)
+    })
+    sortMarkers()
     renderTable()
   }
 
   // ── Table ──────────────────────────────────────────────────────────────────
   const tbody = document.getElementById('tbody')
   const exportBtn = document.getElementById('export-btn')
+  const status = document.getElementById('status')
 
   function renderTable() {
-    tbody.innerHTML = markers.map(m => `
-      <tr>
-        <td>${m.number}</td>
+    tbody.innerHTML = markers.map((m, i) => `
+      <tr data-idx="${i}" class="${m.section ? '' : 'unsectioned'}">
+        <td>${labelOf(m)}</td>
         <td>${m.lat.toFixed(7)}</td>
         <td>${m.lng.toFixed(7)}</td>
-        <td><button class="del-btn" data-num="${m.number}" title="Remove">✕</button></td>
+        <td><button class="del-btn" data-idx="${i}" title="Remove">✕</button></td>
       </tr>
     `).join('')
 
     tbody.querySelectorAll('tr').forEach(row => {
       row.addEventListener('click', (e) => {
         if (e.target.closest('.del-btn')) return
-        const num = parseInt(row.cells[0].textContent, 10)
-        const m = markers.find(x => x.number === num)
+        const m = markers[parseInt(row.dataset.idx, 10)]
         if (m) map.flyTo({ center: [m.lng, m.lat], zoom: map.getZoom() })
       })
     })
 
     tbody.querySelectorAll('.del-btn').forEach(btn => {
-      btn.addEventListener('click', () => removeMarker(parseInt(btn.dataset.num, 10)))
+      btn.addEventListener('click', () => removeMarker(markers[parseInt(btn.dataset.idx, 10)]))
     })
 
-    exportBtn.disabled = markers.length === 0
+    const pending = markers.filter(m => m.section === null).length
+    status.textContent = pending ? `${pending} marker(s) not in a section — export disabled` : ''
+    exportBtn.disabled = pending > 0 || (markers.length === 0 && sections.length === 0)
+    renderSections()
     applyFilter()
   }
 
   // ── Search / filter ────────────────────────────────────────────────────────
   function applyFilter() {
-    const q = searchQuery
+    const q = searchQuery.toUpperCase()
     Array.from(tbody.querySelectorAll('tr')).forEach(row => {
-      const num = row.cells[0]?.textContent ?? ''
-      row.style.display = (!q || num.includes(q)) ? '' : 'none'
+      const label = row.cells[0]?.textContent.toUpperCase() ?? ''
+      row.style.display = (!q || label.includes(q)) ? '' : 'none'
     })
     if (q) {
-      const exact = markers.find(m => String(m.number) === q)
+      const exact = markers.find(m => labelOf(m).toUpperCase() === q)
       if (exact) map.flyTo({ center: [exact.lng, exact.lat], zoom: map.getZoom() })
     }
   }
@@ -413,17 +786,32 @@
   })
 
   // ── Clear all ─────────────────────────────────────────────────────────────
-  document.getElementById('clear-btn').addEventListener('click', () => {
-    if (!markers.length) return
-    if (!confirm(`Remove all ${markers.length} markers?`)) return
+  function clearMarkers() {
     markers.forEach(m => m.mapMarker.remove())
     markers.length = 0
+  }
+
+  function clearSections() {
+    stopEditing()
+    sections.forEach(s => s.label.remove())
+    sections.length = 0
+    refreshSections()
+  }
+
+  document.getElementById('clear-btn').addEventListener('click', () => {
+    if (!markers.length && !sections.length) return
+    if (!window.confirm(`Remove all ${markers.length} markers and ${sections.length} sections?`)) return
+    clearMarkers()
+    clearSections()
     renderTable()
   })
 
   // ── Export JSON ───────────────────────────────────────────────────────────
   exportBtn.addEventListener('click', () => {
-    const data = markers.map(({ number, lat, lng }) => ({ number, lat, lng }))
+    const data = {
+      sections: sections.map(({ id, polygon }) => ({ id, polygon })),
+      markers: markers.map(({ section, number, lat, lng }) => ({ id: `${section}${number}`, section, number, lat, lng })),
+    }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
@@ -433,9 +821,15 @@
   })
 
   // ── Import JSON ───────────────────────────────────────────────────────────
+  // Accepts the new { sections, markers } object, or the legacy bare [{ number, lat, lng }] array.
+  // Legacy markers have no section: existing sections are kept and markers inside them are assigned;
+  // the rest stay unsectioned (grey) until a section is drawn around them.
   document.getElementById('import-btn').addEventListener('click', () => {
     document.getElementById('import-input').click()
   })
+
+  const isNum = (v) => typeof v === 'number' && isFinite(v)
+  const validPolygon = (p) => Array.isArray(p) && p.length >= 3 && p.every(c => Array.isArray(c) && isNum(c[0]) && isNum(c[1]))
 
   document.getElementById('import-input').addEventListener('change', (e) => {
     const file = e.target.files[0]
@@ -444,15 +838,25 @@
     reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target.result)
-        if (!Array.isArray(data)) throw new Error('Expected array')
-        // clear existing
-        markers.forEach(m => m.mapMarker.remove())
-        markers.length = 0
-        for (const item of data) {
-          const { number, lat, lng } = item
-          if (typeof number !== 'number' || typeof lat !== 'number' || typeof lng !== 'number') continue
-          addMarker(number, lat, lng)
+        const legacy = Array.isArray(data)
+        if (!legacy && !(data && Array.isArray(data.markers))) throw new Error('Expected array or { sections, markers }')
+
+        clearMarkers()
+        if (!legacy) {
+          clearSections()
+          for (const s of data.sections ?? []) {
+            if (typeof s.id !== 'string' || !validPolygon(s.polygon) || sections.some(x => x.id === s.id)) continue
+            addSection(s.id, s.polygon)
+          }
         }
+        for (const item of legacy ? data : data.markers) {
+          const { number, lat, lng } = item
+          if (!isNum(number) || !isNum(lat) || !isNum(lng)) continue
+          const known = !legacy && typeof item.section === 'string' && sections.some(s => s.id === item.section)
+          addMarker(known ? item.section : null, number, lat, lng)
+        }
+        assignUnsectioned()
+        renderTable()
       } catch (err) {
         alert('Invalid JSON file: ' + err.message)
       }

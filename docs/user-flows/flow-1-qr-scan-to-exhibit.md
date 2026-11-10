@@ -85,7 +85,7 @@ Slides up from bottom, map visible behind (dimmed slightly).
 | Exhibit type badge | Small pill |
 | Distance/wayfinding hint | "Near the lake entrance · 5 min walk" |
 | Listen button | Primary CTA, large, green (#588157). User can listen remotely |
-| Navigate button | Secondary button style, green outline. Behavior TBD (see Open Decisions) |
+| Navigate button | Outlined `ex-forest` button (white bg, forest border + text). Flies map to exhibit, closes sheet, draws animated dashed route from visitor's GPS if fix is usable (accuracy ≤ 60 m); otherwise fly-to only. Route cleared on map tap. See `docs/specs/gh-38-path-navigation-overlay.md` |
 | Dismiss | Swipe down or tap map area above sheet |
 
 **Note:** Tapping a visited (green) pin shows the same Preview sheet with Listen button (allows re-listening).
@@ -230,6 +230,6 @@ Full-screen overlay on top of map. Only triggers at milestones (1, 3, 5, 10, 15,
 ## Open Decisions (to resolve before hifi)
 
 1. ~~Language selection~~ — **RESOLVED**: set at onboarding (map load screen), override via toggle in bottom sheet (becomes new default for subsequent exhibits)
-2. Does "Navigate" in Preview sheet open Google Maps, show in-app path, or just text hint? (Pending: test if Google Maps works for in-park navigation)
+2. ~~Navigate behavior~~ — **RESOLVED**: in-app animated route line over `park-paths.json` (gh-38). Amenity sheet has the same Navigate button (gh-131, `docs/specs/gh-131-navigate-amenity.md`)
 3. Discovery Card flow details (separate flow doc)
 4. ~~Exact milestone numbers~~ — **RESOLVED**: frequent milestones (1, 3, 5, 10, 15, 20, 30, 40, 50)

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marker UX Prototype — Experium</title>
+<style>
+:root {
+  --ex-orange: #dda15e;
+  --ex-forest: #588157;
+  --ex-sage: #a3b18a;
+  --ex-ink: #2b2b2b;
+  --ex-muted: #8a8a8a;
+  --ex-bg: #f8f7f4;
+  --ex-paper: #ffffff;
+  --ex-border: #e8e5df;
+  --ex-coming-soon: #9e7548;
+  --ex-amenity: #5a7fa0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #141414;
+  color: #fff;
+  min-height: 100vh;
+  padding: 24px 16px 40px;
+}
+h1 {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.subtitle {
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 24px;
+}
+.panels {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+.panel { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.panel-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #555;
+}
+.panel-label.current { color: #555; }
+.panel-label.proposed { color: var(--ex-orange); }
+
+/* Phone shell */
+.phone {
+  width: 210px;
+  height: 430px;
+  border-radius: 26px;
+  background: #0f172a;
+  border: 2.5px solid #2a2a2a;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px #1a1a1a;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.phone:active { cursor: grabbing; }
+
+canvas.map-layer {
+  position: absolute;
+  top: 0; left: 0;
+  display: block;
+}
+
+/* World-relative marker card (position set via JS each frame) */
+.marker-card {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+.marker-card.hidden { opacity: 0; }
+.marker-card.visible { opacity: 1; }
+
+.card-inner {
+  background: var(--ex-paper);
+  border-radius: 13px;
+  padding: 9px 14px 9px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.45), 0 1px 3px rgba(0,0,0,0.3);
+  text-align: center;
+  min-width: 140px;
+}
+.card-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ex-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.card-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ex-ink);
+  margin-top: 1px;
+  letter-spacing: -0.01em;
+}
+.card-hint {
+  font-size: 10px;
+  color: var(--ex-forest);
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+/* Caret SVG overlay */
+.caret-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  overflow: visible;
+}
+
+/* Nav bar */
+.nav-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 52px;
+  background: rgba(248,247,244,0.97);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--ex-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 50;
+  padding: 0 8px 8px;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  flex: 1;
+  font-size: 9px; font-weight: 600;
+  color: #aaa;
+}
+.nav-item.active { color: var(--ex-orange); }
+.nav-icon { font-size: 17px; line-height: 1; }
+
+/* Zoom / debug badge */
+.dbg-badge {
+  position: absolute;
+  top: 10px; left: 10px;
+  background: rgba(0,0,0,0.55);
+  color: rgba(255,255,255,0.75);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 8px;
+  z-index: 40;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  letter-spacing: 0.03em;
+}
+
+/* Info pills */
+.info-pills {
+  display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;
+  max-width: 210px;
+}
+.pill {
+  font-size: 10px; padding: 3px 9px; border-radius: 20px;
+  background: rgba(255,255,255,0.06); color: #888;
+  font-weight: 500;
+}
+.pill.hi { background: rgba(221,161,94,0.18); color: var(--ex-orange); }
+
+/* Change log */
+.changelog {
+  max-width: 660px;
+  margin: 28px auto 0;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.changelog-head {
+  padding: 11px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #555;
+}
+.clog-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.clog-row:last-child { border-bottom: none; }
+.ctag {
+  flex-shrink: 0; margin-top: 1px;
+  font-size: 9px; font-weight: 700;
+  padding: 2px 7px; border-radius: 4px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.ctag-zoom { background: rgba(88,129,87,0.22); color: #7fb27e; }
+.ctag-size { background: rgba(221,161,94,0.18); color: var(--ex-orange); }
+.ctag-ux   { background: rgba(90,127,160,0.22); color: #8ab8d8; }
+.clog-text { font-size: 12px; color: #bbb; line-height: 1.55; }
+.clog-text strong { color: #eee; }
+code { font-family: 'SF Mono', monospace; font-size: 10.5px; background: rgba(255,255,255,0.07); padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<h1>Marker UX — Prototype</h1>
+<p class="subtitle">Drag to pan · Scroll to zoom · Blue dot = you</p>
+
+<div class="panels">
+
+  <!-- ── CURRENT ── -->
+  <div class="panel">
+    <div class="panel-label current">Current</div>
+    <div class="phone" id="phone-A">
+      <canvas class="map-layer" id="canvas-A"></canvas>
+      <div class="dbg-badge" id="badge-A">z 19.50</div>
+      <div class="nav-bar">
+        <div class="nav-item"><div class="nav-icon">🏠</div><span>Home</span></div>
+        <div class="nav-item active"><div class="nav-icon">🗺</div><span>Map</span></div>
+        <div class="nav-item"><div class="nav-icon">···</div><span>More</span></div>
+      </div>
+    </div>
+    <div class="info-pills">
+      <div class="pill">z 19.5 start</div>
+      <div class="pill">world-anchored pins</div>
+      <div class="pill">big at z20+</div>
+    </div>
+  </div>
+
+  <!-- ── PROPOSED ── -->
+  <div class="panel">
+    <div class="panel-label proposed">Proposed</div>
+    <div class="phone" id="phone-B">
+      <canvas class="map-layer" id="canvas-B"></canvas>
+      <div class="dbg-badge" id="badge-B">z 18.50</div>
+      <div class="nav-bar">
+        <div class="nav-item"><div class="nav-icon">🏠</div><span>Home</span></div>
+        <div class="nav-item active"><div class="nav-icon">🗺</div><span>Map</span></div>
+        <div class="nav-item"><div class="nav-icon">···</div><span>More</span></div>
+      </div>
+    </div>
+    <div class="info-pills">
+      <div class="pill hi">z 18.5 start</div>
+      <div class="pill hi">card above exhibit</div>
+      <div class="pill hi">drifts on pan</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Change summary -->
+<div class="changelog">
+  <div class="changelog-head">Proposed changes</div>
+  <div class="clog-row">
+    <span class="ctag ctag-zoom">Zoom</span>
+    <div class="clog-text">Landing zoom <strong>19.5 → 18.5</strong> — more spatial context on load, park layout visible before first pan</div>
+  </div>
+  <div class="clog-row">
+    <span class="ctag ctag-size">Size</span>
+    <div class="clog-text"><code>PIN_MAX_PX 96 → 56</code> in <code>nearby.ts</code> — pins won't cover the exhibit footprint at z20+; world-anchored pins still grow with zoom but are capped smaller</div>
+  </div>
+  <div class="clog-row">
+    <span class="ctag ctag-ux">UX</span>
+    <div class="clog-text">Markers sit at <strong>12:00 above the exhibit</strong> by default (world-relative). When panning, each marker drifts in the <strong>opposite direction</strong> (~28% of pan, max 42 px), revealing the exhibit footprint underneath. Drift decays back when panning stops.</div>
+  </div>
+  <div class="clog-row">
+    <span class="ctag ctag-ux">UX</span>
+    <div class="clog-text">While drifted, a <strong>dashed caret line</strong> connects the marker to a small geo-anchor dot at the exact coordinate — so the viewer always knows which exhibit the marker belongs to.</div>
+  </div>
+</div>
+
+<script>
+const EXHIBITS = [
+  { id:'e1', name:'Butterfly Garden',  num:4,  wx:0.32, wy:0.41 },
+  { id:'e2', name:'Dinosaur Trail',    num:7,  wx:0.55, wy:0.30 },
+  { id:'e3', name:'Fossil Wall',       num:12, wx:0.68, wy:0.55 },
+  { id:'e4', name:'Savanna Walk',      num:2,  wx:0.22, wy:0.62 },
+  { id:'e5', name:'Rainforest Dome',   num:9,  wx:0.78, wy:0.38 },
+  { id:'e6', name:'Coral Reef',        num:15, wx:0.44, wy:0.72 },
+  { id:'e7', name:'Birds of Paradise', num:3,  wx:0.15, wy:0.28 },
+  { id:'e8', name:'Insect House',      num:11, wx:0.60, wy:0.80 },
+  { id:'e9', name:'Coming Soon Aviary',num:20, wx:0.85, wy:0.65, cs:true },
+];
+const VISITED = new Set(['e2', 'e7']);
+const PATHS   = [
+  ['e1','e4'],['e4','e6'],['e6','e8'],['e2','e3'],['e3','e5'],
+  ['e1','e2'],['e7','e1'],['e5','e9'],
+];
+
+const DRIFT_FACTOR = 0.28;
+const DRIFT_MAX    = 42;
+const DRIFT_DECAY  = 0.88;
+
+class MapSim {
+  constructor(phoneId, canvasId, { zoom, maxPinPx, proposed }) {
+    this.phone    = document.getElementById(phoneId);
+    this.canvas   = document.getElementById(canvasId);
+    this.ctx      = this.canvas.getContext('2d');
+    this.zoom     = zoom;
+    this.maxPinPx = maxPinPx;
+    this.proposed = proposed;
+
+    const vw = this.phone.clientWidth;
+    const vh = this.phone.clientHeight - 52;
+    this.vw = vw; this.vh = vh;
+    this.canvas.width  = vw;
+    this.canvas.height = vh;
+
+    this.ox = vw / 2;
+    this.oy = vh * 0.52;
+
+    /* pan drift state (proposed only) */
+    this.driftX    = 0;
+    this.driftY    = 0;
+    this._panning  = false;
+    this._panEndMs = 0;
+
+    this._bindDrag();
+    this._bindZoom();
+  }
+
+  get scale() { return 300 * Math.pow(2, this.zoom - 18.5); }
+
+  w2s(wx, wy) {
+    return {
+      x: this.ox + (wx - 0.5) * this.scale,
+      y: this.oy + (wy - 0.5) * this.scale,
+    };
+  }
+
+  pinPx() {
+    const raw = 18 + (this.zoom - 15) * 7;
+    return Math.min(Math.max(raw, 16), this.maxPinPx);
+  }
+
+  _bindDrag() {
+    let lx, ly, held = false;
+
+    this.phone.addEventListener('mousedown', e => {
+      e.preventDefault(); held = true; lx = e.clientX; ly = e.clientY;
+    });
+    document.addEventListener('mouseup', () => { held = false; this._panning = false; this._panEndMs = performance.now(); });
+    document.addEventListener('mousemove', e => {
+      if (!held) return;
+      const dx = e.clientX - lx, dy = e.clientY - ly;
+      lx = e.clientX; ly = e.clientY;
+      this.ox += dx; this.oy += dy;
+      if (this.proposed) {
+        /* card drifts OPPOSITE to pan */
+        this.driftX = Math.max(-DRIFT_MAX, Math.min(DRIFT_MAX, this.driftX - dx * DRIFT_FACTOR));
+        this.driftY = Math.max(-DRIFT_MAX, Math.min(DRIFT_MAX, this.driftY - dy * DRIFT_FACTOR));
+        this._panning = true;
+        this._panEndMs = performance.now();
+      }
+    });
+
+    this.phone.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) return;
+      held = true; lx = e.touches[0].clientX; ly = e.touches[0].clientY;
+    }, { passive: true });
+    this.phone.addEventListener('touchmove', e => {
+      if (!held || e.touches.length !== 1) return;
+      e.preventDefault();
+      const dx = e.touches[0].clientX - lx, dy = e.touches[0].clientY - ly;
+      lx = e.touches[0].clientX; ly = e.touches[0].clientY;
+      this.ox += dx; this.oy += dy;
+      if (this.proposed) {
+        this.driftX = Math.max(-DRIFT_MAX, Math.min(DRIFT_MAX, this.driftX - dx * DRIFT_FACTOR));
+        this.driftY = Math.max(-DRIFT_MAX, Math.min(DRIFT_MAX, this.driftY - dy * DRIFT_FACTOR));
+        this._panning = true; this._panEndMs = performance.now();
+      }
+    }, { passive: false });
+    this.phone.addEventListener('touchend', () => { held = false; this._panning = false; this._panEndMs = performance.now(); });
+  }
+
+  _bindZoom() {
+    this.phone.addEventListener('wheel', e => {
+      e.preventDefault();
+      this.zoom = Math.min(21.5, Math.max(15, this.zoom - e.deltaY * 0.008));
+    }, { passive: false });
+  }
+
+  _bg() {
+    const { ctx, vw, vh } = this;
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, vw, vh);
+    const ts = 24 * Math.pow(2, this.zoom - 18.5);
+    const gox = ((this.ox % ts) + ts) % ts, goy = ((this.oy % ts) + ts) % ts;
+    ctx.strokeStyle = 'rgba(255,255,255,0.035)'; ctx.lineWidth = 0.5;
+    for (let x = gox - ts; x < vw + ts; x += ts) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,vh); ctx.stroke(); }
+    for (let y = goy - ts; y < vh + ts; y += ts) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(vw,y); ctx.stroke(); }
+    const tl = this.w2s(0,0), br = this.w2s(1,1);
+    ctx.save();
+    ctx.fillStyle='rgba(88,129,87,0.07)'; ctx.strokeStyle='rgba(88,129,87,0.28)';
+    ctx.lineWidth=1.5; ctx.setLineDash([7,4]);
+    ctx.fillRect(tl.x,tl.y,br.x-tl.x,br.y-tl.y); ctx.strokeRect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
+    ctx.setLineDash([]); ctx.restore();
+    ctx.save(); ctx.strokeStyle='rgba(163,177,138,0.18)'; ctx.lineWidth=1.2; ctx.setLineDash([4,6]);
+    for (const [a,b] of PATHS) {
+      const ea=EXHIBITS.find(e=>e.id===a), eb=EXHIBITS.find(e=>e.id===b);
+      if(!ea||!eb) continue;
+      const sa=this.w2s(ea.wx,ea.wy), sb=this.w2s(eb.wx,eb.wy);
+      ctx.beginPath(); ctx.moveTo(sa.x,sa.y); ctx.lineTo(sb.x,sb.y); ctx.stroke();
+    }
+    ctx.setLineDash([]); ctx.restore();
+  }
+
+  _drawMarkerWorld(ex) {
+    const { ctx } = this;
+    const { x, y } = this.w2s(ex.wx, ex.wy);
+    const r = this.pinPx() / 2;
+    const color = ex.cs ? '#9e7548' : VISITED.has(ex.id) ? '#588157' : '#dda15e';
+    const sg = ctx.createRadialGradient(x+1.5,y+3,0,x+1.5,y+3,r*0.8);
+    sg.addColorStop(0,'rgba(0,0,0,0.4)'); sg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath(); ctx.arc(x+1.5,y+3,r*0.8,0,Math.PI*2); ctx.fillStyle=sg; ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,r*0.62,0,Math.PI*2); ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,r*0.5,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+    ctx.fillStyle='#2b2b2b';
+    ctx.font=`bold ${Math.max(7,r*0.55)}px -apple-system,sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(String(ex.num),x,y);
+  }
+
+  _drawMarkerProposed(ex) {
+    const { ctx } = this;
+    const { x: geoX, y: geoY } = this.w2s(ex.wx, ex.wy);
+    const mx = geoX + this.driftX;
+    const my = geoY + this.driftY;
+    const r  = this.pinPx() / 2;
+    const color = ex.cs ? '#9e7548' : VISITED.has(ex.id) ? '#588157' : '#dda15e';
+
+    const drifted = Math.abs(this.driftX) > 1.5 || Math.abs(this.driftY) > 1.5;
+
+    /* geo-anchor dot (true coordinate) — only visible when drifted */
+    if (drifted) {
+      ctx.beginPath(); ctx.arc(geoX, geoY, 3, 0, Math.PI*2);
+      ctx.fillStyle = color + 'bb'; ctx.fill();
+
+      /* caret line: marker center → geo dot */
+      ctx.save();
+      ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]); ctx.globalAlpha = 0.55;
+      ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(geoX, geoY); ctx.stroke();
+      ctx.setLineDash([]); ctx.restore();
+    }
+
+    /* full disc marker at drifted position */
+    const sg = ctx.createRadialGradient(mx+1.5, my+3, 0, mx+1.5, my+3, r*0.8);
+    sg.addColorStop(0,'rgba(0,0,0,0.4)'); sg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath(); ctx.arc(mx+1.5, my+3, r*0.8, 0, Math.PI*2); ctx.fillStyle=sg; ctx.fill();
+    ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI*2); ctx.fillStyle=color; ctx.fill();
+    ctx.beginPath(); ctx.arc(mx, my, r*0.62, 0, Math.PI*2); ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(mx, my, r*0.5, 0, Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+    ctx.fillStyle='#2b2b2b';
+    ctx.font=`bold ${Math.max(7, r*0.55)}px -apple-system,sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(String(ex.num), mx, my);
+  }
+
+  _youDot() {
+    const { ctx } = this;
+    const cx = this.vw/2, cy = this.vh*0.52;
+    ctx.beginPath(); ctx.arc(cx,cy,13,0,Math.PI*2); ctx.fillStyle='rgba(96,165,250,0.15)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy,9,0,Math.PI*2);  ctx.fillStyle='rgba(96,165,250,0.25)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy,5.5,0,Math.PI*2); ctx.fillStyle='#60a5fa'; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy,5.5,0,Math.PI*2); ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+  }
+
+  tickDrift() {
+    /* decay drift back to 0 once panning stops */
+    if (!this._panning) {
+      this.driftX *= DRIFT_DECAY;
+      this.driftY *= DRIFT_DECAY;
+      if (Math.abs(this.driftX) < 0.3) this.driftX = 0;
+      if (Math.abs(this.driftY) < 0.3) this.driftY = 0;
+    }
+  }
+
+  draw() {
+    if (this.proposed) this.tickDrift();
+    this._bg();
+    if (this.proposed) {
+      for (const ex of EXHIBITS) this._drawMarkerProposed(ex);
+    } else {
+      for (const ex of EXHIBITS) this._drawMarkerWorld(ex);
+    }
+    this._youDot();
+  }
+}
+
+/* ── instantiate ── */
+const mapA = new MapSim('phone-A', 'canvas-A', { zoom:19.5, maxPinPx:96,  proposed:false });
+const mapB = new MapSim('phone-B', 'canvas-B', { zoom:18.5, maxPinPx:56,  proposed:true  });
+
+/* ── main loop ── */
+function loop() {
+  mapA.draw();
+  mapB.draw();
+  document.getElementById('badge-A').textContent = `z ${mapA.zoom.toFixed(2)}`;
+  document.getElementById('badge-B').textContent = `z ${mapB.zoom.toFixed(2)}`;
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
