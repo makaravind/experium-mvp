@@ -36,8 +36,8 @@ Source of truth for all design decisions made during initial planning.
 | Map | ~~Three.js / React Three Fiber~~ **Mapbox GL JS + drone orthophoto** | Real drone ortho is more accurate than illustrated map; visitors recognize actual park landmarks |
 | PWA / Service Worker | `next-pwa` | Drop-in, handles precaching + runtime caching with ~10 lines config |
 | Audio strategy | Full upfront download (~25MB per language) | Simple, fully offline after first load; hybrid later if bounce is an issue |
-| Admin UI | Supabase dashboard (no custom admin in v1) | Table editor + RLS sufficient; eliminates entire admin route surface |
-| Admin auth | Supabase Auth (magic link) | Already in stack, ties into RLS, no password management |
+| Admin UI | ~~Supabase dashboard (no custom admin in v1)~~ **Dev-only `/admin` tool** for sections, exhibits, audio, photos, amenities; dashboard for the rest | Placing 67 exhibits and renumbering by dashboard is unworkable; a map editor is the right tool. See "Admin tool & display IDs" below |
+| Admin auth | ~~Supabase Auth (magic link)~~ **None — gated by `NODE_ENV !== 'production'`** (404 in prod), service-role key server-side only | Solo dev, one laptop; auth for a tool never deployed is waste. Revisit if the tool is ever deployed |
 | TTS service | Deferred — trial ElevenLabs / Google TTS | Not a runtime dep; manual content pipeline step |
 | Offline UX (first load) | Blocker screen if no network + retry button | App is useless without audio; don't over-engineer partial states |
 | Offline UX (missing audio) | Revert to the precache language + toast (log to analytics) | Simple, no retry loop or fallback TTS; the visitor stays on audio that works |
@@ -109,3 +109,24 @@ Source of truth for all design decisions made during initial planning.
 | Curated path | Fixed recommended route designed editorially | Complements GPS — editorial curation for "what to see" vs GPS for "what's close" |
 | Exhibit categories | A/B/C tier per exhibit, manually assigned, default B | A = longer audio (90s) + larger pin (1.3×) + nearby priority + persists at low zoom. C = 60s audio, standard pin, hides at low zoom. Reassign from real data after 2-4 weeks |
 | User info capture | Optional modal on first load (name, phone, email) + skip link | No OTP in v1. Stored locally, synced when online. Never re-shown if skipped; Discovery Card shows "Your Name Here" tap-to-edit from any card's full-screen view |
+
+## Admin tool & display IDs
+
+Specs: `docs/specs/exhibit-admin-tool.md`, `docs/specs/amenity-admin.md`. Architecture: `docs/tech-architecture.md § Admin Tool`.
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Identity model | `exhibits.code` (SMALLINT) stays the **permanent** internal code for `/s/{code}` and QR scans. `section` + `number` is the **display ID** (`K1`) and may change when an exhibit moves | An exhibit can be physically moved between sections; the printed QR URL must survive that. No QR codes were printed yet, so no backward-compat was needed |
+| Sections | Named-by-letter polygons over the park; every exhibit and every amenity belongs to exactly one, derived from the polygon it sits in (first polygon wins on overlap) | The polygon is the single source of truth, so section can never drift from position. Dropping a pin outside all sections snaps back |
+| Section letters | FK with `ON UPDATE CASCADE`; renames apply before deletes and cannot swap | A rename is one row update; swaps would need transient duplicate ids |
+| Exhibit numbering | Lowest free positive number in the section; also hand-editable, duplicates blocked in the UI and by a deferred unique constraint | Keeps numbers dense (owner's choice); a freed `A3` may later be a different exhibit, acceptable pre-launch |
+| Amenity identity | Section letter only, no number (`Washroom · Section G`). Two of a type in one section are told apart by name | "Refer to it as A, B" was the need; per-type numbering would add a column and logic for no stated benefit |
+| Amenity photos | Not managed by the tool; `amenities.photos` is never written | Visitor UI ignores the URLs today |
+| Dev-only | `app/admin/**` and `app/api/admin/**` return 404 when `NODE_ENV === 'production'`; all writes use the service-role client server-side | One laptop, one Supabase project; building auth would be waste. Admin chunks are excluded from the service-worker precache |
+| Staged edits, one transactional Save | Edits live in client state; Save sends one changeset to the `admin_apply_changes(jsonb)` function (sections, exhibits, audio, photos, amenities) in one transaction | One DB with no staging: a stray drag must never go live, and number swaps need a single transaction |
+| Uploads | Immediate to Storage under a new unique path; the DB points at them only after Save. Audio → 64 kbps mono MP3 (ffmpeg); photos → max 1600 px WebP (`sharp`, devDependency) | Keeps staging without holding big files in the browser; unique paths bust CDN and service-worker caches. Discarded uploads orphan files (accepted pre-launch) |
+| New exhibit code | `max(code) + 1`, generated inside the function | Simple; a concurrent save or deleting the top code could reuse a number. Acceptable for one user, no deletes |
+| Deleting exhibits | Out of scope; set `status = coming_soon`. Amenities can be deleted (staged) | Exhibits have QR codes and scan history pointing at them; amenities have no references |
+| Visitor app | `displayNumber` (was `code`) → `displayId: string` (`K1`) on map pins, preview sheet and search (case-insensitive prefix); `CachedAmenity.section` shown on the amenity sheet. Store persist version bumped (v5) so stale caches are cleared | Lookups, `/s/{code}` and `/api/scan` stay on `code`. Visitor change shipped only after the NOT NULL migrations |
+| Rollout order | Add nullable columns + function → place data (seed from the marker-placer export) → `NOT NULL` → deploy the visitor change | The visitor query selects `section`/`number`; deploying early would fail the whole offline dataset load |
+| Placeholders | Markers with no exhibit yet became `coming_soon` exhibits named `Exhibit G2` etc. (codes 81–137, type `landmark`, tier `bronze`) | Preserves the placed positions; rename or hide them in `/admin` |

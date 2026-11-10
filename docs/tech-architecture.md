@@ -21,8 +21,8 @@ Production:  https://{domain}/s/{code}
 Example:     https://experium.aikyatechnology.in/s/A7X3
 
 /s/{code}  → visitor experience (resolve + render)
-/admin     → admin dashboard (protected)
-/api/*     → backend API
+/admin     → admin tool (dev-only: served under `next dev`, 404 in production)
+/api/*     → backend API (`/api/admin/*` is dev-only, 404 in production)
 ```
 
 The `/s/{code}` endpoint:
@@ -54,7 +54,7 @@ The `/s/{code}` endpoint:
 | Auth (admin) | Supabase Auth (magic link) | Already in stack, RLS integration, no password management |
 | Auth (visitor) | FingerprintJS + optional info capture | `@fingerprintjs/fingerprintjs` for persistent identity without login; plain inputs stored locally, synced to server when online |
 | UI primitives | `@base-ui/react` + shadcn/ui | Base UI for headless accessible primitives; shadcn for pre-styled components |
-| Admin UI | Supabase dashboard (no custom admin in v1) | Table editor + RLS = sufficient for solo dev + maintainer |
+| Admin UI | Dev-only `/admin` tool (MapLibre + staged edits, one transactional Save) | Sections, exhibits, audio, photos and amenities edited on the map; see [Admin Tool](#admin-tool-dev-only). Supabase dashboard remains for everything else (QR codes, reports, ads) |
 | Analytics | Custom (DB writes) + Vercel Analytics | Scan logging in DB; `@vercel/analytics` for page-level traffic |
 | TTS | Deferred (ElevenLabs / Google TTS per batch) | Not a runtime dep — manual content pipeline step |
 | DNS / Email | Cloudflare (Email Routing, free tier) | DNS for `aikyatechnology.in`; subdomain `experium.aikyatechnology.in` for app; forwards `experium@aikyatechnology.in` → Gmail for visitor feedback |
@@ -147,6 +147,32 @@ ads
   end_date      DATE
 ```
 
+### Sections, Display IDs and Amenities
+
+The tables above are high-level; these were added with the admin tool (migrations `20261110000100`–`20261110000400`) and match the live schema.
+
+```sql
+sections
+  id            TEXT PK       -- letters only, ^[A-Z]+$  ("A", "B", … "P")
+  polygon       JSONB         -- [[lng, lat], …], >= 3 points; the park is split into named polygons
+  created_at / updated_at
+
+exhibits  (additions)
+  code          SMALLINT UNIQUE  -- PERMANENT internal code: /s/{code} URLs and QR scans. Never changes.
+  section       TEXT NOT NULL    -- FK → sections.id ON UPDATE CASCADE (renaming a letter is one row update)
+  number        SMALLINT NOT NULL CHECK (number > 0)
+  UNIQUE (section, number) DEFERRABLE INITIALLY DEFERRED   -- lets one transaction swap/shift numbers
+
+amenities  (additions)
+  section       TEXT NOT NULL    -- FK → sections.id ON UPDATE CASCADE; letter only, no number
+```
+
+- **Display ID** = `section || number` (e.g. `K1`). It is what visitors see on map pins, the preview sheet and in search; it may change when an exhibit is physically moved. `code` does not.
+- **Amenities** show only the section ("Washroom · Section G") on the amenity sheet; two of one type in a section are told apart by name.
+- **Placement rule:** the polygon is the source of truth. A pin must lie inside a section (first polygon wins on overlap); dropping outside snaps back. A section that holds exhibits or amenities cannot be deleted, and a reshape that would strand one is rejected.
+- **Numbering:** a new or moved exhibit takes the lowest free positive number in its section.
+- `sections` has anon `SELECT`; all writes go through the service role.
+
 ## API Endpoints
 
 ### Public (Visitor)
@@ -161,9 +187,31 @@ GET  /api/progress          → User's discovered exhibits
 GET  /api/exhibits/all      → All exhibit metadata + coords (for offline cache)
 ```
 
-### Admin
+### Admin (dev-only)
 
-No custom admin UI in v1. All admin operations (CRUD on exhibits, QR codes, reports, ads) done directly via Supabase dashboard with RLS policies restricting access to authenticated admin users.
+All handlers start with `adminGuard()` (`lib/admin/guard.ts`), which returns 404 when `NODE_ENV === 'production'`.
+
+```
+GET  /api/admin/data          → sections, exhibits, audio, photos, amenities (the editor's loaded state)
+POST /api/admin/save          → one changeset → RPC admin_apply_changes(jsonb), single transaction
+POST /api/admin/upload-audio  → WAV/MP3 → ffmpeg 64kbps mono MP3 → Storage `audio/{code}/{lang}-{ts}.mp3`
+POST /api/admin/upload-photo  → image → sharp, max 1600px WebP → Storage `images/exhibits/{code}/{uuid}.webp`
+```
+
+Everything not covered by the tool (QR codes, reports, ads, deleting exhibits) is still done in the Supabase dashboard.
+
+## Admin Tool (dev-only)
+
+`/admin` in `experium-ai-tour-app`, usable only from a machine running `next dev` (`npm run dev`). It edits the **live** database; there is no staging project.
+
+- **Map:** MapLibre over `park.pmtiles`. Draw, reshape (vertex drag), rename and delete sections; drag exhibit pins (cross-section move renumbers) and amenity pins; click inside a section to add an exhibit or an amenity (Exhibit | Amenity toggle).
+- **Panels:** Details (name, type, tier, status, description, facts JSON, number), Audio (script, status, preview, upload per en/hi/te), Photos (upload, caption, hero, reorder, delete) for exhibits; a single Details panel (name, type, description, delete) for amenities.
+- **Staged edits:** all changes live in client state. A bar shows the diff ("2 moved, 1 amenity added…") with Save and Discard. Save posts one changeset to `admin_apply_changes`; any failure rolls everything back and shows the DB error verbatim. Save is blocked while any exhibit or amenity is unplaced, or a panel holds an invalid value.
+- **Uploads are immediate but non-destructive:** files go to Storage under a new unique path; the DB only points at them after Save. Discarded uploads leave orphan files (accepted pre-launch).
+- **Changeset contract:** `lib/admin/types.ts` (`Changeset`) mirrors the jsonb documented in the header of `20261110000100_sections.sql` and extended in `20261110000300_amenity_section.sql`. Rows update partially (only changed keys); new rows carry a client-generated UUID and, for exhibits, get `code = max(code)+1` inside the function. `amenities.photos` is never touched.
+- **Section letter renames** apply before deletes and cannot swap (chain through a spare letter); the tool shows a note that visitors will see the new letter.
+- **Not in the tool:** QR code management, TTS generation (`tools/generate-audio.py`), exhibit deletion (set `status = coming_soon`), amenity photos.
+- Specs: `docs/specs/exhibit-admin-tool.md`, `docs/specs/amenity-admin.md`.
 
 ## Telemetry
 
@@ -194,7 +242,7 @@ Aggregated views (computed nightly or on-demand):
 
 ## Security
 
-- Admin routes: auth-protected (session cookie or JWT)
+- Admin tool: no auth. It is gated by `NODE_ENV !== 'production'` only (404 in every production build, verified on a prod build) and uses the service-role key server-side. Do not run `next dev` bound to a network interface, a staging deployment in dev mode, or any non-production preview with these routes reachable. `admin_apply_changes` is executable by `service_role` only (anon/authenticated revoked). The admin chunks are excluded from the service-worker precache (`exclude` in `next.config.ts`) so visitors never download them.
 - Visitor: no auth required for content; OTP only for progress saving
 - Rate limiting on OTP endpoint (prevent abuse)
 - QR codes are sequential-resistant (use random short codes, not incrementing IDs)
