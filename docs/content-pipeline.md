@@ -135,50 +135,60 @@ tools/
 
 ## Panorama Processing Pipeline (Virtual Tour)
 
-Separate from the audio pipeline. Run once per 360° photo batch.
+Separate from the audio pipeline. Run once per 360° capture spot, locally from the **app repo** (`experium-ai-tour-app/`), never in CI. Spec: `docs/specs/m9a-virtual-tour-viewer.md`.
 
 ```
-[12K equirect PNG from camera] → [Resize + encode] → [Upload to Supabase Storage] → [Seed tour_nodes.tiles_url]
+[12K equirect master] → tile (tile-panorama.js) → upload (same script) → seed (seed-tour-nodes.js)
 ```
 
-### Encoding spec
+Masters (12000×6000 PNG/JPEG, ~90 MB each) are **never committed**; keep them outside the repo (e.g. `~/Downloads/Panos`).
 
-| Setting | Value | Rationale |
-|---------|-------|-----------|
-| Resolution | 4096×2048 | 4K — good quality on mobile, ~4.5× smaller than 12K source |
-| Format | JPEG | Better compression than PNG; no transparency needed |
-| Quality | 85% | Sharp enough for 360 viewer zoom; ~2.8MB per image |
+### Natural key: `pano_ref`
 
-### Local resize command (macOS `sips`)
+`pano_ref` is the capture-spot label from the drone-survey PDF (`1`…`40`, `37A`, `lobby` for `Front Top View`). It is the Storage folder (`panoramas/<pano_ref>/`) and the `tour_nodes` upsert key, so every step is idempotent and independent of UUIDs. Letters, digits, `-` and `_` only.
+
+### Tiled pyramid (replaces the single-JPEG flow)
+
+Per node, JPEG q85, 512 px tiles, cut from the master:
+
+| File | Size | Use |
+|------|------|-----|
+| `manifest.json` | — | `tour_nodes.tiles_url`; `baseUrl`, `levels`, `tileUrl` pattern |
+| `preview.jpg` | 1024×512 (~50 KB) | `tour_nodes.preview_url`; gallery slide, splash backdrop |
+| `base.jpg` | 512×256 (~15 KB) | instant low-res while tiles stream in |
+| `l0/{col}_{row}.jpg` | 1024 wide, 2×1 | |
+| `l1/…` | 2048 wide, 4×2 | |
+| `l2/…` | 4096 wide, 8×4 | |
+
+≈2.9 MB / ~45 objects per node; 42 nodes ≈ 122 MB. Egress is the only risk (~3 MB per 5 nodes viewed; Supabase free tier 5 GB/month ≈ 1,500 tour sessions) — past that, Pro or R2 (only URLs are stored).
+
+### Steps
 
 ```bash
-sips -z 2048 4096 --setProperty format jpeg --setProperty formatOptions 85 \
-  input.png --out output.jpg
+cd experium-ai-tour-app            # needs .env.local: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+
+# 1. tile (inspect first) — writes /tmp/tiles/<pano_ref>, uploads nothing
+node tools/tile-panorama.js "<master>" <pano_ref> --dry-run
+
+# 2. tile + upload to the public `panoramas` bucket (upsert; prints tiles_url / preview_url)
+node tools/tile-panorama.js "<master>" <pano_ref>
+
+# 3. seed tour_nodes (upsert on pano_ref; derives tiles_url / preview_url)
+node tools/seed-tour-nodes.js --pano-ref <pano_ref> [--label "Name"] [--lobby] [--lat N --lng N] --dry-run
+node tools/seed-tour-nodes.js --pano-ref <pano_ref> [--label "Name"] [--lobby] [--lat N --lng N]
 ```
 
-### Upload
+m9a defaults — lobby (`Front Top View` → `pano_ref=lobby`, `is_lobby=true`, label "Park Entrance", lat/lng at the gate) and node `1` (label "Node 1"):
 
-Upload to `panoramas/<node-label>/pano.jpg` in Supabase Storage. Copy the public URL into `tour_nodes.tiles_url` (column name is `tiles_url` to stay compatible with future v2 tile manifest upgrade).
+```bash
+node tools/seed-tour-nodes.js --lat <gate_lat> --lng <gate_lng> --dry-run   # review rows
+node tools/seed-tour-nodes.js --lat <gate_lat> --lng <gate_lng>
+```
 
-### Estimated size (40 nodes)
-
-40 images × ~2.8MB = **~112MB** — well within Supabase free tier (1GB).
-
-### v2: Tile pyramid (deferred)
-
-Storage size is nearly identical (~2.9MB/image as tiles vs 2.8MB single JPEG). The UX benefit is load time — PSV renders a 15KB preview instantly then fetches only the ~6 tiles in the current viewport (~400KB), so first render drops from 2–3s to <0.5s on mobile LTE.
-
-Tile pyramid per image (512×512 tiles, 4K source):
-
-| Level | Grid | Tiles | ~Size |
-|-------|------|-------|-------|
-| Preview | 1×1 | 1 | 15KB |
-| Low (1K) | 2×1 | 2 | 50KB |
-| Mid (2K) | 4×2 | 8 | 320KB |
-| Full (4K) | 8×4 | 32 | 2.5MB |
-| **Total** | | **43** | **~2.9MB** |
-
-Tiling script and `EquirectangularTilesAdapter` integration tracked in issue #127.
+- Label defaults to `Node <pano_ref>`; rename later (`/admin/tour`, m9b). Re-seeding resets the label.
+- `lat`/`lng` are only written when passed, so coordinates placed in `/admin/tour` survive a re-seed.
+- Re-tiling at a higher top-level resolution later is just a re-run of step 2; `tiles_url` does not change.
+- Prereqs: `tour_nodes` migration and the `panoramas` bucket must exist (m9a step 2).
 
 ---
 
