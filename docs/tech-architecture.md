@@ -46,8 +46,8 @@ The `/s/{code}` endpoint:
 | Map | MapLibre GL v4 + drone orthophoto tileset | Open-source Mapbox GL fork (no API key); ortho raster tiles; exhibit pins as GeoJSON; GPS "you are here" via watchPosition() |
 | Map tiles | PMTiles (`pmtiles`) | Single-file tile archive served from Supabase Storage; no tile server needed |
 | 3D / visualization | Three.js (`three`) | Used for 3D map elements and exhibit visualizations |
-| 360° panorama | `@photo-sphere-viewer/core` + `virtual-tour-plugin` + `markers-plugin` | Node graph navigation with nav arrows + exhibit pin markers; `preload: true` prefetches adjacent nodes; plain equirect in v1, tile pyramid (via `equirectangular-tiles-adapter`) deferred to v2 |
-| Panorama images | 4096×2048 JPEG 85% (~2.8MB/image) | Resized locally from 12K masters via `sips`; hosted on Supabase Storage; `tour_nodes.tiles_url` (production) or direct URL (v1) |
+| 360° panorama | `@photo-sphere-viewer/core` + `virtual-tour-plugin` (server mode) + `markers-plugin` + `equirectangular-tiles-adapter` | Node graph navigation with arrows (links) + exhibit pins (markers); `getNode` resolves a node on demand; `preload: true` prefetches neighbours' `base.jpg` |
+| Panorama images | Tile pyramid per node (`base.jpg`, `preview.jpg`, `l{level}/{col}_{row}.jpg`, ~2.9MB/node) | Tiled from the 12K masters by `tools/tile-panorama.js`; hosted in the public Supabase Storage bucket `panoramas`; `tour_nodes.tiles_url` points at the manifest |
 | Trail routing | Custom BFS (planned) | Segment graph in `public/data/trails.geojson`; BFS chains segments for A→B routing — `@turf/*` not yet installed |
 | Animation | Framer Motion | All UI transitions, sheet open/close, menu animations |
 | PWA / Offline | `@serwist/next` (full upfront ~25MB download) | Offline-first after initial load; all audio cached via service worker |
@@ -173,6 +173,34 @@ amenities  (additions)
 - **Numbering:** a new or moved exhibit takes the lowest free positive number in its section.
 - `sections` has anon `SELECT`; all writes go through the service role.
 
+### Virtual Tour
+
+Migrations `20261110000500_virtual_tour.sql`, `20261110000600_admin_apply_tour.sql`. Full model in `docs/user-flows/flow-8-virtual-tour.md`.
+
+```sql
+tour_nodes
+  id UUID PK, label TEXT, pano_ref TEXT UNIQUE   -- '1'…'40', '37A', 'lobby'
+  tiles_url TEXT, preview_url TEXT               -- manifest.json / preview.jpg in bucket `panoramas`
+  lat FLOAT8 NULL, lng FLOAT8 NULL               -- placed in /admin/tour; NULL = unplaced
+  is_lobby BOOLEAN                               -- unique partial index: one lobby
+
+tour_edges  (directed; a connected pair is two rows)
+  from_node_id, to_node_id FK → tour_nodes ON DELETE CASCADE  (PK together)
+  bearing SMALLINT 0–359   -- yaw in from_node's pano toward to_node
+  pitch   SMALLINT -90–90  -- DEFAULT -15
+
+exhibits  (additions)
+  tour_node_id UUID NULL FK → tour_nodes ON DELETE SET NULL   -- one node per exhibit
+  tour_heading SMALLINT NULL 0–359, tour_pitch SMALLINT NULL -90–90   -- pin position in that pano
+```
+
+- Yaw/pitch are authored by clicking in the panorama, never computed: the panos have no EXIF/XMP and aren't assumed north-aligned. DB degrees → radians in `lib/tour.ts` (`nodeLinks`, `nodeMarkers`).
+- Both tour tables have anon `SELECT`; writes go through the service role. `exhibits.tour_*` ride in the precached dataset (`CachedExhibit`).
+- **Client state:** `tourSpot` (`{ nodeId, lat, lng, heading, label, at }`) in the persisted zustand store, `version` 7. The v6 → v7 migration is non-destructive (keeps `cachedExhibits`). `lib/map-store.ts` has `flyToTourSpotTrigger` (registered in `ParkMap`, same pattern as `recenterTrigger`).
+- **Exit → map:** `/tour` writes `tourSpot`, shows `ExitSplash` (0.6 s), pushes `/map`; on mount `ParkMap` flies to the spot if `at` is within 10 s. `ParkMap` renders `tourSpot` as a DOM `maplibregl.Marker` (white puck + "360°" chip, no cone) that re-enters `/tour?node=…&heading=…`.
+- **`/tour` is outside the `(map)` layout**, so it mounts its own `PreviewSheet` for exhibit-pin taps (data from `cachedExhibits`). "Navigate" = exit flow, then `/map` with that exhibit's sheet open.
+- Tour is online-only: panoramas aren't precached (`/tour` shell is), and the home "360° Virtual Tour →" button (beside "Explore the Park →") is hidden offline.
+
 ## API Endpoints
 
 ### Public (Visitor)
@@ -198,7 +226,12 @@ POST /api/admin/upload-audio  → WAV/MP3 → ffmpeg 64kbps mono MP3 → Storage
 POST /api/admin/upload-photo  → image → sharp, max 1600px WebP → Storage `images/exhibits/{code}/{uuid}.webp`
 ```
 
-Everything not covered by the tool (QR codes, reports, ads, deleting exhibits) is still done in the Supabase dashboard.
+```
+GET  /api/admin/tour/data     → tour_nodes, tour_edges, exhibits with tour columns
+POST /api/admin/tour/save     → one changeset → RPC admin_apply_tour(jsonb), single transaction
+```
+
+Everything not covered by the tools (QR codes, reports, ads, deleting exhibits) is still done in the Supabase dashboard.
 
 ## Admin Tool (dev-only)
 
@@ -212,6 +245,18 @@ Everything not covered by the tool (QR codes, reports, ads, deleting exhibits) i
 - **Section letter renames** apply before deletes and cannot swap (chain through a spare letter); the tool shows a note that visitors will see the new letter.
 - **Not in the tool:** QR code management, TTS generation (`tools/generate-audio.py`), exhibit deletion (set `status = coming_soon`), amenity photos.
 - Specs: `docs/specs/exhibit-admin-tool.md`, `docs/specs/amenity-admin.md`.
+
+### Tour authoring (`/admin/tour`)
+
+Same guard (`adminGuard()` / `requireAdminPage()`), staged-edit and batch-save pattern; saves through `admin_apply_tour(changes jsonb)` (service_role only), so nodes, edges and exhibit links commit atomically. Source: `app/admin/tour/`, `components/admin/tour/`, `lib/admin/tour-*.ts`.
+
+1. **Place:** node list (thumbnail, label, `pano_ref`, placed ✓/✗) beside the park map; click the map to set `lat/lng`; label editable.
+2. **Edges:** proposals from `public/park-paths.json` (nodes snapped to their nearest path point, adjacent along a path), nearest-neighbour fallback for nodes far from any path; accept/reject per edge, accepting creates both directed rows. Nothing reads the path network at runtime.
+3. **Aim:** embedded viewer; pick an edge or linked exhibit, click its target in the panorama → yaw + pitch stored (`tour_edges.bearing/pitch`, `exhibits.tour_heading/tour_pitch`). Existing arrows/pins render live for a visual check.
+4. **Link exhibits:** proposes the nearest placed node within a radius; human accepts/overrides/clears. Exhibits with no pano keep `tour_node_id = NULL`.
+5. **Validate + Save:** blockers — node without `lat/lng`, edge without yaw, missing reverse edge, linked exhibit without yaw/pitch, no lobby, nodes unreachable from the lobby.
+
+The production graph (42 nodes, ~100 directed edges) is authored through this tool against the live DB; the 90 MB PNG masters stay out of git. Spec: `docs/specs/m9b-virtual-tour-navigation.md`.
 
 ## Telemetry
 
@@ -242,7 +287,7 @@ Aggregated views (computed nightly or on-demand):
 
 ## Security
 
-- Admin tool: no auth. It is gated by `NODE_ENV !== 'production'` only (404 in every production build, verified on a prod build) and uses the service-role key server-side. Do not run `next dev` bound to a network interface, a staging deployment in dev mode, or any non-production preview with these routes reachable. `admin_apply_changes` is executable by `service_role` only (anon/authenticated revoked). The admin chunks are excluded from the service-worker precache (`exclude` in `next.config.ts`) so visitors never download them.
+- Admin tool: no auth. It is gated by `NODE_ENV !== 'production'` only (404 in every production build, verified on a prod build) and uses the service-role key server-side. Do not run `next dev` bound to a network interface, a staging deployment in dev mode, or any non-production preview with these routes reachable. `admin_apply_changes` and `admin_apply_tour` are executable by `service_role` only (anon/authenticated revoked). The admin chunks are excluded from the service-worker precache (`exclude` in `next.config.ts`) so visitors never download them.
 - Visitor: no auth required for content; OTP only for progress saving
 - Rate limiting on OTP endpoint (prevent abuse)
 - QR codes are sequential-resistant (use random short codes, not incrementing IDs)
