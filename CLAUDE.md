@@ -27,6 +27,7 @@ QR-code-based audio guide for park visitors. Scan marker → webapp plays audio 
 - `docs/open-questions.md` — unresolved items by urgency
 - `docs/specs/exhibit-admin-tool.md` — dev-only `/admin` tool + section-based display IDs (implemented)
 - `docs/specs/amenity-admin.md` — amenity management + amenity sections (implemented)
+- `docs/insights.md` — hidden key-gated `/insights` usage page: unlock, key, metrics, caveats (implemented)
 
 ### User Experience
 - `docs/user-journey.md` — high-level visitor flows
