@@ -79,13 +79,10 @@
   │ │  you              │   │
   │ └───────────────────┘   │
   │                         │
-  │ [▼ Explore the Park]    │
-  │  (collapsible map)      │
-  │                         │
   │ [⚠ Report Issue]       │
   └─────────────────────────┘
         ↓
-[User scans next nearby exhibit / taps "Explore" to see map]
+[User scans next nearby exhibit / taps the Map tab]
 ```
 
 ## Second/Third Scan
@@ -103,8 +100,6 @@ Same as above (no loading screen — assets already cached offline). After audio
   │ ┌───────────────────┐   │
   │ │  [📷] Scan Now    │   │
   │ └───────────────────┘   │
-  │                         │
-  │ [▼ Explore the Park]    │
   │                         │
   └─────────────────────────┘
 ```
@@ -133,38 +128,6 @@ Full-screen celebration takeover:
   │       [Tap to continue] │
   └─────────────────────────┘
 ```
-
-## Explore the Park (Collapsible Map)
-
-When user taps "Explore the Park" below Scan Now:
-```
-  ┌─────────────────────────┐
-  │ [▲ Explore the Park]    │
-  │                         │
-  │ ┌───────────────────┐   │
-  │ │  [Illustrated     │   │
-  │ │   Park Map SVG]   │   │
-  │ │                   │   │
-  │ │  • Pin 1 (Lake)   │   │
-  │ │  • Pin 2 (Rare    │   │
-  │ │    Garden)        │   │
-  │ │  • Pin 3 ...      │   │
-  │ │  (5 unvisited     │   │
-  │ │   curated pins)   │   │
-  │ └───────────────────┘   │
-  │                         │
-  │ [Pin tapped:]           │
-  │ ┌───────────────────┐   │
-  │ │ 📷 Baobab Tree    │   │
-  │ │ "Near the lake    │   │
-  │ │  entrance, ~5 min │   │
-  │ │  walk"            │   │
-  │ │ [Navigate →]      │   │
-  │ └───────────────────┘   │
-  └─────────────────────────┘
-```
-
-5 curated unvisited exhibits shown. As exhibits are visited, next unvisited ones rotate in.
 
 ## Returning User
 

@@ -199,7 +199,7 @@ exhibits  (additions)
 - **Client state:** `tourSpot` (`{ nodeId, lat, lng, heading, label, at }`) in the persisted zustand store, `version` 7. The v6 → v7 migration is non-destructive (keeps `cachedExhibits`). `lib/map-store.ts` has `flyToTourSpotTrigger` (registered in `ParkMap`, same pattern as `recenterTrigger`).
 - **Exit → map:** `/tour` writes `tourSpot`, shows `ExitSplash` (0.6 s), pushes `/map`; on mount `ParkMap` flies to the spot if `at` is within 10 s. `ParkMap` renders `tourSpot` as a DOM `maplibregl.Marker` (white puck + "360°" chip, no cone) that re-enters `/tour?node=…&heading=…`.
 - **`/tour` is outside the `(map)` layout**, so it mounts its own `PreviewSheet` for exhibit-pin taps (data from `cachedExhibits`). "Navigate" = exit flow, then `/map` with that exhibit's sheet open.
-- Tour is online-only: panoramas aren't precached (`/tour` shell is), and the home "360° Virtual Tour →" button (beside "Explore the Park →") is hidden offline.
+- Tour is online-only: panoramas aren't precached (`/tour` shell is), and the home "360° Virtual Tour →" button is hidden offline.
 
 ## API Endpoints
 

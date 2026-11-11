@@ -18,8 +18,6 @@ Home is the default landing tab. Shows trail progress, scan CTA, explore link, a
 | Next milestone | Below trail | "1 exhibit to your first milestone!" |
 | Did You Know? section | Below trail block | 3 exhibit fact cards; peek state by default, expands to swipeable carousel on tap. Hidden until offline precache populates exhibits with facts. |
 | Scan Now button | Center, prominent | Primary CTA, green (#588157). Tapping opens camera immediately |
-| Explore the Park | Below Scan | Text link/button. Tapping navigates to Map tab |
-| Banner ad | Bottom | Static display banner, persistent |
 | Tab bar | Fixed bottom | Home (active) · Scan · Map |
 
 ### Returning User (1+ exhibits discovered)
@@ -30,8 +28,6 @@ Home is the default landing tab. Shows trail progress, scan CTA, explore link, a
 | Progress count | Below trail | "X/50 discovered · Y more to next badge!" |
 | Did You Know? section | Below trail block | 3 exhibit fact cards; peek state by default, expands to swipeable carousel on tap. Hidden until offline precache populates exhibits with facts. |
 | Scan Now button | Center, prominent | Primary CTA, green (#588157). Tapping opens camera immediately |
-| Explore the Park | Below Scan | Text link/button. Tapping navigates to Map tab |
-| Banner ad | Bottom | Static display banner, persistent |
 | Tab bar | Fixed bottom | Home (active) · Scan · Map |
 
 ---
@@ -44,7 +40,6 @@ Home is the default landing tab. Shows trail progress, scan CTA, explore link, a
 | Tap ✨ pulse button | DYK card stack slides in; carousel fades in after 420ms |
 | Swipe DYK carousel | Scroll-snap; dot indicators sync to active card |
 | Tap DYK card | Opens exhibit PreviewSheet with no audio; Listen button navigates to /s/{code}?scansrc=app |
-| Tap Explore the Park | Navigates to Map tab |
 | Tap Scan tab (tab bar) | Camera opens immediately |
 | Tap Map tab (tab bar) | Navigates to Map tab |
 

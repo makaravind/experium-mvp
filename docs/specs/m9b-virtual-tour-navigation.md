@@ -101,7 +101,7 @@ Tool modes, left→right as the workflow:
 9. **#107 Exhibit pins**: MarkersPlugin pins at `tour_heading`/`tour_pitch` with unvisited/visited state; tap → `PreviewSheet` mounted in `/tour`.
 10. **Exit splash + recentre**: `ExitSplash`, `tourSpot` in the store (v7, non-destructive), `flyToTourSpotTrigger` in `lib/map-store.ts` + `ParkMap`, Map pill + Navigate wiring.
 11. **Persisted 360° pin** on `ParkMap` (DOM marker, tap → `/tour`).
-12. **#108 Home**: keep `ExploreParkLink` ("Explore the Park →") and add a second button "360° Virtual Tour →" linking to `/tour`, hidden offline. The design's Home frame shows both; flow-8 and #108 say *rename*, so **follow the design (add, don't rename)** and update the flow-8 and #108 text.
+12. **#108 Home**: add a "360° Virtual Tour →" button linking to `/tour`, hidden offline. (The "Explore the Park →" link was later removed from Home; the Map tab covers it.)
 13. **e2e**: extend m9a's specs with a mocked 3-node graph: arrow tap changes the node pill; pin tap opens the sheet; Map pill → exit splash → `/map` with `tourSpot` set; home button hidden offline; spot pin tap returns to `/tour`.
 14. **Cleanup**: delete `app/tour-test/page.tsx` and `public/pano/*` prototype assets once `/tour` supersedes it; update `docs/user-flows/flow-8-virtual-tour.md` and `docs/tech-architecture.md` to the final design.
 15. **Device checks (HITL)**: iOS Safari hop latency with `preload`, memory across 10+ hops, offline hiding, exit→map recentre accuracy.
@@ -144,7 +144,7 @@ Steps 8 and 9 can be built against the 2–3 seeded nodes from m9a while the gra
 - `supabase/migrations/20261110000100_sections.sql` — `admin_apply_changes` RPC pattern.
 - `lib/park-paths.ts` (`loadParkPaths`, `findRoute`, projection helpers), `public/park-paths.json` (named paths with `coords: [lat,lng][]`), `lib/nearby.ts` (`haversineMetres`).
 - `app/(map)/layout.tsx` (PreviewSheet mount at ~L391, `handleNavigate` at ~L207, `loadParkPaths` at ~L155), `components/map/ParkMap.tsx` (trigger registration at ~L562–571), `lib/map-store.ts` (trigger pattern).
-- `components/exhibit/ExploreParkLink.tsx`, `app/page.tsx:63` — home button.
+- `components/exhibit/VirtualTourLink.tsx`, `app/page.tsx` — home button.
 - `lib/store.ts:153` — persist version + migrate (previous bumps drop the dataset; this one must not).
 - `app/tour-test/page.tsx` — PSV plugin wiring reference; delete in step 14.
 - `@photo-sphere-viewer/virtual-tour-plugin` / `markers-plugin` 5.15.1 docs — links, `preload`, marker positions in radians.
@@ -163,7 +163,7 @@ Steps 8 and 9 can be built against the 2–3 seeded nodes from m9a while the gra
 - [ ] Exhibit pins at authored yaw/pitch, orange/green by visited state; tap opens `PreviewSheet` (listen works from cache; close by tapping the panorama or swipe).
 - [x] Map pill/Navigate → exit splash (≤ 0.6 s when cached) → `/map` centred on the last node; `tourSpot` persists across reload; 360° pin shows and re-enters the tour.
 - [x] Store `version` 7 migration keeps `cachedExhibits`.
-- [x] Home shows "360° Virtual Tour →" below "Explore the Park →"; hidden offline.
+- [x] Home shows "360° Virtual Tour →" below Scan Now; hidden offline.
 - [x] Prototype (`app/tour-test`, `public/pano`) removed; flow-8 and tech-architecture updated.
 - [ ] `npm run lint`, typecheck, unit and e2e pass (compare against the known baseline failures list).
 
@@ -182,7 +182,6 @@ Steps 8 and 9 can be built against the 2–3 seeded nodes from m9a while the gra
 
 - [ ] **Navigate semantics** — opens the map sheet vs starts a route directly (assumed: opens the sheet on the map). Aravind.
 - [ ] **Cone on the map pin** — omitted because panos aren't assumed north-aligned; the design shows one. Accept the puck + chip only? Aravind.
-- [ ] **Home button** — design adds it beside "Explore the Park"; flow-8/#108 say rename. Following the design. Confirm.
 - [ ] **Preload with tile configs** — verify VirtualTourPlugin `preload` works with `EquirectangularTilesAdapter` nodes on 5.15.1; fallback is preloading `base.jpg` only. Dev, during step 8.
 - [ ] **Red dots for 37A and Front Top View** — no map positions; placed by hand in step 7. Aravind.
 - [ ] **Edge-proposal thresholds** (40 m off-path, k = 2–3 nearest) — tune during step 3 on real positions.

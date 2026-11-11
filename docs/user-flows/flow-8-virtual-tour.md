@@ -99,7 +99,7 @@ Shown only when `exhibitId` param is present (entry from exhibit gallery or virt
 
 ## Home Screen Change
 
-"Explore the Park →" is kept. A second button, **"360° Virtual Tour →"**, is added below it and links to `/tour` (no node param — resolves the lobby node on load). Hidden offline. No new card or modal.
+A **"360° Virtual Tour →"** button is shown below Scan Now and links to `/tour` (no node param — resolves the lobby node on load). Hidden offline. No new card or modal.
 
 ---
 
