@@ -130,3 +130,12 @@ Specs: `docs/specs/exhibit-admin-tool.md`, `docs/specs/amenity-admin.md`. Archit
 | Visitor app | `displayNumber` (was `code`) → `displayId: string` (`K1`) on map pins, preview sheet and search (case-insensitive prefix); `CachedAmenity.section` shown on the amenity sheet. Store persist version bumped (v5) so stale caches are cleared | Lookups, `/s/{code}` and `/api/scan` stay on `code`. Visitor change shipped only after the NOT NULL migrations |
 | Rollout order | Add nullable columns + function → place data (seed from the marker-placer export) → `NOT NULL` → deploy the visitor change | The visitor query selects `section`/`number`; deploying early would fail the whole offline dataset load |
 | Placeholders | Markers with no exhibit yet became `coming_soon` exhibits named `Exhibit G2` etc. (codes 81–137, type `landmark`, tier `bronze`) | Preserves the placed positions; rename or hide them in `/admin` |
+
+## Insights page
+
+Spec: `docs/specs/gh-130-insights-page.md`. Architecture: `docs/tech-architecture.md § Insights`.
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Access gate | Shared secret in env `INSIGHTS_KEY`, sent as `x-insights-key` to `/api/insights` and compared in constant time; wrong/missing → bare 401. Unlocked by 8 taps on the More button; key kept in the persisted store. Not the dev-only `/admin` guard | Insights only matter against live data, so the dev-only guard is out. Real user auth is m8-user-auth. One shared key covers the owner now and park staff later; rotation is an env change. Alternatives rejected: dev-only page (no use from a phone at the park), public aggregates (leaks usage data). Cost: the key sits in `localStorage` on unlocked devices (accepted for a v1 internal tool); a 401 clears it; per-person keys wait for m8 |
+| No event log, approximate numbers | No schema or tracking changes; read `scans` / `playbacks` as they are and label the numbers. "Scans" = new user/QR/source combinations; "Minutes listened" is a lower bound ("at least"); a replay on a later day is not counted in "Today" | `scans` keeps `scanned_at` from first insert only, and `playbacks` keeps the longest single listen (`GREATEST`) and first `played_at`, so repeat scans and total listen time cannot be dated exactly. Append-only `scan_events` / `playback_events` would be exact but is more work and counts only from deploy onward. Revisit if the numbers prove too coarse |

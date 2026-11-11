@@ -213,6 +213,7 @@ POST /api/report            → Submit issue report
 POST /api/user/info         → Save optional user details (name/phone/email)
 GET  /api/progress          → User's discovered exhibits
 GET  /api/exhibits/all      → All exhibit metadata + coords (for offline cache)
+GET  /api/insights          → Usage stats jsonb (`?range=today|7d|all`); key-gated via `x-insights-key` header, not a visitor endpoint
 ```
 
 ### Admin (dev-only)
@@ -257,6 +258,19 @@ Same guard (`adminGuard()` / `requireAdminPage()`), staged-edit and batch-save p
 5. **Validate + Save:** blockers — node without `lat/lng`, edge without yaw, missing reverse edge, linked exhibit without yaw/pitch, no lobby, nodes unreachable from the lobby.
 
 The production graph (42 nodes, ~100 directed edges) is authored through this tool against the live DB; the 90 MB PNG masters stay out of git. Spec: `docs/specs/m9b-virtual-tour-navigation.md`.
+
+## Insights
+
+Hidden usage page at `/insights`, shown as an "Insights" row in the 3-dot menu only after unlock (8 taps on the More button, then a shared key). Works in production, unlike `/admin`. Spec: `docs/specs/gh-130-insights-page.md`.
+
+- **Gate:** env `INSIGHTS_KEY`. `GET /api/insights` compares the `x-insights-key` header in constant time; missing, wrong or unset key → bare 401; bad `range` → 400. The client keeps the key in the persisted store (`insightsKey`); a 401 clears it.
+- **Aggregation:** one RPC, `insights_summary(p_since timestamptz) returns jsonb` (`service_role` only). The API computes `p_since`; `null` means All.
+- **Ranges (IST):** Today = since `Asia/Kolkata` midnight, 7d = now − 7 days, All = no lower bound.
+- **Metrics:** scans, unique visitors, minutes listened, listen rate, top 5 exhibits (display ID, name, plays), plays by language (en / hi / te).
+- **Numbers are approximate** (no event log):
+  - `scans` is one row per `(user_id, qr_code_id, scan_src)` and `scanned_at` is set at first insert. "Scans" counts new user/QR/source combinations; re-scans are not dated.
+  - `playbacks` is one row per `(user_id, exhibit_id, language)`; `listen_duration_sec` is the longest single listen (`GREATEST`), not a total, and `played_at` is the first play. "Minutes listened" is a lower bound (UI says "at least"); a replay on a later day is not counted in "Today".
+- **Offline / caching:** online-only. `insights` is excluded from the service-worker precache (like `admin`); the API is network-only (`no-store`).
 
 ## Telemetry
 
