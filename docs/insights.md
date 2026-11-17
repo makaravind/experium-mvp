@@ -1,22 +1,19 @@
 # Insights page
 
-Hidden, key-gated usage page for the owner (and park staff later). Works in production, on a phone, against live data. GitHub [#130](https://github.com/makaravind/experium-ai-tour-app/issues/130), milestone m7-launch-ready. Design record: `docs/specs/gh-130-insights-page.md`. Architecture summary: `docs/tech-architecture.md § Insights`.
+Hidden usage page for the owner (and park staff later). Works in production, on a phone, against live data. GitHub [#130](https://github.com/makaravind/experium-ai-tour-app/issues/130), milestone m7-launch-ready. Design record: `docs/specs/gh-130-insights-page.md`. Architecture summary: `docs/tech-architecture.md § Insights`.
 
 ## How to unlock
 
 1. Open the app, tap **More** 8 times, each tap less than 4 s after the last. A longer gap resets the count.
-2. The menu closes and an "Enter insights key" dialog opens.
-3. Enter the key and tap **Unlock**. A wrong key shows "Invalid key" and stores nothing.
-4. An **Insights** row now appears in the 3-dot menu, above "About us". It opens `/insights`.
+2. An **Insights** row now appears in the 3-dot menu, above "About us". It opens `/insights`.
 
-The key is saved in the device's persisted store (`insightsKey` in `localStorage`). Visitors without it never see the row, and `/insights` redirects them to `/map`.
+There is no key or dialog. The unlock is `insightsUnlocked` in the device's persisted store (`localStorage`). Visitors without it never see the row, and `/insights` redirects them to `/map`.
 
-## The key
+## Access
 
-- Env var `INSIGHTS_KEY` (server-only, see `.env.example`). Set it in Vercel before launch.
-- `GET /api/insights` reads it from the `x-insights-key` header and compares in constant time. Missing, wrong or unset → bare 401.
-- **Rotate:** change the env var and redeploy. Devices holding the old key get a 401 on their next load, which clears the key and sends them to `/map`. They re-unlock with the new key.
-- One shared key, no per-person access. Per-person keys wait for m8-user-auth.
+- **No authentication.** `GET /api/insights` is public: anyone who calls it directly gets the usage aggregates. The gesture only hides the UI. The data is aggregate counts, no personal data.
+- Real access control waits for m8-user-auth.
+- History: it used to need a shared `INSIGHTS_KEY` (`x-insights-key` header). Removed; `INSIGHTS_KEY` can be deleted from Vercel. Devices that held a key migrate to unlocked (store v10).
 
 ## What the page shows
 
@@ -47,19 +44,17 @@ So "Minutes" is a lower bound, "plays" counts user/exhibit/language combinations
 | Piece | File (in `experium-ai-tour-app/`) |
 |---|---|
 | Aggregation RPC `insights_summary(p_since)` (service_role only) | `supabase/migrations/20261111000200_insights_summary.sql` |
-| API route | `app/api/insights/route.ts` |
+| API route (no auth) | `app/api/insights/route.ts` |
 | IST range helper | `lib/insights.ts` |
 | Unlock gesture | `components/exhibit/TabBar.tsx` |
-| Key dialog | `components/more/InsightsKeyDialog.tsx` |
 | Menu row | `components/more/UserMenu.tsx` |
 | Page | `app/insights/page.tsx` |
-| Store field | `lib/store.ts` (`insightsKey`, persisted; `insightsKeyDialogOpen`, not persisted) |
+| Store field | `lib/store.ts` (`insightsUnlocked`, persisted) |
 | Precache exclude | `next.config.ts` (`admin\|insights` chunks stay out of the service-worker cache) |
 
 ## Known limits
 
-- The key sits in `localStorage` on each unlocked device. Accepted for a v1 internal tool.
-- No rate limit on the key check.
+- `/api/insights` is unauthenticated and has no rate limit. Accepted for a v1 internal tool with aggregate-only data.
 - `/insights` is not precached, so opening it from the menu while offline may not load the page at all.
 - Per-hour charts, ad CTR, reports, and device / scan-source breakdowns are out of scope.
 - No automated tests by decision. Verified manually: the RPC against raw SQL on `scans` / `playbacks`, the API status codes, and the unlock flow.

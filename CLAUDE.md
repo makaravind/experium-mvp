@@ -27,7 +27,7 @@ QR-code-based audio guide for park visitors. Scan marker → webapp plays audio 
 - `docs/open-questions.md` — unresolved items by urgency
 - `docs/specs/exhibit-admin-tool.md` — dev-only `/admin` tool + section-based display IDs (implemented)
 - `docs/specs/amenity-admin.md` — amenity management + amenity sections (implemented)
-- `docs/insights.md` — hidden key-gated `/insights` usage page: unlock, key, metrics, caveats (implemented)
+- `docs/insights.md` — hidden gesture-unlocked `/insights` usage page: unlock, access, metrics, caveats (implemented)
 
 ### User Experience
 - `docs/user-journey.md` — high-level visitor flows
@@ -61,6 +61,12 @@ QR-code-based audio guide for park visitors. Scan marker → webapp plays audio 
 - **E2E on every PR to main** — `.github/workflows/e2e.yml` runs `npm run e2e` (Chromium + WebKit) against the Next.js dev server. Playwright report uploaded as artifact on failure.
 - All Supabase calls are mocked via `page.route`; no real credentials needed in CI.
 - WebKit-specific flakes are `test.skip`'d with explanations — do not remove skips without fixing the underlying issue.
+
+## Critical DB Tables
+
+**Always inform the user before AND after any change to these tables** (schema, migrations, data writes/deletes, RLS, constraints, indexes). Get explicit confirmation before applying to a real DB.
+
+`exhibits`, `sections`, `amenities`, `exhibit_audio`, `exhibit_photos`, `exhibit_qr_codes`, `tour_edges`, `tour_nodes`
 
 ## Development Guidelines
 

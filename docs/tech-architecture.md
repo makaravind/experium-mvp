@@ -196,10 +196,21 @@ exhibits  (additions)
 
 - Yaw/pitch are authored by clicking in the panorama, never computed: the panos have no EXIF/XMP and aren't assumed north-aligned. DB degrees → radians in `lib/tour.ts` (`nodeLinks`, `nodeMarkers`).
 - Both tour tables have anon `SELECT`; writes go through the service role. `exhibits.tour_*` ride in the precached dataset (`CachedExhibit`).
-- **Client state:** `tourSpot` (`{ nodeId, lat, lng, heading, label, at }`) in the persisted zustand store, `version` 7. The v6 → v7 migration is non-destructive (keeps `cachedExhibits`). `lib/map-store.ts` has `flyToTourSpotTrigger` (registered in `ParkMap`, same pattern as `recenterTrigger`).
+- **Client state:** `tourSpot` (`{ nodeId, lat, lng, heading, label, at }`) in the persisted zustand store (added in `version` 7; the v6 → v7 step was non-destructive, but the store is now v8, which clears `cachedExhibits` — see [Exhibit Photos](#exhibit-photos)). `lib/map-store.ts` has `flyToTourSpotTrigger` (registered in `ParkMap`, same pattern as `recenterTrigger`).
 - **Exit → map:** `/tour` writes `tourSpot`, shows `ExitSplash` (0.6 s), pushes `/map`; on mount `ParkMap` flies to the spot if `at` is within 10 s. `ParkMap` renders `tourSpot` as a DOM `maplibregl.Marker` (white puck + "360°" chip, no cone) that re-enters `/tour?node=…&heading=…`.
 - **`/tour` is outside the `(map)` layout**, so it mounts its own `PreviewSheet` for exhibit-pin taps (data from `cachedExhibits`). "Navigate" = exit flow, then `/map` with that exhibit's sheet open.
 - Tour is online-only: panoramas aren't precached (`/tour` shell is), and the home "360° Virtual Tour →" button is hidden offline.
+
+### Exhibit Photos
+
+Spec: `docs/specs/exhibit-photos-visitor.md`. Photos are `exhibit_photos` rows (uploaded in `/admin`, bucket `images`).
+
+- **Data:** `fetchCachedExhibits` embeds `exhibit_photos(url, caption, is_hero, sort_order)` in the bulk exhibits select (like `tour_nodes(preview_url)`). `CachedExhibit.photos` is `ExhibitPhoto[]` (`url, caption, is_hero`) sorted by `sort_order`; `PreviewExhibit.photos` is optional. URLs persist in the store, so the gallery needs no per-sheet fetch.
+- **Ordering:** `lib/exhibit-photos.ts` (pure) — `galleryPhotos(exhibit)` → slides (hero → 360° → rest; no hero → 360° first) and `thumbUrl(exhibit)` → hero → 360° preview → first photo → `null` (gradient). `PreviewSheet` and `Gallery` both use it.
+- **Offline:** `exhibit-photo-cache` (`EXHIBIT_PHOTO_CACHE` in `lib/cache-names.ts`, listed in `CONTENT_CACHE_NAMES`). `getAssetGroups` has a 4th group with the **hero URL per exhibit only** (no hero → no entry). `app/sw.ts` has a `CacheFirst` route (`CacheableResponsePlugin` 0/200) for `/storage/v1/object/public/images/exhibits/`, so photos viewed later are cached too. An uncached photo fails offline and `Gallery` hides the `<img>`, leaving the blank slide background.
+- **Empty state:** no photos and no tour → `Gallery` renders one slide of `public/exhibit-placeholder.webp` (in the app shell precache). `AmenitySheet` still uses the `count`/`palette` path.
+- **Store:** persist `version` 8. v7 `cachedExhibits` lack `photos`, so the v8 migration clears `cachedExhibits`/`cachedAmenities` and `AppGate` re-runs the precache once (v6 devices also get the `tourSpot: null` default).
+- **Upload size:** `/api/admin/upload-photo` resizes to max 1000 px WebP, quality 75 (~60–100 KB each); photos uploaded earlier stay 1600 px until re-uploaded.
 
 ## API Endpoints
 
@@ -213,7 +224,7 @@ POST /api/report            → Submit issue report
 POST /api/user/info         → Save optional user details (name/phone/email)
 GET  /api/progress          → User's discovered exhibits
 GET  /api/exhibits/all      → All exhibit metadata + coords (for offline cache)
-GET  /api/insights          → Usage stats jsonb (`?range=today|7d|all`); key-gated via `x-insights-key` header, not a visitor endpoint
+GET  /api/insights          → Usage stats jsonb (`?range=today|7d|all`); unauthenticated (UI hidden behind a gesture), not a visitor endpoint
 ```
 
 ### Admin (dev-only)
@@ -224,7 +235,7 @@ All handlers start with `adminGuard()` (`lib/admin/guard.ts`), which returns 404
 GET  /api/admin/data          → sections, exhibits, audio, photos, amenities (the editor's loaded state)
 POST /api/admin/save          → one changeset → RPC admin_apply_changes(jsonb), single transaction
 POST /api/admin/upload-audio  → WAV/MP3 → ffmpeg 64kbps mono MP3 → Storage `audio/{code}/{lang}-{ts}.mp3`
-POST /api/admin/upload-photo  → image → sharp, max 1600px WebP → Storage `images/exhibits/{code}/{uuid}.webp`
+POST /api/admin/upload-photo  → image → sharp, max 1000px WebP (quality 75) → Storage `images/exhibits/{code}/{uuid}.webp`
 ```
 
 ```
@@ -261,9 +272,9 @@ The production graph (42 nodes, ~100 directed edges) is authored through this to
 
 ## Insights
 
-Hidden usage page at `/insights`, shown as an "Insights" row in the 3-dot menu only after unlock (8 taps on the More button, then a shared key). Works in production, unlike `/admin`. Spec: `docs/specs/gh-130-insights-page.md`.
+Hidden usage page at `/insights`, shown as an "Insights" row in the 3-dot menu only after unlock (8 taps on the More button, no key). Works in production, unlike `/admin`. Spec: `docs/specs/gh-130-insights-page.md`.
 
-- **Gate:** env `INSIGHTS_KEY`. `GET /api/insights` compares the `x-insights-key` header in constant time; missing, wrong or unset key → bare 401; bad `range` → 400. The client keeps the key in the persisted store (`insightsKey`); a 401 clears it.
+- **Gate:** none on the API. `GET /api/insights` is unauthenticated; bad `range` → 400. The client keeps a persisted `insightsUnlocked` flag (set by the 8-tap gesture) that shows the menu row and lets `/insights` load. Real access control waits for m8-user-auth.
 - **Aggregation:** one RPC, `insights_summary(p_since timestamptz) returns jsonb` (`service_role` only). The API computes `p_since`; `null` means All.
 - **Ranges (IST):** Today = since `Asia/Kolkata` midnight, 7d = now − 7 days, All = no lower bound.
 - **Metrics:** scans, unique visitors, minutes listened, listen rate, top 5 exhibits (display ID, name, plays), plays by language (en / hi / te).

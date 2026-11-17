@@ -94,6 +94,17 @@ Slides up from bottom, map visible behind (dimmed slightly).
 
 **Key difference:** Active state triggers sponsor ad overlay on map. Preview does not. Audio access is identical in both states.
 
+#### Photo gallery
+
+Photos come from `exhibit_photos` (uploaded in `/admin`), embedded in the cached exhibits dataset. Spec: `docs/specs/exhibit-photos-visitor.md`.
+
+- **Gallery order:** hero photo → 360° slide (if the exhibit has a tour node) → remaining photos by `sort_order`. No hero: 360° first, then photos by `sort_order`.
+- **Thumbnail fallback chain:** hero photo → 360° preview → first photo by `sort_order` → gradient (display-ID badge on top). The `360°` badge shows whenever the exhibit has a tour node.
+- **Single slide:** the `n / total` counter and thumbnail strip are hidden; they appear only with more than one slide.
+- **Empty state (no photos, no tour):** one slide of the branded "No image available" artwork (`/exhibit-placeholder.webp`, in the app shell so it works offline). Thumbnail stays the gradient.
+- **Tap:** a photo opens the fullscreen viewer with the real image; the 360° slide enters the tour.
+- **Offline:** each exhibit's hero is precached, so the thumbnail and slide 1 always render. Other photos are cached when first viewed online; if not cached, the slide shows the neutral blank background (no broken-image icon).
+
 ### S3: Full-Screen Audio Player
 
 Triggered when user taps Listen in S2 (either Active or Preview state). Bottom sheet slides up to full screen.
@@ -103,7 +114,7 @@ Triggered when user taps Listen in S2 (either Active or Preview state). Bottom s
 | Element | Position | Details |
 |---------|----------|---------|
 | Close button (X) | Top-right | Collapses back to S2, pauses audio |
-| Exhibit photo(s) | Top half | Large hero image, swipeable gallery if multiple photos |
+| Exhibit photo(s) | Top half | Large hero image, swipeable gallery if multiple photos (see [Photo gallery](#photo-gallery)) |
 | Exhibit name | Below photo | Large bold text |
 | Scientific name | Below name | Italic, muted color. Only for plants (null otherwise) |
 | Audio progress bar | Center | Scrubable, shows elapsed/total time (e.g., 0:34 / 1:12) |

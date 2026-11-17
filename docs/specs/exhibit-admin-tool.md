@@ -59,7 +59,7 @@ Out of scope: QR code management (`exhibit_qr_codes`), TTS generation (stays in 
 
 ### File uploads are immediate but non-destructive
 
-**Decision**: Audio and photo uploads go to Storage right away under a **new unique object path** (`audio/{code}/{lang}-{timestamp}.mp3`, `images/exhibits/{code}/{uuid}.webp`); the DB row only points at them after Save. Audio: WAV/MP3 → 64 kbps mono MP3 via the local `ffmpeg` (as in `tools/upload-audio.js`). Photos: resized to max 1600 px WebP with `sharp`.
+**Decision**: Audio and photo uploads go to Storage right away under a **new unique object path** (`audio/{code}/{lang}-{timestamp}.mp3`, `images/exhibits/{code}/{uuid}.webp`); the DB row only points at them after Save. Audio: WAV/MP3 → 64 kbps mono MP3 via the local `ffmpeg` (as in `tools/upload-audio.js`). Photos: resized to max 1000 px WebP (quality 75) with `sharp` (was 1600 px; changed by `exhibit-photos-visitor.md`).
 **Why**: Keeps the staged model (nothing visible to visitors before Save) without holding big files in browser memory; unique paths also bust CDN and service-worker caches.
 **Consequences**: Discarded uploads leave orphan files in Storage (accepted pre-launch). `sharp` must be added as a devDependency.
 
@@ -68,6 +68,12 @@ Out of scope: QR code management (`exhibit_qr_codes`), TTS generation (stays in 
 **Decision**: Replace the existing `displayNumber` (currently `exhibits.code`) with `displayId` = `${section}${number}` (e.g. `A3`) from the precache/map queries; lookups and URLs keep using `code`. No fallback for unplaced exhibits — the visitor change ships only after Migration 2.
 **Why**: The plumbing already exists (types, store, search, map pin, sheets); only the type and source change. No fallback because the data is fully placed before release.
 **Consequences**: Persisted store shape changes → bump the persist version so `cachedExhibits` is cleared and re-fetched (see the v2 migration at `lib/store.ts:167`).
+
+### Regroup mode (reshape + move pins between sections)
+
+**Decision**: Each section row has **Reshape** (strict: rejects a polygon edit that strands a pin) and **Regroup**. In both, corners drag, a double-click removes a corner (min 3) and dragging an edge-midpoint dot adds one. In Regroup, a polygon edit is staged behind an Apply/Cancel preview listing moves (`A3 → B7`); logic in `lib/admin/regroup.ts` (`planRegroup`).
+**Why**: The polygon stays the source of truth, so pins only change section when a boundary moves across them. The preview guards against silently renumbering many pins.
+**Rules**: the edited section wins on overlap; pins inside its new polygon join it; pins that were inside its old polygon and are no longer go to the section containing them now; a pin left in no section rejects the edit. Moved exhibits take the lowest free number in the target, in old display-ID order (`code` tiebreak); amenities change `section` only. Pins already outside their section before the edit are ignored. No DB/API change: Save uses the existing changeset.
 
 ---
 
@@ -135,7 +141,7 @@ Steps 1 and 2 run in parallel; 6, 7, 8 run in parallel after 3. Step 12 can be c
 - [ ] Dragging an exhibit pin into another section re-assigns `section` and the lowest free `number` there; dropping outside every section snaps it back; `code` never changes.
 - [ ] Editing name/type/tier/status/description/facts/number is staged; duplicate `(section, number)` is blocked in the UI and by the DB.
 - [ ] Audio: edit script and status per language, preview, upload WAV/MP3 → stored as 64 kbps mono MP3 at a new unique path; visitor-visible URL changes only after Save.
-- [ ] Photos: upload (≤1600 px WebP), caption, one hero, reorder, delete; persisted on Save.
+- [ ] Photos: upload (≤1000 px WebP), caption, one hero, reorder, delete; persisted on Save.
 - [ ] Save applies everything atomically via `admin_apply_changes`; any failure leaves the DB unchanged and shows the error; Discard restores the loaded state.
 - [ ] After Migration 2, `section`/`number` are NOT NULL and the tool cannot save an unplaced exhibit.
 - [ ] Visitor app shows `A3`-style IDs on map pins, preview sheet and search (case-insensitive); `/s/{code}` URLs and scan flow are unchanged; stale persisted caches are cleared via the store version bump.
