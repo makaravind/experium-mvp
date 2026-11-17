@@ -6,6 +6,7 @@ Usage:
   python3.11 generate-audio.py --csv <path> --all
   python3.11 generate-audio.py --csv <path> --exhibits 1,3,5
   python3.11 generate-audio.py --csv <path> --list
+  python3.11 generate-audio.py --text-file <path> --marker 24 [--force]
 """
 
 import argparse
@@ -135,11 +136,11 @@ def load_exhibits(csv_path):
     return exhibits
 
 
-def generate(exhibit, voice, speed):
+def generate(exhibit, voice, speed, force=False):
     code = exhibit["code"]
     out_file = os.path.join(OUTPUT_DIR, f"{code}-en.wav")
 
-    if os.path.exists(out_file):
+    if os.path.exists(out_file) and not force:
         print(f"  [{code}] skip — {os.path.basename(out_file)} already exists")
         return
 
@@ -170,13 +171,28 @@ def generate(exhibit, voice, speed):
 
 def main():
     parser = argparse.ArgumentParser(description="Generate exhibit audio from CSV")
-    parser.add_argument("--csv", required=True, help="Path to the Experium CSV file")
+    parser.add_argument("--csv", help="Path to the Experium CSV file")
+    parser.add_argument("--text-file", help="Path to a plain-text script (use with --marker)")
+    parser.add_argument("--marker", help="pdf marker code for --text-file, e.g. 24")
+    parser.add_argument("--force", action="store_true", help="Overwrite an existing WAV")
     parser.add_argument("--all", action="store_true", help="Generate audio for all exhibits")
     parser.add_argument("--exhibits", help="Comma-separated pdf marker codes, e.g. 1,3,5")
     parser.add_argument("--list", action="store_true", help="List all exhibits and exit")
     parser.add_argument("--voice", default=DEFAULT_VOICE, help=f"Voice (default: {DEFAULT_VOICE})")
     parser.add_argument("--speed", default=DEFAULT_SPEED, help=f"Speech speed (default: {DEFAULT_SPEED})")
     args = parser.parse_args()
+
+    if args.text_file:
+        if not args.marker or not os.path.exists(args.text_file):
+            print("--text-file needs an existing file and --marker")
+            sys.exit(1)
+        with open(args.text_file, encoding="utf-8") as f:
+            script = f.read().strip()
+        check_models()
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        generate({"code": args.marker, "name": "inline script", "script": script},
+                 args.voice, args.speed, args.force)
+        return
 
     if not args.csv or not os.path.exists(args.csv):
         print(f"CSV not found: {args.csv}")
