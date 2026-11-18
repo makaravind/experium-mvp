@@ -95,6 +95,13 @@ Shown only when `exhibitId` param is present (entry from exhibit gallery or virt
 - Works for any exhibit at the current node, not just the entry exhibit
 - Tapping the panorama (not a pin) closes the sheet
 
+**Focus bubble** (spec: `docs/specs/exhibit-focus-bubble.md`): after the pano settles ~250 ms, the pin nearest the view centre (within ~20°) shows the same bubble as the map (thumb, name, state), as a PSV marker `__focus__` (`components/tour/TourViewer.tsx`).
+
+- Tap → `PreviewSheet`, like a pin tap
+- Hidden on rotate, on node change, and while `PreviewSheet` is open
+- Analytics: `peek_tap` / `pin_tap` with `surface: 'tour'`
+- Unverified on device: whether PSV fires `position-updated` on load / node change. If not, the entry bubble only appears after the first rotate
+
 ---
 
 ## Home Screen Change

@@ -201,6 +201,17 @@ Next.js page
 | "You are here" | GPS `watchPosition()` → project to 3D coords → blue accuracy circle on map (v1 confirmed) |
 | Nearby pin highlights | Unvisited pins within 50m (max 5) get pulse animation + 1.3× scale. Category A guaranteed a slot |
 
+## Focus Bubble
+
+Spec: `docs/specs/exhibit-focus-bubble.md`.
+
+- After a pan settles (~250 ms), the pin nearest the screen centre (within 90 CSS px) gets a bubble: thumbnail, name, state. Hidden on the next pan.
+- Also hidden while the exhibit sheet, amenity sheet, search or a navigation route is active; re-picks when browsing returns.
+- Tap opens the exhibit sheet, same as a pin tap.
+- One persistent MapLibre DOM marker + portal in `components/map/ParkMap.tsx` (`calcFocusCandidates`); card in `components/map/FocusBubble.tsx`; pick rule in `lib/focus-pick.ts`.
+- Analytics: `peek_tap` (bubble) vs `pin_tap` (pin), both `{ exhibitId, surface, visited }`.
+- Existing off-screen peek chips unchanged.
+
 ## QR Tour Integration
 
 1. Visitor scans QR at exhibit
