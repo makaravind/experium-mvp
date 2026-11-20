@@ -2,7 +2,7 @@
 
 **GitHub**: TBD (issue not created yet)
 **Milestone**: TBD
-**Status**: IMPLEMENTED (2026-11-20, app branch `impl/pip-reduced-motion-hint`, not yet merged to `main`). Defaults used for open questions: top-of-screen card, English only, `pip_static` once per page load, ready signal = `AppGate` phase `clear` + `introDone`
+**Status**: IMPLEMENTED (2026-11-20, app `main` @ `26e2710`). Defaults used for open questions: top-of-screen card, English only, `pip_static` once per page load, ready signal = `AppGate` phase `clear` + `introDone`
 **Builds on**: [pip-mascot-bigger.md](pip-mascot-bigger.md), [animated-pip-mascot.md](animated-pip-mascot.md)
 
 ---
