@@ -169,3 +169,26 @@ Spec: `docs/specs/animated-pip-mascot.md`. Spots and states: `docs/design.md § 
 | `speaking` source | `SheetSummary` gets optional `mascotState` prop; `PreviewSheet` passes `isPlaying ? 'speaking' : 'idle'`; `AmenitySheet` passes nothing | `isPlaying` is local state in the direct parent; no store field needed |
 | TrailCard celebration | Persisted `lastCelebratedTotal` (+ setter). On mount, if `selectTotalDiscovered` > it → `celebrating` ~3s, then `idle`, and store the new total. Pure helper `shouldCelebrate` in `lib/trail.ts`. Store **v11**; the migration seeds `lastCelebratedTotal` with the visitor's current total, before the early returns | Discovery happens on map/exhibit pages and `TrailCard` mounts fresh on return home, so an in-session ref would miss it. Any increase celebrates; milestones keep their own overlay. Seeding stops existing visitors celebrating once after deploy |
 | LoadingScreen | `<PipMascot state="thinking" size={112} />` replaces the leaf logo tile; `LeafIcon` import removed | Pip is the face of the app on first load. Visual check at 375×667: Pip reads clearly on matcha with no tile, so no fallback tile was added. Leaf logo no longer shown on this screen |
+
+### Bigger Pip
+
+Spec: `docs/specs/pip-mascot-bigger.md`. Supersedes the `interactive={false}`, poster pixelRatio 1 and `speaking` source rows above.
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Perch slot | `BottomSheet` splits into an outer draggable wrapper (fixed, `y`, drag, shadow; no clip) and an inner scroller (`rounded-t-3xl overflow-y-auto overflow-x-clip bg-ex-paper`). New optional `perch` prop renders in the outer wrapper (`right-4 top-0`, `pointer-events-none`); `SheetPerchPip` (108 px, lifted 70 px) is the consumer | The old sheet root was the scroller and clipped anything above its top edge. Same `y` motion value, so Pip follows the drag. Portalling to `body` was rejected (duplicate drag math, z-index vs tab bar) |
+| Two Pips in the sheet | Collapsed Pip in `perch`, expanded Pip in `SheetSummary` (110 px, straddling the gallery's bottom-right edge). Both stay mounted and get the same state; the inactive one is hidden (150 ms fade) | `onCollapse` resets audio, so `speaking` only ever shows expanded. Remounting would flash the poster. wobnimo shares one WebGL context, so the second instance is cheap |
+| Tap | `PipMascot` `interactive` prop (default `false`; `true` on perch, expanded and TrailCard Pips). Canvas wrapper gets `pointer-events-auto` (root stays `pointer-events-none`); tap = wobnimo `poke()` (hop + spin) | wobnimo listens for click/pointermove on the canvas. No custom `surprised` for taps. Reduced-motion / no-WebGL2 get the poster only, no tap. A Pip tap does not close the sheet (backdrop is a lower sibling) |
+| Sleep | App-driven in `PipMascot`: requested `idle` + 20 s with no poke / state change → `sleeping`. Poke or any state change wakes it | wobnimo has no auto-sleep. In the wrapper, every spot gets it with no per-site code. Never sleeps in other states or in poster-only mode |
+| Reactions | `useMascotReaction()` (`lib/use-mascot-reaction.ts`) → `[reaction, react(state, ms)]`; newest wins, timer cleared on unmount. `PreviewSheet`: `pipState = isPlaying ? 'speaking' : (reaction ?? 'idle')`, fed to both sheet Pips | Event state lives with the audio element. `AmenitySheet` has no audio: idle + tap + sleep only |
+| Reaction table | `surprised` on sheet open / new exhibit 1.2 s · `celebrating` on audio end 2 s (shows on the collapsed perch, `onEnded` auto-collapses) · `sad` on audio fallback or the "Needs internet" banner 3 s · `speaking` always wins · `TrailCard` `celebrating` 3 s (unchanged) | |
+| Crisp rendering | `public/pip.webp` re-rendered at pixelRatio 3 (336 px, ~12 KB); canvas `maxPixelRatio={3}` (wobnimo default 2) | The 112 px ratio-1 poster was visibly soft at ~108 px, and the poster is first paint / reduced-motion / chunk-load |
+| TrailCard perch | Pip 104 px, `absolute right-[44px] top-[-44px]`, left of the ⓘ button (stays tappable). Lead text `pr-[132px]`. `SearchOverlay` wraps `TrailCard` in `pt-11` so Pip isn't clipped by the scroll list | Home is `fixed overflow-hidden`; perching adds no height, so no bottom content is pushed off 375×667. Pip overlaps the empty right of the subtitle |
+
+As-built gotchas:
+
+- **Perch lift 70 px on 108 px Pip** (~65% above the sheet edge, feet at the handle row). The mockup's "top third" put Pip's feet on the name's first line at 375 px; the no-overlap rule won.
+- **Parked sheet** (`y = fullH`, no `itemId`): the lifted perch pokes into the viewport, so the perch is hidden when there is no `itemId` (and while expanded).
+- **Expanded Pip hides instantly on collapse** (no fade-out) because the gallery→thumb resize makes an absolute child jump; it fades in (150 ms) on expand.
+- **Expanded Pip overlaps the photo's bottom-right**, so gallery dots/counters may sit under it. Device check pending. Expanded text column reserves `pr-24`.
+- **Unverified:** sheet drag / swipe-close e2e is not exercised under dummy Supabase and WebKit wasn't run. Real-iOS check of the `BottomSheet` split (scroller is now a child of the translated fixed wrapper) is pending.

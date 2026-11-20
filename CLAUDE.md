@@ -30,6 +30,7 @@ QR-code-based audio guide for park visitors. Scan marker → webapp plays audio 
 - `docs/insights.md` — hidden gesture-unlocked `/insights` usage page: unlock, access, metrics, caveats (implemented)
 - `docs/specs/exhibit-focus-bubble.md` — focus bubble: nearest pin auto-peeks (thumb, name, state) on map + virtual tour (implemented)
 - `docs/specs/animated-pip-mascot.md` — Pip mascot: wobnimo animated mascot, states, poster fallback (implemented)
+- `docs/specs/pip-mascot-bigger.md` — bigger perched Pip, tap, sleep, reactions (implemented)
 
 ### User Experience
 - `docs/user-journey.md` — high-level visitor flows
