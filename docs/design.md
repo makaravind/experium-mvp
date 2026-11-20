@@ -20,3 +20,4 @@ Behaviours (all spots except `LoadingScreen`, which stays non-interactive):
 - **Sleep:** an `idle` Pip falls asleep after 20 s with no tap or state change; a tap or any state change wakes it.
 - **Reactions:** `surprised` 1.2 s when the sheet opens / a new exhibit is selected; `celebrating` 2 s when audio ends; `sad` 3 s on audio fallback or the "Needs internet" banner; `speaking` always wins.
 - **Perch hiding:** the collapsed perch is hidden while the sheet is expanded or parked (no exhibit); the expanded Pip is hidden while collapsed.
+- **Reduce Motion hint:** when the OS asks for reduced motion Pip stays on its poster (no tap, sleep or reactions). A one-time dismissible card ("Pip is resting") explains why and where to turn it off (iOS / Android steps). Spec: `docs/specs/pip-reduced-motion-hint.md`.

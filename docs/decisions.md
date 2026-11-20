@@ -192,3 +192,16 @@ As-built gotchas:
 - **Expanded Pip hides instantly on collapse** (no fade-out) because the gallery→thumb resize makes an absolute child jump; it fades in (150 ms) on expand.
 - **Expanded Pip overlaps the photo's bottom-right**, so gallery dots/counters may sit under it. Device check pending. Expanded text column reserves `pr-24`.
 - **Unverified:** sheet drag / swipe-close e2e is not exercised under dummy Supabase and WebKit wasn't run. Real-iOS check of the `BottomSheet` split (scroller is now a child of the translated fixed wrapper) is pending.
+
+### Reduced-motion hint
+
+Spec: `docs/specs/pip-reduced-motion-hint.md`. Found on a real iPhone (2026-11-20): Pip looked broken because iOS **Reduce Motion** was on, so `PipMascot` correctly kept the poster. Android was fine.
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Hint | One-time dismissible card, `PipMotionHint` (`components/common`), mounted in `AppGate` once the gate is `clear` and the intro is done. Shown when `prefers-reduced-motion` matches and persisted `pipMotionHintSeen` is `false`; "Got it" sets the flag. No auto-dismiss | One shell-level component covers every entry point: QR-scan visitors landing on `/s/<code>` never see home. No store version bump: a missing key defaults to `false` = "not seen", which is the wanted result for existing visitors |
+| Copy | "Pip is resting. Reduce Motion is on, so Pip holds still." + iOS steps (Settings → Accessibility → Motion → Reduce Motion) or Android steps (… → Remove animations; "the name can differ by phone") or none on other platforms. `detectPlatform` (`lib/platform.ts`) reads the user agent; a touch-capable Mac UA is iPadOS | The exact settings path is the useful part; Android labels vary by vendor |
+| Analytics | `track` (`@vercel/analytics`): `pip_static { reason: 'reduced_motion' \| 'no_webgl2' \| 'canvas_failed' }` once per page load (module-level flag in `PipMascot`, not per instance); `pip_motion_hint_shown` / `pip_motion_hint_dismissed { platform: 'ios' \| 'android' \| 'other' }` | Shows how many visitors never see a live Pip and why, and whether the hint is seen and cleared |
+| Not done | No in-app "Let Pip move" override (would override an OS accessibility setting); no hint for `no_webgl2` / `canvas_failed` (the visitor can't fix those) | Revisit the override only if `pip_static` shows many reduced-motion visitors |
+
+Real-device check (iOS + Android, 2026-11-20): Pip animates on both; on iOS it stayed on the poster until Reduce Motion was turned off. Position: top-of-screen safe-area card; it covers the map search bar / home header until dismissed (one time).

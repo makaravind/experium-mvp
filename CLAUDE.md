@@ -31,6 +31,7 @@ QR-code-based audio guide for park visitors. Scan marker → webapp plays audio 
 - `docs/specs/exhibit-focus-bubble.md` — focus bubble: nearest pin auto-peeks (thumb, name, state) on map + virtual tour (implemented)
 - `docs/specs/animated-pip-mascot.md` — Pip mascot: wobnimo animated mascot, states, poster fallback (implemented)
 - `docs/specs/pip-mascot-bigger.md` — bigger perched Pip, tap, sleep, reactions (implemented)
+- `docs/specs/pip-reduced-motion-hint.md` — one-time hint when Reduce Motion keeps Pip still + `pip_static` analytics (implemented)
 
 ### User Experience
 - `docs/user-journey.md` — high-level visitor flows
